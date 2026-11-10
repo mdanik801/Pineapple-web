@@ -11,10 +11,10 @@ export default function MobileMenu({ cats }: { cats: Cat[] }) {
   const close = () => setOpen(false);
   return (
     <>
-      <button aria-label="Open menu" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center text-brand"><Menu size={24} /></button>
+      <button aria-label="Open menu" onClick={() => setOpen(true)} className="grid h-9 w-9 place-items-center text-neutral-900"><Menu size={22} /></button>
       <div className={`fixed inset-0 z-[60] bg-black/50 transition-opacity ${open ? "opacity-100" : "pointer-events-none opacity-0"}`} onClick={close} />
       <aside aria-hidden={!open} className={`fixed left-0 top-0 z-[60] h-full w-80 max-w-[85%] overflow-y-auto bg-white transition-transform ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between bg-brand px-5 py-4 text-white"><span className="font-serif text-lg">Menu</span><button aria-label="Close menu" onClick={close}><X /></button></div>
+        <div className="flex items-center justify-between bg-[#111111] px-5 py-4 text-white"><span className="font-serif text-lg">Menu</span><button aria-label="Close menu" onClick={close}><X /></button></div>
         <ul className="divide-y divide-line">
           <li><Link href="/shop" onClick={close} className="block px-5 py-4 font-semibold text-brand">All Products</Link></li>
           {cats.map((c) => (

@@ -1,10 +1,17 @@
 import "server-only";
+import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { db } from "./supabase";
 
 const COOKIE = "pa_session";
-const key = () => new TextEncoder().encode(process.env.AUTH_SECRET!);
+const devSecret = process.env.NODE_ENV === "development" && !process.env.AUTH_SECRET
+  ? randomBytes(32).toString("base64url")
+  : undefined;
+const key = () => {
+  const secret = process.env.AUTH_SECRET || devSecret;
+  return secret ? new TextEncoder().encode(secret) : null;
+};
 
 export type Customer = {
   id: string;
@@ -20,11 +27,13 @@ export type Customer = {
 };
 
 export async function createSession(customerId: string) {
+  const signingKey = key();
+  if (!signingKey) throw new Error("AUTH_SECRET is required to create customer sessions.");
   const token = await new SignJWT({ sub: customerId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(key());
+    .sign(signingKey);
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -40,9 +49,10 @@ export async function destroySession() {
 
 export async function getCustomer(): Promise<Customer | null> {
   const token = (await cookies()).get(COOKIE)?.value;
-  if (!token) return null;
+  const signingKey = key();
+  if (!token || !signingKey) return null;
   try {
-    const { payload } = await jwtVerify(token, key());
+    const { payload } = await jwtVerify(token, signingKey);
     const { data } = await db
       .from("customers")
       .select("id,customer_code,first_name,last_name,email,phone,status,total_orders,total_spent,created_at")

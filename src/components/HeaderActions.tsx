@@ -11,30 +11,27 @@ export default function HeaderActions({ name, popular }: { name: string | null; 
   const cartCount = useStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useStore((s) => s.wishlist.length);
   const setDrawer = useStore((s) => s.setDrawer);
-  const badge = "grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[11px] font-bold text-white";
-  const mBadge = "absolute -right-1 -top-1 " + badge;
+  const badge = "grid h-5 min-w-5 place-items-center rounded-full bg-black px-1 text-[10px] font-medium text-white";
+  const mBadge = "absolute -right-0.5 -top-0.5 " + badge;
 
   return (
     <>
-      {/* Desktop: search + text links, like Yellow */}
-      <div className="hidden flex-col items-end gap-4 md:flex">
-        <button type="button" onClick={() => setOpen(true)} aria-label="Open search"
-          className="group flex w-72 items-center justify-between rounded-full border border-brand/20 bg-[#f6f8f7] py-1 pl-5 pr-1 text-left text-sm text-muted shadow-sm transition-all duration-300 hover:w-80 hover:border-brand hover:bg-white hover:shadow-[0_8px_24px_-10px_rgba(10,60,42,.5)] focus-visible:ring-4 focus-visible:ring-brand/15">
-          <span className="truncate transition-colors duration-300 group-hover:text-ink">Search products…</span>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand text-white transition-all duration-300 group-hover:bg-gold group-hover:rotate-[-8deg] group-hover:scale-105"><Search size={17} /></span>
+      <div className="hidden items-center gap-3 text-neutral-900 md:flex lg:gap-5">
+        <button type="button" onClick={() => setOpen(true)} aria-label="Open search" title="Search products"
+          className="group grid h-10 w-10 place-items-center text-neutral-700 hover:text-black lg:w-auto lg:grid-cols-[auto_1fr] lg:gap-2 lg:border-b lg:border-black/20 lg:px-1">
+          <Search size={18} />
+          <span className="hidden text-xs lg:inline">Search</span>
         </button>
-        <div className="flex items-center gap-6 text-sm text-ink">
-          <button onClick={() => setDrawer(true)} className="flex items-center gap-2 hover:text-gold"><ShoppingBag size={20} />Shopping Cart <span className={badge}>{mounted ? cartCount : 0}</span></button>
-          <Link href="/wishlist" className="flex items-center gap-2 hover:text-gold"><Heart size={20} />My Wish List{mounted && wishCount > 0 && <span className={badge}>{wishCount}</span>}</Link>
-          <Link href={name ? "/account" : "/login"} className="flex items-center gap-2 hover:text-gold">{name ? <><User size={20} />{name}</> : "Sign In"}</Link>
-        </div>
+        <button onClick={() => setDrawer(true)} aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`} title="Shopping cart" className="relative grid h-10 w-10 place-items-center hover:text-neutral-500"><ShoppingBag size={19} /><span className={badge}>{mounted ? cartCount : 0}</span></button>
+        <Link href="/wishlist" aria-label="Wishlist" title="Wishlist" className="relative grid h-10 w-10 place-items-center hover:text-neutral-500"><Heart size={19} />{mounted && wishCount > 0 && <span className={badge}>{wishCount}</span>}</Link>
+        <Link href={name ? "/account" : "/login"} aria-label={name ? "My account" : "Sign in"} title={name || "Sign in"} className="grid h-10 w-10 place-items-center hover:text-neutral-500"><User size={19} /></Link>
       </div>
 
-      {/* Mobile: compact icons */}
-      <div className="flex items-center text-brand md:hidden">
-        <button aria-label="Search" onClick={() => setOpen(true)} className="grid h-10 w-10 place-items-center"><Search size={21} /></button>
-        <Link href="/wishlist" aria-label="Wishlist" className="relative grid h-10 w-10 place-items-center"><Heart size={21} />{mounted && wishCount > 0 && <span className={mBadge}>{wishCount}</span>}</Link>
-        <button aria-label="Open cart" onClick={() => setDrawer(true)} className="relative grid h-10 w-10 place-items-center"><ShoppingBag size={21} />{mounted && cartCount > 0 && <span className={mBadge}>{cartCount}</span>}</button>
+      <div className="flex items-center text-neutral-900 md:hidden">
+        <button aria-label="Search" onClick={() => setOpen(true)} className="grid h-9 w-9 place-items-center"><Search size={19} /></button>
+        <Link href="/wishlist" aria-label="Wishlist" className="relative grid h-9 w-9 place-items-center"><Heart size={19} />{mounted && wishCount > 0 && <span className={mBadge}>{wishCount}</span>}</Link>
+        <button aria-label="Open cart" onClick={() => setDrawer(true)} className="relative grid h-9 w-9 place-items-center"><ShoppingBag size={19} /><span className={mBadge}>{mounted ? cartCount : 0}</span></button>
+        <Link href={name ? "/account" : "/login"} aria-label={name ? "My account" : "Sign in"} className="grid h-9 w-9 place-items-center"><User size={19} /></Link>
       </div>
 
       {open && <SearchModal popular={popular} onClose={() => setOpen(false)} />}

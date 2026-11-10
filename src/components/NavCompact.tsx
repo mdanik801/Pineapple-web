@@ -7,7 +7,7 @@ import { useStore, useMounted } from "@/lib/store";
 import SearchModal from "./SearchModal";
 
 /** Shown inside the sticky nav bar once the page is scrolled past the top row. Slides in/out vertically. */
-export default function NavCompact({ name, popular }: { name: string | null; popular: string[] }) {
+export default function NavCompact({ name, popular, brandName, logoUrl }: { name: string | null; popular: string[]; brandName: string; logoUrl: string }) {
   const mounted = useMounted();
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState(false);
@@ -33,8 +33,10 @@ export default function NavCompact({ name, popular }: { name: string | null; pop
     <>
       <div className={`container-x pointer-events-none absolute inset-0 hidden items-center justify-between md:flex ${scrolled ? "" : "invisible delay-500"}`} aria-hidden={!scrolled}>
         <div className="h-full overflow-hidden py-1.5">
-          <Link href="/" aria-label="Pineapple home" style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full items-center rounded-sm bg-white px-2 transition-transform duration-300 hover:scale-105">
-            <Image src="/logo-mark.png" alt="Pineapple" width={32} height={60} className="h-[30px] w-auto" />
+          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full max-w-40 items-center px-2 text-sm text-white transition-transform duration-300 hover:scale-105">
+            {logoUrl
+              ? <Image src={logoUrl} alt={brandName} width={150} height={48} unoptimized={logoUrl.toLowerCase().endsWith(".svg")} className="h-8 w-auto max-w-full object-contain" />
+              : brandName && <span className="truncate font-serif">{brandName}</span>}
           </Link>
         </div>
         <div className="flex h-full items-center gap-1 overflow-hidden">

@@ -1,7 +1,9 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { db } from "./supabase";
 import { effectivePrice } from "./format";
+import { normalizeHeroBanners } from "./hero-banners";
 
 export type Category = {
   id: string; name: string; slug: string; description: string | null;
@@ -23,6 +25,28 @@ export type Variant = {
   image_url: string | null; stock: number;
 };
 
+export type BrandData = {
+  id: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  logo_url: string | null;
+};
+
+export type PaymentMethod = { gateway_id: string; name: string };
+
+export type HomepageBottomCarouselItem = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  button_text: string;
+  button_url: string;
+  image_url: string;
+  active: true;
+  sort_order: number | null;
+};
+
 const PRODUCT_COLS =
   "id,name,slug,regular_price,sale_price,category_id,featured_image,is_new_arrival,created_at,product_images(url,is_primary,display_order),product_variants(id,status,color,image_url)";
 
@@ -33,13 +57,30 @@ type RawProduct = {
   product_variants?: { id: string; status: string | null; color: string | null; image_url: string | null }[];
 };
 
-function pickImages(p: RawProduct) {
-  const imgs = [...(p.product_images ?? [])].sort(
-    (a, b) => Number(b.is_primary) - Number(a.is_primary) || (a.display_order ?? 0) - (b.display_order ?? 0),
-  );
-  const urls = imgs.map((i) => i.url);
-  if (p.featured_image && !urls.includes(p.featured_image)) urls.unshift(p.featured_image);
-  return urls;
+function validProductImage(value: unknown): string | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const image = value.trim();
+  if (image.startsWith("/") && !image.startsWith("//")) return image;
+
+  try {
+    const host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
+    const url = new URL(image);
+    return (url.protocol === "https:" || url.protocol === "http:") && url.hostname === host ? image : null;
+  } catch {
+    return null;
+  }
+}
+
+function pickImages(p: Pick<RawProduct, "featured_image" | "product_images">) {
+  const gallery = [...(p.product_images ?? [])]
+    .map((image) => ({ ...image, url: validProductImage(image.url) }))
+    .filter((image): image is typeof image & { url: string } => !!image.url)
+    .sort(
+      (a, b) => Number(b.is_primary) - Number(a.is_primary) || (a.display_order ?? 0) - (b.display_order ?? 0),
+    );
+  const primary = gallery.find((image) => image.is_primary)?.url;
+  const featured = validProductImage(p.featured_image);
+  return [...new Set([primary, ...gallery.map((image) => image.url), featured].filter((url): url is string => !!url))];
 }
 
 function swatchesOf(p: RawProduct) {
@@ -93,11 +134,29 @@ export const getCategories = cache(async (): Promise<Category[]> => {
 export const getSettings = cache(async () => {
   const { data } = await db
     .from("business_settings")
-    .select("company_name,brand_name,phone,email,support_phone,support_email,whatsapp,address,office_address,business_hours,description")
+    .select("company_name,brand_name,company_logo,website,phone,email,support_phone,support_email,whatsapp,address,office_address,business_hours,description")
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   return data;
+});
+
+export const getBrands = cache(async (): Promise<BrandData[]> => {
+  const { data } = await db
+    .from("brands")
+    .select("id,name,slug,description,logo_url,status")
+    .eq("status", "active")
+    .order("name");
+  return (data ?? []) as BrandData[];
+});
+
+export const getPaymentMethods = cache(async (): Promise<PaymentMethod[]> => {
+  const { data } = await db
+    .from("payment_gateways_config")
+    .select("gateway_id,name,is_enabled")
+    .eq("is_enabled", true)
+    .order("name");
+  return (data ?? []).map(({ gateway_id, name }) => ({ gateway_id, name }));
 });
 
 export const getSocial = cache(async () => {
@@ -110,16 +169,68 @@ export const getPolicies = cache(async () => {
   return (data?.content_data ?? {}) as Record<string, string>;
 });
 
-export const getBanners = cache(async () => {
-  const now = new Date().toISOString();
-  const { data } = await db
-    .from("homepage_banners")
-    .select("id,title,subtitle,image_url,mobile_image_url,cta_text,cta_link,start_date,end_date")
-    .eq("is_active", true)
-    .order("display_order");
-  return (data ?? []).filter(
-    (b) => (!b.start_date || b.start_date <= now) && (!b.end_date || b.end_date >= now),
-  );
+export const getBanners = unstable_cache(async () => {
+  const { data, error } = await db
+    .from("website_content")
+    .select("content_data")
+    .eq("section_key", "hero_banner")
+    .maybeSingle();
+  if (error || !data) return [];
+
+  let allowedImageHost: string | undefined;
+  try {
+    allowedImageHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
+  } catch {}
+  return normalizeHeroBanners(data.content_data, allowedImageHost);
+}, ["website-content-hero-banner-v3"], { revalidate: 60, tags: ["hero-banners"] });
+
+function normalizeHomepageBottomCarousel(value: unknown): HomepageBottomCarouselItem[] {
+  if (!value || typeof value !== "object" || !Array.isArray((value as { items?: unknown }).items)) return [];
+
+  const items = (value as { items: unknown[] }).items;
+  return items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => !!item && typeof item === "object" && (item as { active?: unknown }).active === true)
+    .sort((a, b) => {
+      const aOrder = (a.item as { sort_order?: unknown }).sort_order;
+      const bOrder = (b.item as { sort_order?: unknown }).sort_order;
+      const aValue = typeof aOrder === "number" && Number.isFinite(aOrder) ? aOrder : Number.POSITIVE_INFINITY;
+      const bValue = typeof bOrder === "number" && Number.isFinite(bOrder) ? bOrder : Number.POSITIVE_INFINITY;
+      return aValue - bValue || a.index - b.index;
+    })
+    .map(({ item, index }) => {
+      const row = item as Record<string, unknown>;
+      const text = (field: unknown) => typeof field === "string" ? field : "";
+      const order = row.sort_order;
+      return {
+        id: text(row.id) || `homepage-bottom-${index}`,
+        title: text(row.title),
+        subtitle: text(row.subtitle),
+        description: text(row.description),
+        button_text: text(row.button_text),
+        button_url: text(row.button_url),
+        image_url: text(row.image_url),
+        active: true as const,
+        sort_order: typeof order === "number" && Number.isFinite(order) ? order : null,
+      };
+    });
+}
+
+export const getHomepageBottomCarousel = unstable_cache(async (): Promise<HomepageBottomCarouselItem[]> => {
+  try {
+    const { data, error } = await db
+      .from("website_content")
+      .select("content_data")
+      .eq("section_key", "homepage_bottom_carousel")
+      .maybeSingle();
+    if (error || !data) return [];
+    return normalizeHomepageBottomCarousel(data.content_data);
+  } catch {
+    return [];
+  }
+}, ["website-content-homepage-bottom-carousel-v1"], {
+  revalidate: 60,
+  tags: ["homepage-bottom-carousel"],
 });
 
 export type ListOpts = {

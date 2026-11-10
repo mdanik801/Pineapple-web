@@ -1,53 +1,82 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getCategories, getSettings, getSocial } from "@/lib/data";
+import { getPolicies, getPaymentMethods, getSettings, getSocial } from "@/lib/data";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 
 export default async function Footer() {
-  const [cats, s, social] = await Promise.all([getCategories(), getSettings(), getSocial()]);
-  const top = cats.filter((c) => !c.parent_id);
-  const links: [string, string | undefined][] = [["Facebook", social.facebook], ["Instagram", social.instagram], ["YouTube", social.youtube]];
+  const [settings, social, policies, paymentMethods] = await Promise.all([
+    getSettings(), getSocial(), getPolicies(), getPaymentMethods(),
+  ]);
+  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim() || "";
+  const logo = settings?.company_logo?.trim() || "";
+  const policyLinks: [string, string, string][] = [
+    ["About us", "about_us", "/pages/about"],
+    ["Delivery policy", "shipping_policy", "/pages/shipping"],
+    ["Exchange policy", "return_policy", "/pages/returns"],
+    ["Privacy policy", "privacy_policy", "/pages/privacy"],
+    ["Terms & conditions", "terms_conditions", "/pages/terms"],
+  ];
+  const socialLinks = Object.entries(social).flatMap(([key, value]) => {
+    const url = value?.trim();
+    if (!url) return [];
+    if (/^https?:\/\//i.test(url)) return [[key, url]];
+    if (key.toLowerCase() === "whatsapp") {
+      const number = url.replace(/\D/g, "");
+      return number ? [["WhatsApp", `https://wa.me/${number}`]] : [];
+    }
+    return [];
+  });
   return (
-    <footer className="mt-20 bg-brand text-white/85">
-      <div className="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="mt-16 bg-[#111111] text-white/75 sm:mt-24">
+      <div className="container-x grid gap-x-10 gap-y-12 py-12 sm:py-16 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="inline-block bg-white p-2"><Image src="/logo-full.jpg" alt="Pineapple" width={140} height={96} className="h-14 w-auto" /></div>
-          <p className="mt-4 text-sm leading-relaxed">{s?.description ?? "Premium fashion & lifestyle."}</p>
-          <div className="mt-4 flex gap-4 text-sm">
-            {links.filter(([, u]) => u).map(([n, u]) => <a key={n} href={u} target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{n}</a>)}
-          </div>
+          {(logo || brandName) && <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} className="inline-flex min-h-10 items-center">
+            {logo
+              ? <Image src={logo} alt={brandName} width={176} height={64} unoptimized={logo.toLowerCase().endsWith(".svg")} className="h-10 w-auto max-w-44 object-contain brightness-0 invert" />
+              : <span className="font-serif text-lg text-white">{brandName}</span>}
+          </Link>}
+          {settings?.description && <p className="mt-5 max-w-xs text-sm leading-7">{settings.description}</p>}
         </div>
         <div>
-          <h3 className="mb-4 font-serif text-lg text-gold">Shop</h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/shop" className="hover:text-gold">All Products</Link></li>
-            {top.map((c) => <li key={c.id}><Link href={`/category/${c.slug}`} className="hover:text-gold">{c.name}</Link></li>)}
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-4 font-serif text-lg text-gold">My Account</h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/account" className="hover:text-gold">Profile</Link></li>
-            <li><Link href="/account/orders" className="hover:text-gold">Orders</Link></li>
-            <li><Link href="/account/addresses" className="hover:text-gold">Addresses</Link></li>
-            <li><Link href="/wishlist" className="hover:text-gold">Wishlist</Link></li>
-            <li><Link href="/cart" className="hover:text-gold">Cart</Link></li>
-            <li><Link href="/track-order" className="hover:text-gold">Track Order</Link></li>
-            <li><Link href="/pages/shipping" className="hover:text-gold">Shipping Policy</Link></li>
-            <li><Link href="/pages/returns" className="hover:text-gold">Return Policy</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-4 font-serif text-lg text-gold">Contact</h3>
+          <h3 className="mb-5 text-[10px] font-medium uppercase tracking-[.2em] text-white">Information</h3>
           <ul className="space-y-3 text-sm">
-            {(s?.office_address ?? s?.address) && <li className="flex gap-2"><MapPin size={16} className="mt-0.5 shrink-0 text-gold" />{s?.office_address ?? s?.address}</li>}
-            {(s?.support_phone ?? s?.phone) && <li className="flex gap-2"><Phone size={16} className="mt-0.5 shrink-0 text-gold" />{s?.support_phone ?? s?.phone}</li>}
-            {(s?.support_email ?? s?.email) && <li className="flex gap-2"><Mail size={16} className="mt-0.5 shrink-0 text-gold" />{s?.support_email ?? s?.email}</li>}
-            {s?.business_hours && <li className="flex gap-2"><Clock size={16} className="mt-0.5 shrink-0 text-gold" />{s.business_hours}</li>}
+            {policies.about_us && <li><Link href="/pages/about" className="hover:text-white">About us</Link></li>}
+            {settings?.website && /^https?:\/\//i.test(settings.website) && <li><a href={settings.website} target="_blank" rel="noopener noreferrer" className="hover:text-white">Website</a></li>}
+            {settings?.office_address || settings?.address ? <li className="flex gap-2 leading-6"><MapPin size={15} className="mt-1 shrink-0" />{settings.office_address || settings.address}</li> : null}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-5 text-[10px] font-medium uppercase tracking-[.2em] text-white">Policies</h3>
+          <ul className="space-y-3 text-sm">
+            {policyLinks.filter(([, key]) => policies[key]).map(([label, key, href]) => (
+              <li key={key}><Link href={href} className="hover:text-white">{label}</Link></li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-5 text-[10px] font-medium uppercase tracking-[.2em] text-white">Customer service</h3>
+          <ul className="space-y-3 text-sm">
+            {(settings?.support_phone || settings?.phone) && <li className="flex gap-2"><Phone size={15} className="mt-0.5 shrink-0" /><a href={`tel:${settings.support_phone || settings.phone}`} className="hover:text-white">{settings.support_phone || settings.phone}</a></li>}
+            {(settings?.support_email || settings?.email) && <li className="flex gap-2"><Mail size={15} className="mt-0.5 shrink-0" /><a href={`mailto:${settings.support_email || settings.email}`} className="break-all hover:text-white">{settings.support_email || settings.email}</a></li>}
+            {settings?.business_hours && <li className="flex gap-2 leading-6"><Clock size={15} className="mt-1 shrink-0" />{settings.business_hours}</li>}
+          </ul>
+        </div>
+        <div>
+          <h3 className="mb-5 text-[10px] font-medium uppercase tracking-[.2em] text-white">Social media</h3>
+          <ul className="space-y-3 text-sm">
+            {socialLinks.map(([label, url]) => <li key={label}><a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-white">{label}</a></li>)}
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/15 py-5 text-center text-xs">© {new Date().getFullYear()} Pineapple. All rights reserved.</div>
+      <div className="border-t border-white/15">
+        <div className="container-x flex flex-col gap-4 py-5 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()}{brandName ? ` ${brandName}` : ""}</p>
+          {paymentMethods.length > 0 && <div className="flex flex-wrap items-center gap-2" aria-label="Enabled payment methods">
+            <span className="mr-1 uppercase tracking-[.14em]">Payment</span>
+            {paymentMethods.map((method) => <span key={method.gateway_id} className="border border-white/20 px-2.5 py-1">{method.name}</span>)}
+          </div>}
+        </div>
+      </div>
     </footer>
   );
 }

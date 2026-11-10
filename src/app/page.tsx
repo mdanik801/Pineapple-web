@@ -1,60 +1,97 @@
 import Link from "next/link";
-import SmartImage from "@/components/SmartImage";
+import Image from "next/image";
+import { Suspense } from "react";
+import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
-import Section from "@/components/Section";
-import ProductGrid from "@/components/ProductGrid";
-import { getBanners, getCategories, listProducts, descendantIds } from "@/lib/data";
-import { Truck, ShieldCheck, RotateCcw, Headphones } from "lucide-react";
+import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
+import EditorialShowcase from "@/components/EditorialShowcase";
+import { getBanners, getBrands, getCategories, getSettings, getShippingZones, listProducts } from "@/lib/data";
+import { money } from "@/lib/format";
 
 export const revalidate = 60;
 
 export default async function Home() {
-  const [banners, cats] = await Promise.all([getBanners(), getCategories()]);
-  const top = cats.filter((c) => !c.parent_id);
-
-  const [newArr, featured, ...perCat] = await Promise.all([
-    listProducts({ flag: "new", limit: 8 }).then(async (r) => (r.products.length >= 4 ? r : listProducts({ limit: 8 }))),
-    listProducts({ flag: "featured", limit: 8 }),
-    ...top.map((c) => listProducts({ categoryIds: descendantIds(cats, c.id), limit: 4 })),
+  const [banners, categories, settings, brands, zones, featured] = await Promise.all([
+    getBanners(),
+    getCategories(),
+    getSettings(),
+    getBrands(),
+    getShippingZones(),
+    listProducts({ flag: "featured", limit: 6 }),
   ]);
+  const topCategories = categories.filter((category) => !category.parent_id);
+  const featuredProducts = featured.products;
+  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim() || "";
+  const brandDescription = settings?.description?.trim() || "";
+  const campaign = banners[0];
+  const deliveryRate = zones.length ? Math.min(...zones.map((zone) => zone.rate)) : null;
 
   return (
     <>
-      <HeroSlider banners={banners} />
+      {banners.length > 0 && <HeroSlider banners={banners} />}
 
-      <section className="container-x mt-8 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-        {[[Truck, "Fast Delivery", "Nationwide shipping"], [ShieldCheck, "Cash on Delivery", "Pay when you receive"], [RotateCcw, "Easy Returns", "7-day return policy"], [Headphones, "Support", "Sat–Thu, 9AM–8PM"]].map(([Icon, t, s]) => {
-          const I = Icon as typeof Truck;
-          return (
-            <div key={t as string} className="flex items-center gap-3 border border-line p-4">
-              <I className="shrink-0 text-gold" size={28} />
-              <div><p className="font-semibold text-brand">{t as string}</p><p className="text-xs text-muted">{s as string}</p></div>
+      {(campaign || deliveryRate !== null) && (
+        <section className="container-x border-b border-black/10 py-12 text-center sm:py-16 lg:py-20">
+          {deliveryRate !== null && <p className="mb-5 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">Delivery rates from {money(deliveryRate)}</p>}
+          {brandName && <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{brandName}</p>}
+          {campaign?.title && <h1 className="mx-auto max-w-3xl font-serif text-3xl leading-tight text-neutral-950 sm:text-4xl lg:text-5xl">{campaign.title}</h1>}
+          {campaign?.subtitle && <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-neutral-600 sm:text-base">{campaign.subtitle}</p>}
+        </section>
+      )}
+
+      {topCategories.length > 0 && (
+        <section className="container-x py-14 sm:py-20 lg:py-24">
+          <div className="mb-8 flex items-end justify-between border-b border-black/10 pb-4 sm:mb-10">
+            <div>
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">Browse the collection</p>
+              <h2 className="font-serif text-3xl text-neutral-950 sm:text-4xl">Categories</h2>
             </div>
-          );
-        })}
-      </section>
+            <Link href="/shop" className="text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black">All products</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
+            {topCategories.map((category) => (
+              <Link key={category.id} href={`/category/${category.slug}`} className="group block">
+                <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
+                  <CategoryImage key={`${category.id}:${category.image_url ?? ""}`} src={category.image_url} alt={category.name} sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw" />
+                </div>
+                <div className="flex items-center justify-between border-b border-black/10 py-3">
+                  <h3 className="text-xs font-medium uppercase tracking-[.12em] text-neutral-900 sm:text-sm">{category.name}</h3>
+                  <span aria-hidden="true" className="text-sm text-neutral-500 transition-transform group-hover:translate-x-1">→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <Section title="Shop by Category" subtitle="Explore our curated collections">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {top.map((c) => (
-            <Link key={c.id} href={`/category/${c.slug}`} className="group relative block aspect-[4/5] overflow-hidden bg-brand">
-              <SmartImage src={c.image_url} alt={c.name} className="object-cover opacity-90 transition-transform duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-transparent to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-4 text-center text-white">
-                <h3 className="font-serif text-lg md:text-xl">{c.name}</h3>
-                <span className="mt-1 inline-block border-b border-gold text-xs tracking-widest text-gold">SHOP NOW</span>
+      {featuredProducts.length > 0 && <EditorialShowcase products={featuredProducts} />}
+
+      {brandDescription && (
+        <section className="border-y border-black/10 bg-[#f7f7f5] px-4 py-16 text-center sm:py-24">
+          {brandName && <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{brandName}</p>}
+          <p className="mx-auto max-w-2xl font-serif text-xl leading-relaxed text-neutral-800 sm:text-2xl">{brandDescription}</p>
+        </section>
+      )}
+
+      {brands.some((brand) => brand.logo_url) && (
+        <section className="container-x py-14 sm:py-20">
+          <div className="mb-8 text-center">
+            <p className="text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">The label portfolio</p>
+            <h2 className="mt-2 font-serif text-2xl text-neutral-950 sm:text-3xl">Our brands</h2>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8 border-y border-black/10 py-8 sm:gap-x-16 sm:py-10">
+            {brands.map((brand) => brand.logo_url ? (
+              <div key={brand.id} className="flex h-12 min-w-24 items-center justify-center sm:h-16 sm:min-w-32">
+                <Image src={brand.logo_url} alt={brand.name} width={160} height={64} unoptimized={brand.logo_url.toLowerCase().endsWith(".svg")} style={{ width: "auto", height: "auto" }} className="max-h-12 max-w-36 object-contain sm:max-h-16 sm:max-w-44" />
               </div>
-            </Link>
-          ))}
-        </div>
-      </Section>
+            ) : null)}
+          </div>
+        </section>
+      )}
 
-      {newArr.products.length > 0 && <Section title="New Arrivals" subtitle="Fresh styles, just landed" href="/shop?sort=new"><ProductGrid products={newArr.products} /></Section>}
-      {featured.products.length > 0 && <Section title="Featured" subtitle="Handpicked favorites" href="/shop"><ProductGrid products={featured.products} /></Section>}
-
-      {top.map((c, i) => perCat[i].products.length > 0 && (
-        <Section key={c.id} title={c.name} href={`/category/${c.slug}`}><ProductGrid products={perCat[i].products} /></Section>
-      ))}
+      <Suspense fallback={<section aria-label="Loading homepage carousel" className="aspect-[4/5] w-full animate-pulse bg-neutral-100 sm:aspect-[16/8] lg:aspect-[16/7]" />}>
+        <HomepageBottomCarousel />
+      </Suspense>
     </>
   );
 }

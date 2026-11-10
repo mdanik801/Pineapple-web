@@ -5,16 +5,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ChromeGate from "@/components/ChromeGate";
-import { getShippingZones } from "@/lib/data";
+import { getSettings, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 
 const sans = Inter({ variable: "--font-sans-var", subsets: ["latin"] });
 const serif = Playfair_Display({ variable: "--font-serif-var", subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: { default: "Pineapple — Premium Fashion & Lifestyle", template: "%s | Pineapple" },
-  description: "Shop premium fashion for men, women and kids at Pineapple. Cash on delivery across Bangladesh.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim();
+  const description = settings?.description?.trim();
+  return {
+    title: brandName
+      ? { default: brandName, template: `%s | ${brandName}` }
+      : { default: "Store", template: "%s" },
+    ...(description ? { description } : {}),
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const free = (await getShippingZones()).find((z) => z.free_shipping_threshold != null);
