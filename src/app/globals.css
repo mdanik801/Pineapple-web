@@ -84,7 +84,7 @@ body {
 @keyframes megaIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
 .nav-link { position: relative; }
-.nav-link::after { content: ""; position: absolute; left: 1rem; right: 1rem; bottom: .5rem; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .35s cubic-bezier(.22,1,.36,1); }
+.nav-link::after { content: ""; position: absolute; left: 0.75rem; right: 0.75rem; bottom: 0.35rem; height: 2px; background: currentColor; transform: scaleX(0); transform-origin: center; transition: transform .3s cubic-bezier(.22,1,.36,1); }
 .group:hover > .nav-link::after, .nav-link:hover::after { transform: scaleX(1); }
 
 /* clickable elements always show the pointer cursor */

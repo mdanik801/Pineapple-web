@@ -10,30 +10,56 @@ export default async function Header() {
   const [cats, me, popular, settings] = await Promise.all([getCategories(), getCustomer(), getPopularTerms(), getSettings()]);
   const top = cats.filter((c) => !c.parent_id);
   const kids = (id: string) => cats.filter((c) => c.parent_id === id);
-  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim() || "";
-  const logo = settings?.company_logo?.trim() || "";
+  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim() || "Pineapple";
+  const logo = settings?.company_logo?.trim() || "/logo-full.jpg";
 
   return (
-    <>
-      {/* Top row: logo + search + account links (sticky on mobile only) */}
-      <div className="sticky top-0 z-40 border-b border-black/10 bg-white md:static">
-        <div className="container-x relative flex h-[68px] items-center justify-between gap-3 md:h-[82px]">
-          <div className="md:hidden"><MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} /></div>
-          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} className="absolute left-1/2 flex max-w-[42vw] -translate-x-1/2 items-center md:static md:max-w-[220px] md:translate-x-0">
-            {logo
-              ? <Image src={logo} alt={brandName} width={190} height={76} priority unoptimized={logo.toLowerCase().endsWith(".svg")} className="h-10 w-auto max-w-full object-contain md:h-12" />
-              : brandName && <span className="truncate font-serif text-lg font-medium tracking-wide text-neutral-950 md:text-xl">{brandName}</span>}
+    <header className="w-full">
+      {/* Top row: logo + search + account links */}
+      <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
+        <div className="container-x flex h-[68px] items-center justify-between gap-3 md:h-auto md:py-3.5 lg:py-4">
+          {/* Mobile hamburger menu */}
+          <div className="md:hidden">
+            <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
+          </div>
+
+          {/* Brand Logo */}
+          <Link
+            href="/"
+            aria-label={brandName ? `${brandName} home` : "Home"}
+            className="flex items-center shrink-0"
+          >
+            {logo ? (
+              <Image
+                src={logo}
+                alt={brandName}
+                width={200}
+                height={85}
+                priority
+                unoptimized={logo.toLowerCase().endsWith(".svg")}
+                className="h-10 w-auto max-w-[140px] object-contain sm:h-12 md:h-16 md:max-w-[200px] lg:h-[72px]"
+              />
+            ) : (
+              <span className="truncate font-serif text-xl font-bold tracking-wide text-[#0A3C2A] md:text-2xl">{brandName}</span>
+            )}
           </Link>
+
+          {/* Desktop Right (Search + Actions) and Mobile Actions */}
           <HeaderActions name={me?.first_name ?? null} popular={popular} />
         </div>
       </div>
 
       {/* Nav bar (sticky, desktop) with full-width mega menu */}
-      <nav aria-label="Main" className="sticky top-0 z-40 hidden bg-[#111111] text-white md:block">
+      <nav aria-label="Main" className="sticky top-0 z-40 hidden bg-[#0A3C2A] text-white shadow-sm md:block">
         <NavCompact name={me?.first_name ?? null} popular={popular} brandName={brandName} logoUrl={logo} />
-        <ul className="container-x flex items-center justify-center gap-1 lg:gap-4">
+        <ul className="container-x flex items-center justify-center gap-2 lg:gap-6 xl:gap-8">
           <li className="group">
-            <Link href="/shop?sort=new" className="nav-link block px-4 py-4 text-[13px] font-medium uppercase tracking-[.08em] text-gold">New Arrivals</Link>
+            <Link
+              href="/shop?sort=new"
+              className="nav-link block px-3 py-3 text-[12px] font-bold uppercase tracking-[.06em] text-[#C49A3E] transition-colors hover:text-[#deb250] lg:px-4 lg:py-3.5 lg:text-[13px]"
+            >
+              New Arrivals
+            </Link>
           </li>
           {top.map((c) => {
             const children = kids(c.id);
@@ -44,19 +70,24 @@ export default async function Header() {
               : Array.from({ length: Math.ceil(children.length / 8) }, (_, i) => ({ title: i === 0 ? "Shop by type" : "", href: null as string | null, items: children.slice(i * 8, i * 8 + 8) }));
             return (
               <li key={c.id} className="group">
-                <Link href={`/category/${c.slug}`} className="nav-link block px-4 py-4 text-[13px] font-medium uppercase tracking-[.08em] text-white group-hover:text-gold">{c.name}</Link>
+                <Link
+                  href={`/category/${c.slug}`}
+                  className="nav-link block px-3 py-3 text-[12px] font-bold uppercase tracking-[.06em] text-white transition-colors hover:text-[#C49A3E] lg:px-4 lg:py-3.5 lg:text-[13px]"
+                >
+                  {c.name}
+                </Link>
                 {children.length > 0 && (
-                  <div className="invisible absolute inset-x-0 top-full -translate-y-2 border-t border-white/10 bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                  <div className="invisible absolute inset-x-0 top-full -translate-y-2 border-t border-[#0A3C2A]/20 bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                     <div className="container-x grid gap-x-10 gap-y-8 py-9" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(columns.length, 1), 4) + 0}, minmax(0, 1fr))`, paddingInline: "clamp(1rem, 8vw, 8rem)" }}>
                       {columns.map((col, i) => (
                         <div key={i}>
                           {col.title && (col.href
-                            ? <Link href={`/category/${col.href}`} className="mb-3 block text-xs font-bold uppercase tracking-widest text-brand hover:text-gold">{col.title}</Link>
-                            : <p className="mb-3 text-xs font-bold uppercase tracking-widest text-brand">{col.title}</p>)}
+                            ? <Link href={`/category/${col.href}`} className="mb-3 block text-xs font-bold uppercase tracking-widest text-[#0A3C2A] hover:text-[#C49A3E]">{col.title}</Link>
+                            : <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#0A3C2A]">{col.title}</p>)}
                           <ul className="space-y-2.5">
-                            {i === 0 && !nested && <li><Link href={`/category/${c.slug}`} className="text-sm font-semibold text-gold-dark hover:underline">Shop all {c.name}</Link></li>}
+                            {i === 0 && !nested && <li><Link href={`/category/${c.slug}`} className="text-sm font-semibold text-[#a37d2b] hover:underline">Shop all {c.name}</Link></li>}
                             {col.items.map((k) => (
-                              <li key={k.id}><Link href={`/category/${k.slug}`} className="text-sm text-ink/80 transition-all duration-200 hover:translate-x-1 hover:text-brand">{k.name}</Link></li>
+                              <li key={k.id}><Link href={`/category/${k.slug}`} className="text-sm text-ink/80 transition-all duration-200 hover:translate-x-1 hover:text-[#0A3C2A]">{k.name}</Link></li>
                             ))}
                           </ul>
                         </div>
@@ -69,6 +100,6 @@ export default async function Header() {
           })}
         </ul>
       </nav>
-    </>
+    </header>
   );
 }
