@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Phone, ChevronDown } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
@@ -19,6 +19,59 @@ type HeaderActionsProps = {
   supportPhone?: string;
 };
 
+/** Dynamic typing effect hook for search placeholder */
+function useTypingPlaceholder(
+  phrases: string[],
+  typeSpeed = 80,
+  deleteSpeed = 40,
+  pauseTime = 1800
+) {
+  const [placeholder, setPlaceholder] = useState(phrases[0] || "Search product...");
+
+  useEffect(() => {
+    if (!phrases || phrases.length === 0) return;
+
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let timeoutId: NodeJS.Timeout;
+
+    const tick = () => {
+      const currentPhrase = phrases[phraseIdx];
+      if (!currentPhrase) return;
+
+      if (!isDeleting) {
+        charIdx++;
+        setPlaceholder(currentPhrase.slice(0, charIdx));
+
+        if (charIdx === currentPhrase.length) {
+          isDeleting = true;
+          timeoutId = setTimeout(tick, pauseTime);
+          return;
+        }
+        timeoutId = setTimeout(tick, typeSpeed);
+      } else {
+        charIdx--;
+        setPlaceholder(currentPhrase.slice(0, charIdx));
+
+        if (charIdx === 0) {
+          isDeleting = false;
+          phraseIdx = (phraseIdx + 1) % phrases.length;
+          timeoutId = setTimeout(tick, 350);
+          return;
+        }
+        timeoutId = setTimeout(tick, deleteSpeed);
+      }
+    };
+
+    timeoutId = setTimeout(tick, typeSpeed);
+
+    return () => clearTimeout(timeoutId);
+  }, [phrases, typeSpeed, deleteSpeed, pauseTime]);
+
+  return placeholder;
+}
+
 export default function HeaderActions({
   name,
   popular,
@@ -32,6 +85,23 @@ export default function HeaderActions({
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const catRef = useRef<HTMLDivElement>(null);
+
+  const phrases = useMemo(() => {
+    if (popular && popular.length > 0) {
+      const formatted = popular.slice(0, 5).map((p) => `Search "${p}"...`);
+      return [...formatted, "Search products...", "Search new arrivals..."];
+    }
+    return [
+      "Search products...",
+      "Search panjabi...",
+      "Search premium shirts...",
+      "Search denim pants...",
+      "Search polo t-shirts...",
+      "Search new arrivals...",
+    ];
+  }, [popular]);
+
+  const typingPlaceholder = useTypingPlaceholder(phrases);
 
   const cartCount = useStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useStore((s) => s.wishlist.length);
@@ -79,12 +149,12 @@ export default function HeaderActions({
           role="search"
           className="relative flex h-[42px] w-full max-w-[340px] md:max-w-[380px] lg:max-w-[460px] xl:max-w-[500px] items-center rounded-full border border-neutral-200/90 bg-[#f4f5f7] pl-1 pr-2 shadow-2xs transition-all focus-within:border-neutral-400 focus-within:bg-white focus-within:shadow-xs"
         >
-          {/* Text Input */}
+          {/* Text Input with Dynamic Typing Placeholder */}
           <input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search product"
+            placeholder={typingPlaceholder}
             aria-label="Search product"
             className="w-full bg-transparent pl-4 pr-2 text-xs md:text-[13px] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
           />
