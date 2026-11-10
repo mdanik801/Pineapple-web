@@ -4,6 +4,7 @@ import { getCategories, getPopularTerms, getSettings } from "@/lib/data";
 import { getCustomer } from "@/lib/session";
 import HeaderActions from "./HeaderActions";
 import MobileMenu from "./MobileMenu";
+import MobileAnimatedLogo from "./MobileAnimatedLogo";
 import NavCompact from "./NavCompact";
 
 export default async function Header() {
@@ -23,11 +24,20 @@ export default async function Header() {
             <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
           </div>
 
-          {/* Brand Logo: Horizontally centered on mobile viewport, normal flow on desktop */}
+          {/* Mobile Animated Logo: Exactly centered horizontally relative to full mobile viewport */}
           <Link
             href="/"
             aria-label={brandName ? `${brandName} home` : "Home"}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center shrink-0 z-10 md:static md:translate-x-0 md:translate-y-0"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center shrink-0 z-10 md:hidden"
+          >
+            <MobileAnimatedLogo />
+          </Link>
+
+          {/* Desktop & Tablet Logo (Kept unchanged) */}
+          <Link
+            href="/"
+            aria-label={brandName ? `${brandName} home` : "Home"}
+            className="hidden md:flex items-center shrink-0"
           >
             {logo ? (
               <Image
@@ -37,7 +47,7 @@ export default async function Header() {
                 height={85}
                 priority
                 unoptimized={logo.toLowerCase().endsWith(".svg")}
-                className="h-8.5 w-auto max-w-[105px] object-contain sm:h-11 sm:max-w-[140px] md:h-16 md:max-w-[200px] lg:h-[72px]"
+                className="h-16 w-auto max-w-[200px] object-contain lg:h-[72px]"
               />
             ) : (
               <span className="truncate font-serif text-lg sm:text-xl font-bold tracking-wide text-[#0A3C2A] md:text-2xl">{brandName}</span>

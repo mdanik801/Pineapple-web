@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Cinzel } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,6 +10,7 @@ import { money } from "@/lib/format";
 
 const sans = Inter({ variable: "--font-sans-var", subsets: ["latin"] });
 const serif = Playfair_Display({ variable: "--font-serif-var", subsets: ["latin"] });
+const cinzel = Cinzel({ variable: "--font-cinzel-var", subsets: ["latin"], weight: ["600", "700"] });
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const free = (await getShippingZones()).find((z) => z.free_shipping_threshold != null);
   const note = free ? `Delivery is FREE inside ${free.name} on orders over ${money(free.free_shipping_threshold)}. Shipping calculated at checkout.` : undefined;
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="en" className={`${sans.variable} ${serif.variable} ${cinzel.variable}`}>
       <body suppressHydrationWarning className="flex min-h-screen flex-col">
         <ChromeGate><Header /></ChromeGate>
         <main className="flex-1">{children}</main>
