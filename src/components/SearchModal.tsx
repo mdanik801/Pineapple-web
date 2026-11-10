@@ -103,7 +103,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
               </div>
               <section>
                 <div className="mb-4 flex items-end justify-between"><h2 className="font-serif text-lg sm:text-xl text-brand">Featured products</h2><Link href="/shop" onClick={onClose} className="group flex items-center gap-1 text-xs sm:text-sm font-semibold text-gold-dark">Shop all <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link></div>
-                {featured.length ? <Grid items={featured} onPick={pick} cols="grid-cols-2 md:grid-cols-4" /> : <Skeletons cols="grid-cols-2 md:grid-cols-4" n={4} />}
+                {featured.length ? <Grid items={featured} onPick={pick} cols="grid-cols-1 md:grid-cols-4" /> : <Skeletons cols="grid-cols-1 md:grid-cols-4" n={4} />}
               </section>
             </div>
           ) : (
@@ -112,7 +112,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
                 <h2 className="font-serif text-lg sm:text-xl text-brand">{!ready ? <>Searching for “{term}”…</> : res.items.length ? <>Results for “{term}”</> : <>No results for “{term}”</>}</h2>
                 {ready && res.items.length > 0 && <button onClick={() => submit(term)} className="group flex items-center gap-1 text-xs sm:text-sm font-semibold text-gold-dark">View all results <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></button>}
               </div>
-              {!ready ? <Skeletons cols="grid-cols-2 md:grid-cols-4 lg:grid-cols-4" n={4} /> : res.items.length > 0 ? <Grid items={res.items} onPick={pick} cols="grid-cols-2 md:grid-cols-4" /> : (
+              {!ready ? <Skeletons cols="grid-cols-1 md:grid-cols-4 lg:grid-cols-4" n={4} /> : res.items.length > 0 ? <Grid items={res.items} onPick={pick} cols="grid-cols-1 md:grid-cols-4" /> : (
                 <div className="rounded-xl bg-[#f6f8f7] py-12 text-center">
                   <Search size={36} className="mx-auto text-brand/30" />
                   <p className="mt-3 text-xs sm:text-sm text-muted">We couldn&apos;t find anything. Try a different keyword.</p>
@@ -144,7 +144,7 @@ function Grid({ items, onPick, cols }: { items: ProductCardData[]; onPick: () =>
           <li key={p.id} style={{ animationDelay: `${i * 60}ms` }} className="group [animation:popIn_.4s_cubic-bezier(.22,1,.36,1)_both]">
             <Link href={`/product/${p.slug}`} onClick={onPick} className="block">
               <div className="relative aspect-[5/6] overflow-hidden rounded-lg bg-brand-50 ring-1 ring-line">
-                <SmartImage src={p.image} alt={p.name} sizes="(max-width:768px) 50vw, 22vw" className="object-cover" />
+                <SmartImage src={p.image} alt={p.name} sizes="(max-width: 768px) 100vw, 22vw" className="object-cover" />
                 {off > 0 && <span className="absolute left-1.5 top-1.5 rounded-xs bg-gold px-1.5 py-0.5 text-[10px] font-bold text-white">-{off}%</span>}
                 {!p.in_stock && <span className="absolute inset-x-0 bottom-0 bg-ink/75 py-1 text-center text-[10px] font-semibold text-white">SOLD OUT</span>}
               </div>
