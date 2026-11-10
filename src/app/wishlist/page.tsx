@@ -23,8 +23,8 @@ export default function WishlistPage() {
 
   const shown = (wishlist.length ? products ?? [] : []).filter((p) => wishlist.includes(p.id));
   return (
-    <div className="container-x min-h-[50vh] py-10">
-      <h1 className="section-title mb-8">My Wishlist</h1>
+    <div className="container-x w-full min-w-0 min-h-[50vh] py-6 sm:py-10">
+      <h1 className="section-title mb-6 sm:mb-8 text-2xl sm:text-3xl">My Wishlist</h1>
       {!mounted || (wishlist.length > 0 && products === null) ? <p className="text-muted">Loading…</p> : shown.length === 0 ? (
         <div className="py-16 text-center">
           <Heart className="mx-auto text-brand/30" size={64} />

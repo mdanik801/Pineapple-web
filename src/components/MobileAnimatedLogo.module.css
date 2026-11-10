@@ -1,0 +1,118 @@
+/* Animated Logo Styles from public/pinaple logo.html */
+
+.logoWrapper {
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brandLogo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+}
+
+@media (min-width: 375px) {
+  .brandLogo {
+    gap: 9px;
+  }
+}
+
+/* Geometric Accent Mark */
+.brandMark {
+  width: 7px;
+  height: 7px;
+  background: linear-gradient(135deg, #d4af37, #f3e5ab);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  animation: markPulse 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  flex-shrink: 0;
+}
+
+@media (min-width: 375px) {
+  .brandMark {
+    width: 8.5px;
+    height: 8.5px;
+  }
+}
+
+/* Typography Settings */
+.brandText {
+  font-family: var(--font-cinzel-var), 'Cinzel', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: inline-flex;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+@media (min-width: 360px) {
+  .brandText {
+    font-size: 0.94rem;
+    letter-spacing: 0.19em;
+  }
+}
+
+@media (min-width: 390px) {
+  .brandText {
+    font-size: 1rem;
+    letter-spacing: 0.22em;
+  }
+}
+
+/* Animated Individual Letter Spans */
+.char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(2px);
+  animation: letterReveal 6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  will-change: transform, opacity, filter;
+}
+
+/* CSS Keyframe Animations */
+@keyframes letterReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(3px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+  85%, 100% {
+    opacity: 0;
+    transform: translateY(-6px);
+    filter: blur(2px);
+  }
+}
+
+@keyframes markPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+  }
+  15%, 70% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  85%, 100% {
+    opacity: 0;
+    transform: scale(0) rotate(45deg);
+  }
+}

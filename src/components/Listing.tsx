@@ -43,7 +43,7 @@ export default async function Listing({ basePath, sp, categoryIds, types = [] }:
   const hidden = Object.entries({ q: sp.q, sort: sp.sort, size: sp.size }).filter(([, v]) => v);
 
   return (
-    <div>
+    <div className="w-full min-w-0">
       <div className="border-b border-line pb-4">
         {/* Responsive meta row: product count and sort dropdown */}
         <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
@@ -88,7 +88,7 @@ export default async function Listing({ basePath, sp, categoryIds, types = [] }:
             </FilterDropdown>
           )}
 
-          <FilterDropdown label="Price" active={hasPrice}>
+          <FilterDropdown label="Price" active={hasPrice} align="right">
             <form method="get" action={basePath} className="flex flex-wrap sm:flex-nowrap items-end gap-2">
               {hidden.map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
               <div className="flex-1 min-w-[70px]">

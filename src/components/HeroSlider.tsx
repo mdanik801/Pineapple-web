@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import SmartImage from "./SmartImage";
 
 type B = { id: string; title: string; subtitle: string | null; description?: string | null; image_url: string | null; mobile_image_url: string | null; cta_text: string | null; cta_link: string | null };
@@ -62,13 +61,9 @@ export default function HeroSlider({ banners, ariaLabel = "Featured", priority =
         );
       })}
       {n > 1 && (
-        <>
-          <button aria-label="Previous slide" onClick={() => go((i - 1 + n) % n)} className="absolute left-4 top-1/2 z-[3] hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-brand backdrop-blur transition hover:scale-110 hover:bg-white md:grid"><ChevronLeft /></button>
-          <button aria-label="Next slide" onClick={() => go((i + 1) % n)} className="absolute right-4 top-1/2 z-[3] hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/80 text-brand backdrop-blur transition hover:scale-110 hover:bg-white md:grid"><ChevronRight /></button>
-          <div className="absolute bottom-4 left-1/2 z-[3] flex -translate-x-1/2 gap-2">
-            {banners.map((b, k) => <button key={b.id} aria-label={`Slide ${k + 1}`} onClick={() => go(k)} className={`h-2 rounded-full transition-all duration-500 ${k === i ? "w-7 bg-gold" : "w-2 bg-white/70 hover:bg-white"}`} />)}
-          </div>
-        </>
+        <div className="absolute bottom-4 left-1/2 z-[3] flex -translate-x-1/2 gap-2">
+          {banners.map((b, k) => <button key={b.id} aria-label={`Slide ${k + 1}`} onClick={() => go(k)} className={`h-2 rounded-full transition-all duration-500 ${k === i ? "w-7 bg-gold" : "w-2 bg-white/70 hover:bg-white"}`} />)}
+        </div>
       )}
     </section>
   );
