@@ -2,7 +2,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function FilterDropdown({ label, active, children }: { label: string; active?: boolean; children: React.ReactNode }) {
+export default function FilterDropdown({
+  label,
+  active,
+  align = "left",
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  align?: "left" | "right";
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -26,7 +36,9 @@ export default function FilterDropdown({ label, active, children }: { label: str
         <ChevronDown size={14} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
       </button>
       <div
-        className={`absolute left-0 top-full z-30 mt-1.5 w-max min-w-48 max-w-[calc(100vw-2rem)] rounded-md border border-line bg-white p-3.5 shadow-xl transition-all duration-200 ease-out sm:min-w-56 sm:p-4 ${open ? "visible translate-y-0 opacity-100" : "invisible -translate-y-1 opacity-0 pointer-events-none"}`}
+        className={`absolute top-full z-30 mt-1.5 min-w-48 max-w-[calc(100vw-2rem)] rounded-md border border-line bg-white p-3.5 shadow-xl transition-all duration-200 ease-out sm:min-w-56 sm:p-4 ${
+          align === "right" ? "right-0 sm:right-auto sm:left-0" : "left-0"
+        } ${open ? "block visible translate-y-0 opacity-100" : "hidden invisible -translate-y-1 opacity-0 pointer-events-none"}`}
       >
         {children}
       </div>

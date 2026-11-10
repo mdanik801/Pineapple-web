@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${sans.variable} ${serif.variable} ${cinzel.variable}`}>
       <body suppressHydrationWarning className="flex min-h-screen flex-col">
         <ChromeGate><Header /></ChromeGate>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 w-full min-w-0">{children}</main>
         <ChromeGate><Footer /></ChromeGate>
         <CartDrawer note={note} />
       </body>

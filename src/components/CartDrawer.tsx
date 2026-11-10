@@ -23,7 +23,7 @@ export default function CartDrawer({ note }: { note?: string }) {
         role="dialog"
         aria-label="Shopping cart"
         aria-hidden={!open}
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] sm:rounded-l-2xl ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)] sm:rounded-l-2xl ${open ? "translate-x-0 visible" : "translate-x-full invisible pointer-events-none"}`}
       >
         <div className="flex items-start justify-between px-4 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-6 border-b border-line">
           <div>

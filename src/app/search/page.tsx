@@ -59,12 +59,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const link = (active: boolean) => `block py-1.5 text-sm transition-all duration-200 hover:translate-x-1 hover:text-brand ${active ? "font-semibold text-brand" : "text-ink/80"}`;
 
   return (
-    <div className="container-x py-10">
-      <h1 className="mb-10 text-center text-xl uppercase tracking-[.14em] md:text-2xl">
+    <div className="container-x w-full min-w-0 py-6 sm:py-10">
+      <h1 className="mb-8 text-center text-xl uppercase tracking-[.14em] md:text-2xl">
         {q ? <>{total} result{total === 1 ? "" : "s"} found for “{q}”</> : "Search our store"}
       </h1>
 
-      <div className="grid gap-8 lg:grid-cols-[250px_1fr] lg:gap-12">
+      <div className="grid w-full min-w-0 gap-8 lg:grid-cols-[250px_1fr] lg:gap-12">
         <SidebarShell>
           <Facet title="Categories">
             <ul>
@@ -125,7 +125,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   </ul>
                 </FilterDropdown>
                 {sizes.length > 0 && (
-                  <FilterDropdown label={sp.size ? `Size: ${sp.size}` : "Size"} active={!!sp.size}>
+                  <FilterDropdown label={sp.size ? `Size: ${sp.size}` : "Size"} active={!!sp.size} align="right">
                     <div className="flex max-w-xs flex-wrap gap-2">
                       {sizes.map((s) => <Link key={s} href={href({ size: sp.size === s ? undefined : s, page: undefined })} className={`min-w-11 border px-3 py-1.5 text-center text-sm transition-colors ${sp.size === s ? "border-brand bg-brand text-white" : "border-line hover:border-brand"}`}>{s}</Link>)}
                     </div>
