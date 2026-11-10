@@ -36,14 +36,14 @@ export default function EditorialShowcase({ products }: { products: ProductCardD
           </article>
 
           {supporting.length > 0 && (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-6 lg:col-span-5 lg:grid-cols-1 lg:gap-y-6">
+            <div className="grid grid-cols-1 gap-y-7 md:grid-cols-2 md:gap-x-6 lg:col-span-5 lg:grid-cols-1 lg:gap-y-6">
               {supporting.map((product) => (
                 <article key={product.id} className="group">
                   <Link href={`/product/${product.slug}`} aria-label={product.name} className="relative block aspect-[4/5] overflow-hidden bg-white lg:aspect-[16/9]">
                     {product.image
-                      ? <SmartImage src={product.image} alt={product.name} sizes="(max-width: 1024px) 48vw, 40vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]" />
+                      ? <SmartImage src={product.image} alt={product.name} sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]" />
                       : <div aria-hidden="true" className="absolute inset-0 bg-neutral-100" />}
-                    {product.image2 && <SmartImage src={product.image2} alt="" sizes="(max-width: 1024px) 48vw, 40vw" className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100" />}
+                    {product.image2 && <SmartImage src={product.image2} alt="" sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw" className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100" />}
                   </Link>
                   <div className="flex items-start justify-between gap-3 border-b border-black/15 py-3">
                     <Link href={`/product/${product.slug}`} className="text-xs font-medium leading-5 text-neutral-950 sm:text-sm">{product.name}</Link>

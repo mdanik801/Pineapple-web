@@ -40,7 +40,7 @@ export default async function Home() {
       )}
 
       {topCategories.length > 0 && (
-        <section className="container-x py-14 sm:py-20 lg:py-24">
+        <section className="mx-auto w-full max-w-[94vw] 2xl:max-w-[2400px] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-14 sm:py-20 lg:py-24">
           <div className="mb-8 flex items-end justify-between border-b border-black/10 pb-4 sm:mb-10">
             <div>
               <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">Browse the collection</p>
@@ -48,11 +48,11 @@ export default async function Home() {
             </div>
             <Link href="/shop" className="text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black">All products</Link>
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6 xl:gap-x-7 2xl:gap-x-8 lg:gap-y-10">
             {topCategories.map((category) => (
               <Link key={category.id} href={`/category/${category.slug}`} className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
-                  <CategoryImage key={`${category.id}:${category.image_url ?? ""}`} src={category.image_url} alt={category.name} sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 24vw" />
+                  <CategoryImage key={`${category.id}:${category.image_url ?? ""}`} src={category.image_url} alt={category.name} sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 25vw" />
                 </div>
                 <div className="flex items-center justify-between border-b border-black/10 py-3">
                   <h3 className="text-xs font-medium uppercase tracking-[.12em] text-neutral-900 sm:text-sm">{category.name}</h3>

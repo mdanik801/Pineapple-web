@@ -15,6 +15,19 @@ type SP = { q?: string; cat?: string; avail?: string; min?: string; max?: string
 
 const SORTS = [["rel", "Relevance"], ["new", "Date, new to old"], ["price-asc", "Price, low to high"], ["price-desc", "Price, high to low"], ["name", "Name, A–Z"]] as const;
 
+function paginationRange(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const delta = 1;
+  const left = Math.max(2, current - delta);
+  const right = Math.min(total - 1, current + delta);
+  const range: (number | "...")[] = [1];
+  if (left > 2) range.push("...");
+  for (let i = left; i <= right; i++) range.push(i);
+  if (right < total - 1) range.push("...");
+  range.push(total);
+  return range;
+}
+
 export default async function SearchPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
@@ -133,11 +146,41 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               </div>
 
               {pages > 1 && (
-                <nav aria-label="Pagination" className="mt-12 flex flex-wrap justify-center gap-2">
-                  {Array.from({ length: pages }, (_, i) => i + 1).map((n) => (
-                    <Link key={n} href={href({ page: n === 1 ? undefined : String(n) })} aria-current={n === page ? "page" : undefined}
-                      className={`grid h-10 min-w-10 place-items-center border px-3 text-sm ${n === page ? "border-brand bg-brand text-white" : "border-line hover:border-brand"}`}>{n}</Link>
-                  ))}
+                <nav aria-label="Pagination" className="mt-10 sm:mt-14 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                  {page > 1 && (
+                    <Link
+                      href={href({ page: page - 1 === 1 ? undefined : String(page - 1) })}
+                      className="flex h-9 items-center justify-center border border-line px-2.5 text-xs font-medium text-ink transition-colors hover:border-brand sm:h-10 sm:px-3.5 sm:text-sm"
+                      aria-label="Previous page"
+                    >
+                      ← Prev
+                    </Link>
+                  )}
+                  {paginationRange(page, pages).map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`dots-${idx}`} className="grid h-9 w-7 place-items-center text-xs text-muted sm:h-10 sm:w-8 sm:text-sm">
+                        …
+                      </span>
+                    ) : (
+                      <Link
+                        key={p}
+                        href={href({ page: p === 1 ? undefined : String(p) })}
+                        aria-current={p === page ? "page" : undefined}
+                        className={`grid h-9 min-w-9 place-items-center border px-2 text-xs font-medium transition-colors sm:h-10 sm:min-w-10 sm:px-3 sm:text-sm ${p === page ? "border-brand bg-brand text-white" : "border-line text-ink hover:border-brand"}`}
+                      >
+                        {p}
+                      </Link>
+                    )
+                  )}
+                  {page < pages && (
+                    <Link
+                      href={href({ page: String(page + 1) })}
+                      className="flex h-9 items-center justify-center border border-line px-2.5 text-xs font-medium text-ink transition-colors hover:border-brand sm:h-10 sm:px-3.5 sm:text-sm"
+                      aria-label="Next page"
+                    >
+                      Next →
+                    </Link>
+                  )}
                 </nav>
               )}
             </>
