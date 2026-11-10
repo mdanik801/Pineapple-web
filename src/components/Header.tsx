@@ -15,14 +15,14 @@ export default async function Header() {
 
   return (
     <header className="w-full">
-      {/* 1. Top Announcement Bar (matching reference dark navy bar) */}
-      <div className="bg-[#1c2237] py-2 px-4 text-center text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-white">
+      {/* 1. Top Announcement Bar (matching reference dark navy bar - slim compact height) */}
+      <div className="bg-[#1c2237] py-1 sm:py-1.5 px-3 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.16em] text-white/95 leading-normal">
         Step Into The Festive Season With {brandName}
       </div>
 
       {/* 2. Main Header Row (Logo, Search Pill with Categories, Phone & Action Icons) */}
       <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
-        <div className="container-x relative flex h-[62px] sm:h-[68px] items-center justify-between gap-2 sm:gap-4 md:h-[84px] lg:h-[90px]">
+        <div className="container-x relative flex h-[58px] sm:h-[62px] items-center justify-between gap-2 sm:gap-4 md:h-[72px] lg:h-[76px]">
           {/* Mobile hamburger menu: Left side */}
           <div className="flex items-center shrink-0 z-10 md:hidden">
             <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
@@ -41,7 +41,7 @@ export default async function Header() {
           <Link
             href="/"
             aria-label={brandName ? `${brandName} home` : "Home"}
-            className="hidden md:flex items-center shrink-0 py-2"
+            className="hidden md:flex items-center shrink-0 py-1"
           >
             <AnimatedLogo variant="desktop" />
           </Link>
@@ -56,14 +56,14 @@ export default async function Header() {
         </div>
       </div>
 
-      {/* 4. Category Nav bar (sticky on desktop) with mega menu */}
-      <nav aria-label="Main" className="sticky top-0 z-40 hidden bg-[#0A3C2A] text-white shadow-sm md:block">
+      {/* 3. Category Nav bar (sticky on desktop) with mega menu - slim compact height */}
+      <nav aria-label="Main" className="sticky top-0 z-40 hidden bg-[#0A3C2A] text-white shadow-xs md:block">
         <NavCompact name={me?.first_name ?? null} popular={popular} brandName={brandName} />
-        <ul className="container-x flex items-center justify-center gap-2 lg:gap-6 xl:gap-8">
+        <ul className="container-x flex items-center justify-center gap-1.5 lg:gap-5 xl:gap-7">
           <li className="group">
             <Link
               href="/shop?sort=new"
-              className="nav-link block px-3 py-3 text-[12px] font-bold uppercase tracking-[.06em] text-[#C49A3E] transition-colors hover:text-[#deb250] lg:px-4 lg:py-3.5 lg:text-[13px]"
+              className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-[#C49A3E] transition-colors hover:text-[#deb250] lg:px-3.5 lg:py-2 lg:text-[12px]"
             >
               New Arrivals
             </Link>
@@ -79,7 +79,7 @@ export default async function Header() {
               <li key={c.id} className="group">
                 <Link
                   href={`/category/${c.slug}`}
-                  className="nav-link block px-3 py-3 text-[12px] font-bold uppercase tracking-[.06em] text-white transition-colors hover:text-[#C49A3E] lg:px-4 lg:py-3.5 lg:text-[13px]"
+                  className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-white transition-colors hover:text-[#C49A3E] lg:px-3.5 lg:py-2 lg:text-[12px]"
                 >
                   {c.name}
                 </Link>
