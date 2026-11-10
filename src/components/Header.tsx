@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getCategories, getPopularTerms, getSettings } from "@/lib/data";
 import { getCustomer } from "@/lib/session";
 import HeaderActions from "./HeaderActions";
-import HeaderTopUtility from "./HeaderTopUtility";
 import MobileMenu from "./MobileMenu";
 import AnimatedLogo from "./AnimatedLogo";
 import NavCompact from "./NavCompact";
@@ -21,10 +20,7 @@ export default async function Header() {
         Step Into The Festive Season With {brandName}
       </div>
 
-      {/* 2. Utility Row (matching reference Sailing Life / utility links) */}
-      <HeaderTopUtility name={me?.first_name ?? null} brandName={brandName} />
-
-      {/* 3. Main Header Row (Logo, Search Pill with Categories, Phone & Action Icons) */}
+      {/* 2. Main Header Row (Logo, Search Pill with Categories, Phone & Action Icons) */}
       <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
         <div className="container-x relative flex h-[62px] sm:h-[68px] items-center justify-between gap-2 sm:gap-4 md:h-[84px] lg:h-[90px]">
           {/* Mobile hamburger menu: Left side */}
