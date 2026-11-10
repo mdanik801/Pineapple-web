@@ -1,109 +1,242 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Phone, ChevronDown } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
 import SearchModal from "./SearchModal";
 
-export default function HeaderActions({ name, popular }: { name: string | null; popular: string[] }) {
+type CategoryItem = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type HeaderActionsProps = {
+  name: string | null;
+  popular: string[];
+  categories?: CategoryItem[];
+  supportPhone?: string;
+};
+
+export default function HeaderActions({
+  name,
+  popular,
+  categories = [],
+  supportPhone = "01777702000",
+}: HeaderActionsProps) {
   const router = useRouter();
   const mounted = useMounted();
   const [open, setOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const catRef = useRef<HTMLDivElement>(null);
+
   const cartCount = useStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
   const wishCount = useStore((s) => s.wishlist.length);
   const setDrawer = useStore((s) => s.setDrawer);
+
+  // Close categories dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) {
+        setCatOpen(false);
+      }
+    }
+    if (catOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [catOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const term = searchQuery.trim();
     if (term) {
-      router.push(`/search?q=${encodeURIComponent(term)}`);
+      if (selectedCategory) {
+        router.push(`/shop?category=${selectedCategory.slug}&q=${encodeURIComponent(term)}`);
+      } else {
+        router.push(`/search?q=${encodeURIComponent(term)}`);
+      }
+    } else if (selectedCategory) {
+      router.push(`/category/${selectedCategory.slug}`);
     } else {
       setOpen(true);
     }
   };
 
+  const phoneClean = supportPhone.replace(/[^0-9+]/g, "");
 
   return (
     <>
-      {/* Desktop Layout: 2 stacked rows (Search on top, Actions on bottom) */}
-      <div className="hidden flex-col items-end gap-2 md:flex">
-        {/* Row 1: Search bar */}
+      {/* Desktop & Tablet Center: Pill Search Bar */}
+      <div className="hidden flex-1 items-center justify-center px-4 md:flex lg:px-8">
         <form
           onSubmit={handleSearch}
           role="search"
-          className="relative flex h-[38px] w-56 md:w-64 lg:w-[290px] items-center rounded-full border border-[#d2dad6] bg-white pl-3.5 pr-1 shadow-2xs transition-all focus-within:border-[#0A3C2A] focus-within:ring-1 focus-within:ring-[#0A3C2A]/20"
+          className="relative flex h-[42px] w-full max-w-[340px] md:max-w-[380px] lg:max-w-[460px] xl:max-w-[500px] items-center rounded-full border border-neutral-200/90 bg-[#f4f5f7] pl-1 pr-2 shadow-2xs transition-all focus-within:border-neutral-400 focus-within:bg-white focus-within:shadow-xs"
         >
+          {/* Text Input */}
           <input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search products..."
-            aria-label="Search products"
-            className="w-full bg-transparent pr-2 text-xs md:text-[13px] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
+            placeholder="Search product"
+            aria-label="Search product"
+            className="w-full bg-transparent pl-4 pr-2 text-xs md:text-[13px] text-neutral-800 placeholder:text-neutral-400 focus:outline-none"
           />
+
+          {/* Categories Selector Dropdown */}
+          <div ref={catRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setCatOpen((prev) => !prev)}
+              className="flex items-center gap-1 border-l border-neutral-300/80 px-2.5 py-1 text-xs text-neutral-600 transition-colors hover:text-neutral-900"
+              aria-expanded={catOpen}
+              aria-label="Filter by category"
+            >
+              <span className="max-w-[90px] truncate lg:max-w-[120px]">
+                {selectedCategory ? selectedCategory.name : "Categories"}
+              </span>
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-200 ${catOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {catOpen && (
+              <div className="absolute right-0 top-full mt-2 w-48 max-h-64 overflow-y-auto rounded-xl border border-neutral-200 bg-white py-1.5 shadow-xl z-50">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setCatOpen(false);
+                  }}
+                  className={`w-full px-3.5 py-1.5 text-left text-xs transition-colors hover:bg-neutral-100 ${
+                    !selectedCategory ? "font-bold text-[#0A3C2A]" : "text-neutral-700"
+                  }`}
+                >
+                  All Categories
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(c);
+                      setCatOpen(false);
+                    }}
+                    className={`w-full px-3.5 py-1.5 text-left text-xs transition-colors hover:bg-neutral-100 ${
+                      selectedCategory?.id === c.id ? "font-bold text-[#0A3C2A]" : "text-neutral-700"
+                    }`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Search Magnifying Glass Icon Button */}
           <button
             type="submit"
             aria-label="Search"
-            className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full bg-[#0A3C2A] text-white transition-all hover:bg-[#072b1e] active:scale-95"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:text-neutral-900"
           >
-            <Search size={13} strokeWidth={2.2} />
+            <Search size={16} strokeWidth={2} />
           </button>
         </form>
+      </div>
 
-        {/* Row 2: Action links */}
-        <div className="flex items-center gap-4 lg:gap-6">
-          <button
-            type="button"
-            onClick={() => setDrawer(true)}
-            aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`}
-            title="Shopping cart"
-            className="group flex items-center gap-1.5 text-xs lg:text-[13px] font-normal text-[#212925] transition-colors hover:text-[#0A3C2A]"
-          >
-            <ShoppingBag size={17} strokeWidth={1.75} className="shrink-0 text-[#212925] transition-transform group-hover:scale-105" />
-            <span className="whitespace-nowrap">Shopping Cart</span>
-            <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#C49A3E] px-1 text-[10px] font-bold leading-none text-white shadow-2xs">
-              {mounted ? cartCount : 0}
+      {/* Desktop & Tablet Right: Phone Callout + User, Wishlist, Cart Icons */}
+      <div className="hidden shrink-0 items-center gap-5 lg:gap-7 md:flex">
+        {/* Call Us Now */}
+        <a
+          href={`tel:${phoneClean}`}
+          className="hidden items-center gap-2.5 transition-opacity hover:opacity-80 lg:flex"
+          aria-label={`Call us now at ${supportPhone}`}
+        >
+          <Phone size={19} strokeWidth={1.8} className="shrink-0 text-neutral-800" />
+          <div className="flex flex-col text-left leading-tight">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
+              Call Us Now
             </span>
-          </button>
+            <span className="text-[13px] font-bold text-neutral-900">
+              {supportPhone}
+            </span>
+          </div>
+        </a>
 
+        {/* Action Icons */}
+        <div className="flex items-center gap-4 lg:gap-5">
+          {/* User Profile */}
+          <Link
+            href={name ? "/account" : "/login"}
+            aria-label={name ? `My account, logged in as ${name}` : "Sign in"}
+            title={name ? `Hi, ${name}` : "Sign In"}
+            className="text-neutral-800 transition-colors hover:text-[#0A3C2A]"
+          >
+            <User size={22} strokeWidth={1.6} />
+          </Link>
+
+          {/* Wishlist */}
           <Link
             href="/wishlist"
             aria-label="My Wish List"
             title="My Wish List"
-            className="group flex items-center gap-1.5 text-xs lg:text-[13px] font-normal text-[#212925] transition-colors hover:text-[#0A3C2A]"
+            className="relative text-neutral-800 transition-colors hover:text-[#0A3C2A]"
           >
-            <Heart size={17} strokeWidth={1.75} className="shrink-0 text-[#212925] transition-transform group-hover:scale-105" />
-            <span className="whitespace-nowrap">My Wish List</span>
+            <Heart size={22} strokeWidth={1.6} />
             {mounted && wishCount > 0 && (
-              <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#C49A3E] px-1 text-[10px] font-bold leading-none text-white shadow-2xs">
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C49A3E] px-1 text-[10px] font-bold text-white shadow-2xs">
                 {wishCount}
               </span>
             )}
           </Link>
 
-          <Link
-            href={name ? "/account" : "/login"}
-            aria-label={name ? "My account" : "Sign in"}
-            title={name ? "My account" : "Sign in"}
-            className="whitespace-nowrap text-xs lg:text-[13px] font-normal text-[#212925] transition-colors hover:text-[#0A3C2A]"
+          {/* Cart */}
+          <button
+            type="button"
+            onClick={() => setDrawer(true)}
+            aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`}
+            title="Shopping cart"
+            className="relative cursor-pointer text-neutral-800 transition-colors hover:text-[#0A3C2A]"
           >
-            {name ? `Hi, ${name}` : "Sign In"}
-          </Link>
+            <ShoppingBag size={22} strokeWidth={1.6} />
+            {mounted && cartCount > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#0A3C2A] px-1 text-[10px] font-bold text-white shadow-2xs">
+                {cartCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Layout: Search button on the right side in the same navbar row */}
-      <div className="flex items-center justify-end shrink-0 z-10 md:hidden">
+      {/* Mobile Layout: Search and Cart buttons on the right side */}
+      <div className="flex items-center justify-end gap-1 shrink-0 z-10 md:hidden">
         <button
           type="button"
           aria-label="Search"
           onClick={() => setOpen(true)}
-          className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
+          className="grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
         >
           <Search size={20} />
+        </button>
+        <button
+          type="button"
+          aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`}
+          onClick={() => setDrawer(true)}
+          className="relative grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
+        >
+          <ShoppingBag size={20} />
+          {mounted && cartCount > 0 && (
+            <span className="absolute top-1 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#0A3C2A] px-0.5 text-[9px] font-bold leading-none text-white shadow-2xs">
+              {cartCount}
+            </span>
+          )}
         </button>
       </div>
 

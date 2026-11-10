@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Search, Heart, ShoppingBag, User } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
 import SearchModal from "./SearchModal";
+import AnimatedLogo from "./AnimatedLogo";
 
 /** Shown inside the sticky nav bar once the page is scrolled past the top row. Slides in/out vertically. */
-export default function NavCompact({ name, popular, brandName, logoUrl }: { name: string | null; popular: string[]; brandName: string; logoUrl: string }) {
+export default function NavCompact({ name, popular, brandName }: { name: string | null; popular: string[]; brandName: string; logoUrl?: string }) {
   const mounted = useMounted();
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState(false);
@@ -32,15 +32,9 @@ export default function NavCompact({ name, popular, brandName, logoUrl }: { name
   return (
     <>
       <div className={`container-x pointer-events-none absolute inset-0 hidden items-center justify-between md:flex ${scrolled ? "" : "invisible delay-500"}`} aria-hidden={!scrolled}>
-        <div className="h-full overflow-hidden py-1.5">
-          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full max-w-44 items-center px-2 text-sm text-white transition-transform duration-300 hover:scale-105">
-            {logoUrl ? (
-              <div className="flex items-center rounded-sm bg-white px-2 py-0.5 shadow-xs">
-                <Image src={logoUrl} alt={brandName} width={130} height={36} unoptimized={logoUrl.toLowerCase().endsWith(".svg")} className="h-6 w-auto max-w-full object-contain" />
-              </div>
-            ) : (
-              <span className="truncate font-serif font-bold text-white">{brandName}</span>
-            )}
+        <div className="h-full overflow-hidden py-1.5 flex items-center">
+          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full max-w-52 items-center px-2 text-white transition-transform duration-300 hover:scale-105">
+            <AnimatedLogo variant="compact" textColor="#ffffff" />
           </Link>
         </div>
         <div className="flex h-full items-center gap-1 overflow-hidden">
