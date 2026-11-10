@@ -17,7 +17,7 @@ export default async function Header() {
     <header className="w-full">
       {/* Top row: logo + search + account links */}
       <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
-        <div className="container-x flex h-[68px] items-center justify-between gap-3 md:h-auto md:py-3.5 lg:py-4">
+        <div className="container-x flex h-[62px] sm:h-[68px] items-center justify-between gap-1.5 sm:gap-3 md:h-auto md:py-3.5 lg:py-4">
           {/* Mobile hamburger menu */}
           <div className="md:hidden">
             <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
@@ -37,10 +37,10 @@ export default async function Header() {
                 height={85}
                 priority
                 unoptimized={logo.toLowerCase().endsWith(".svg")}
-                className="h-10 w-auto max-w-[140px] object-contain sm:h-12 md:h-16 md:max-w-[200px] lg:h-[72px]"
+                className="h-8.5 w-auto max-w-[105px] object-contain sm:h-11 sm:max-w-[140px] md:h-16 md:max-w-[200px] lg:h-[72px]"
               />
             ) : (
-              <span className="truncate font-serif text-xl font-bold tracking-wide text-[#0A3C2A] md:text-2xl">{brandName}</span>
+              <span className="truncate font-serif text-lg sm:text-xl font-bold tracking-wide text-[#0A3C2A] md:text-2xl">{brandName}</span>
             )}
           </Link>
 
@@ -78,7 +78,7 @@ export default async function Header() {
                 </Link>
                 {children.length > 0 && (
                   <div className="invisible absolute inset-x-0 top-full -translate-y-2 border-t border-[#0A3C2A]/20 bg-white opacity-0 shadow-2xl transition-all duration-300 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                    <div className="container-x grid gap-x-10 gap-y-8 py-9" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(columns.length, 1), 4) + 0}, minmax(0, 1fr))`, paddingInline: "clamp(1rem, 8vw, 8rem)" }}>
+                    <div className="container-x grid gap-x-8 gap-y-6 py-7 sm:gap-x-10 sm:gap-y-8 sm:py-9" style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(columns.length, 1), 4) + 0}, minmax(0, 1fr))`, paddingInline: "clamp(1rem, 6vw, 8rem)" }}>
                       {columns.map((col, i) => (
                         <div key={i}>
                           {col.title && (col.href
