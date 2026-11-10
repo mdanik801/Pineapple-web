@@ -17,17 +17,17 @@ export default async function Header() {
     <header className="w-full">
       {/* Top row: logo + search + account links */}
       <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
-        <div className="container-x flex h-[62px] sm:h-[68px] items-center justify-between gap-1.5 sm:gap-3 md:h-auto md:py-3.5 lg:py-4">
-          {/* Mobile hamburger menu */}
-          <div className="md:hidden">
+        <div className="container-x relative flex h-[62px] sm:h-[68px] items-center justify-between gap-1.5 sm:gap-3 md:h-auto md:py-3.5 lg:py-4">
+          {/* Mobile hamburger menu: Left side */}
+          <div className="flex items-center shrink-0 z-10 md:hidden">
             <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
           </div>
 
-          {/* Brand Logo */}
+          {/* Brand Logo: Horizontally centered on mobile viewport, normal flow on desktop */}
           <Link
             href="/"
             aria-label={brandName ? `${brandName} home` : "Home"}
-            className="flex items-center shrink-0"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center shrink-0 z-10 md:static md:translate-x-0 md:translate-y-0"
           >
             {logo ? (
               <Image
@@ -44,7 +44,7 @@ export default async function Header() {
             )}
           </Link>
 
-          {/* Desktop Right (Search + Actions) and Mobile Actions */}
+          {/* Right side: Desktop Search + Actions, Mobile Search Button */}
           <HeaderActions name={me?.first_name ?? null} popular={popular} />
         </div>
       </div>

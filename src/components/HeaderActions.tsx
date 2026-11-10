@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag, User } from "lucide-react";
+import { Search, Heart, ShoppingBag } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
 import SearchModal from "./SearchModal";
 
@@ -25,7 +25,6 @@ export default function HeaderActions({ name, popular }: { name: string | null; 
     }
   };
 
-  const mBadge = "absolute -right-1 -top-1 flex h-3.5 min-w-3.5 sm:h-4 sm:min-w-4 items-center justify-center rounded-full bg-[#C49A3E] px-0.5 text-[9px] sm:text-[10px] font-bold leading-none text-white";
 
   return (
     <>
@@ -96,40 +95,16 @@ export default function HeaderActions({ name, popular }: { name: string | null; 
         </div>
       </div>
 
-      {/* Mobile Layout (Tested down to 320px) */}
-      <div className="flex items-center gap-0.5 sm:gap-1 text-neutral-900 md:hidden">
+      {/* Mobile Layout: Search button on the right side in the same navbar row */}
+      <div className="flex items-center justify-end shrink-0 z-10 md:hidden">
         <button
           type="button"
           aria-label="Search"
           onClick={() => setOpen(true)}
-          className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation"
+          className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
         >
-          <Search size={18} />
+          <Search size={20} />
         </button>
-        <Link
-          href="/wishlist"
-          aria-label="Wishlist"
-          className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation"
-        >
-          <Heart size={18} />
-          {mounted && wishCount > 0 && <span className={mBadge}>{wishCount}</span>}
-        </Link>
-        <button
-          type="button"
-          aria-label="Open cart"
-          onClick={() => setDrawer(true)}
-          className="relative grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation"
-        >
-          <ShoppingBag size={18} />
-          <span className={mBadge}>{mounted ? cartCount : 0}</span>
-        </button>
-        <Link
-          href={name ? "/account" : "/login"}
-          aria-label={name ? "My account" : "Sign in"}
-          className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation"
-        >
-          <User size={18} />
-        </Link>
       </div>
 
       {open && <SearchModal popular={popular} onClose={() => setOpen(false)} />}
