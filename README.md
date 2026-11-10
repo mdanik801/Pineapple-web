@@ -1,5 +1,7 @@
 # Pineapple — Customer Storefront
 
+# Pineapple-web
+
 Next.js 16 + Tailwind 4 + Supabase (shared with the admin panel).
 
 Theme: Dark Green `#0A3C2A` · White `#FFFFFF` · Gold `#C49A3E`
