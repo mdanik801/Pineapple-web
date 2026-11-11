@@ -63,9 +63,8 @@ function validProductImage(value: unknown): string | null {
   if (image.startsWith("/") && !image.startsWith("//")) return image;
 
   try {
-    const host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
     const url = new URL(image);
-    return (url.protocol === "https:" || url.protocol === "http:") && url.hostname === host ? image : null;
+    return (url.protocol === "https:" || url.protocol === "http:") ? image : null;
   } catch {
     return null;
   }
@@ -87,7 +86,8 @@ function swatchesOf(p: RawProduct) {
   const seen = new Map<string, string | null>();
   for (const v of p.product_variants ?? []) {
     if (v.status !== "active" || !v.color) continue;
-    if (!seen.has(v.color) || (!seen.get(v.color) && v.image_url)) seen.set(v.color, v.image_url);
+    const img = validProductImage(v.image_url);
+    if (!seen.has(v.color) || (!seen.get(v.color) && img)) seen.set(v.color, img);
   }
   return [...seen].map(([color, image]) => ({ color, image }));
 }

@@ -18,14 +18,14 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function imageSource(value: unknown, allowedHost?: string): string | null {
+function imageSource(value: unknown, _allowedHost?: string): string | null {
   const source = text(value);
   if (!source) return null;
   if (source.startsWith("/") && !source.startsWith("//")) return source;
 
   try {
     const url = new URL(source);
-    if ((url.protocol === "https:" || url.protocol === "http:") && allowedHost && url.hostname === allowedHost) {
+    if (url.protocol === "https:" || url.protocol === "http:") {
       return source;
     }
   } catch {}
