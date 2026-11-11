@@ -25,7 +25,6 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
         </Link>
         <div className="pointer-events-none absolute left-2 top-2 flex flex-col gap-1">
           {off > 0 && <span className="bg-gold px-2 py-1 text-[11px] font-bold text-white">-{off}%</span>}
-          {p.is_new && <span className="bg-brand px-2 py-1 text-[11px] font-bold text-white">NEW</span>}
         </div>
         {!p.in_stock && (
           <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 bg-ink/75 py-1.5 text-center text-xs font-semibold tracking-wider text-white">SOLD OUT</div>

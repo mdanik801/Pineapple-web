@@ -7,6 +7,7 @@ import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
 import EditorialShowcase from "@/components/EditorialShowcase";
 import { getBanners, getBrands, getCategories, getSettings, getShippingZones, listProducts } from "@/lib/data";
 import { money } from "@/lib/format";
+import { categoryHref } from "@/lib/slug";
 
 export const revalidate = 60;
 
@@ -50,7 +51,7 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6 xl:gap-x-7 2xl:gap-x-8 lg:gap-y-10">
             {topCategories.map((category) => (
-              <Link key={category.id} href={`/category/${category.slug}`} className="group block">
+              <Link key={category.id} href={categoryHref(category.slug)} className="group block">
                 <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
                   <CategoryImage key={`${category.id}:${category.image_url ?? ""}`} src={category.image_url} alt={category.name} sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 25vw" />
                 </div>

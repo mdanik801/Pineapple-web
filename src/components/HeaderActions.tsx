@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Phone, ChevronDown } from "lucide-react";
+import { categoryHref } from "@/lib/slug";
 import { useStore, useMounted } from "@/lib/store";
 import SearchModal from "./SearchModal";
 
@@ -17,6 +18,7 @@ type HeaderActionsProps = {
   popular: string[];
   categories?: CategoryItem[];
   supportPhone?: string;
+  variant?: "default" | "desktop" | "mobileCart";
 };
 
 /** Dynamic typing effect hook for search placeholder */
@@ -77,6 +79,7 @@ export default function HeaderActions({
   popular,
   categories = [],
   supportPhone = "01777702000",
+  variant = "default",
 }: HeaderActionsProps) {
   const router = useRouter();
   const mounted = useMounted();
@@ -132,7 +135,7 @@ export default function HeaderActions({
         router.push(`/search?q=${encodeURIComponent(term)}`);
       }
     } else if (selectedCategory) {
-      router.push(`/category/${selectedCategory.slug}`);
+      router.push(categoryHref(selectedCategory.slug));
     } else {
       setOpen(true);
     }
@@ -143,11 +146,11 @@ export default function HeaderActions({
   return (
     <>
       {/* Desktop & Tablet Center: Pill Search Bar */}
-      <div className="hidden flex-1 items-center justify-center px-4 md:flex lg:px-8">
+      <div className="hidden min-w-0 flex-1 items-center justify-center px-3 md:flex md:px-4 lg:px-6 xl:px-8">
         <form
           onSubmit={handleSearch}
           role="search"
-          className="relative flex h-[42px] w-full max-w-[340px] md:max-w-[380px] lg:max-w-[460px] xl:max-w-[500px] items-center rounded-full border border-neutral-200/90 bg-[#f4f5f7] pl-1 pr-2 shadow-2xs transition-all focus-within:border-neutral-400 focus-within:bg-white focus-within:shadow-xs"
+          className="relative flex h-[42px] w-full min-w-[220px] max-w-full items-center rounded-full border border-neutral-200/90 bg-[#f4f5f7] pl-1 pr-2 shadow-2xs transition-all focus-within:border-neutral-400 focus-within:bg-white focus-within:shadow-xs md:max-w-[clamp(26rem,46vw,40rem)] lg:max-w-[clamp(30rem,48vw,48rem)] xl:max-w-[clamp(34rem,50vw,56rem)] 2xl:max-w-[clamp(38rem,52vw,64rem)]"
         >
           {/* Text Input with Dynamic Typing Placeholder */}
           <input
@@ -285,30 +288,34 @@ export default function HeaderActions({
         </div>
       </div>
 
-      {/* Mobile Layout: Search and Cart buttons on the right side */}
-      <div className="flex items-center justify-end gap-1 shrink-0 z-10 md:hidden">
-        <button
-          type="button"
-          aria-label="Search"
-          onClick={() => setOpen(true)}
-          className="grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
-        >
-          <Search size={20} />
-        </button>
-        <button
-          type="button"
-          aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`}
-          onClick={() => setDrawer(true)}
-          className="relative grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
-        >
-          <ShoppingBag size={20} />
-          {mounted && cartCount > 0 && (
-            <span className="absolute top-1 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#0A3C2A] px-0.5 text-[9px] font-bold leading-none text-white shadow-2xs">
-              {cartCount}
-            </span>
+      {/* Mobile Layout: Cart button (right side of compact header) */}
+      {variant !== "desktop" && (
+        <div className={`flex items-center justify-end gap-1 shrink-0 z-10 ${variant === "default" ? "md:hidden" : ""}`}>
+          {variant === "default" && (
+            <button
+              type="button"
+              aria-label="Search"
+              onClick={() => setOpen(true)}
+              className="grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
+            >
+              <Search size={20} />
+            </button>
           )}
-        </button>
-      </div>
+          <button
+            type="button"
+            aria-label={`Shopping cart, ${mounted ? cartCount : 0} items`}
+            onClick={() => setDrawer(true)}
+            className="relative grid h-9 w-9 place-items-center text-neutral-800 hover:text-black touch-manipulation transition-colors"
+          >
+            <ShoppingBag size={20} />
+            {mounted && cartCount > 0 && (
+              <span className="absolute top-1 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#0A3C2A] px-0.5 text-[9px] font-bold leading-none text-white shadow-2xs">
+                {cartCount}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {open && <SearchModal popular={popular} onClose={() => setOpen(false)} />}
     </>

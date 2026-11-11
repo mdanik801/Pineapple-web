@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCategories, getPaymentMethods, getSettings, getSocial } from "@/lib/data";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { categoryHref } from "@/lib/slug";
+import AnimatedLogo from "./AnimatedLogo";
 
 export default async function Footer() {
   const [settings, social, paymentMethods, cats] = await Promise.all([
@@ -29,7 +31,7 @@ export default async function Footer() {
   const topCats = cats.filter((c) => !c.parent_id);
   const shopLinks =
     topCats.length > 0
-      ? topCats.slice(0, 5).map((c) => ({ label: c.name, href: `/category/${c.slug}` }))
+      ? topCats.slice(0, 5).map((c) => ({ label: c.name, href: categoryHref(c.slug) }))
       : [
           { label: "Men Fashion", href: "/category/men" },
           { label: "Women Fashion", href: "/category/women" },
@@ -74,16 +76,19 @@ export default async function Footer() {
         {/* Column 1: Brand & Description & Social */}
         <div>
           <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} className="inline-block">
-            <div className="flex h-14 w-20 items-center justify-center rounded bg-white p-2 shadow-xs transition-opacity hover:opacity-95">
-              <Image
-                src={logo}
-                alt={brandName}
-                width={100}
-                height={50}
-                priority
-                unoptimized={logo.toLowerCase().endsWith(".svg")}
-                className="h-full w-auto object-contain"
-              />
+            <div className="flex flex-wrap items-center justify-start gap-4 sm:gap-5 rounded bg-white px-3 py-2.5 shadow-xs transition-opacity hover:opacity-95">
+              <span className="flex h-12 w-auto max-w-[160px] items-center justify-center sm:h-14 sm:max-w-[200px] lg:h-16 lg:max-w-[220px]">
+                <Image
+                  src={logo}
+                  alt={brandName}
+                  width={220}
+                  height={80}
+                  priority
+                  unoptimized={logo.toLowerCase().endsWith(".svg")}
+                  className="h-full w-auto max-w-full object-contain"
+                />
+              </span>
+           
             </div>
           </Link>
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/80">{description}</p>

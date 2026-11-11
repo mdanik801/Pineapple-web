@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, ChevronDown, ShoppingBag } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
+import { categoryHref } from "@/lib/slug";
 
 type Cat = { id: string; name: string; slug: string; children: { name: string; slug: string }[] };
 
@@ -28,14 +29,14 @@ export default function MobileMenu({ cats }: { cats: Cat[] }) {
           {cats.map((c) => (
             <li key={c.id}>
               <div className="flex items-center">
-                <Link href={`/category/${c.slug}`} onClick={close} className="flex-1 px-5 py-3.5 font-semibold text-brand uppercase tracking-wider text-xs">{c.name}</Link>
+                <Link href={categoryHref(c.slug)} onClick={close} className="flex-1 px-5 py-3.5 font-semibold text-brand uppercase tracking-wider text-xs">{c.name}</Link>
                 {c.children.length > 0 && (
                   <button aria-label={`Toggle ${c.name}`} aria-expanded={exp === c.id} className="px-5 py-3.5" onClick={() => setExp(exp === c.id ? null : c.id)}>
                     <ChevronDown size={18} className={exp === c.id ? "rotate-180" : ""} />
                   </button>
                 )}
               </div>
-              {exp === c.id && <ul className="bg-brand-50 pb-2">{c.children.map((k) => <li key={k.slug}><Link href={`/category/${k.slug}`} onClick={close} className="block px-8 py-2.5 text-sm">{k.name}</Link></li>)}</ul>}
+              {exp === c.id && <ul className="bg-brand-50 pb-2">{c.children.map((k) => <li key={k.slug}><Link href={categoryHref(k.slug)} onClick={close} className="block px-8 py-2.5 text-sm">{k.name}</Link></li>)}</ul>}
             </li>
           ))}
           <li>

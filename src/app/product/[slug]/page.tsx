@@ -8,6 +8,7 @@ import Accordion from "@/components/Accordion";
 import ShareButton from "@/components/ShareButton";
 import { getProductDetail, listProducts, getPolicies, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
+import { categoryHref } from "@/lib/slug";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -39,7 +40,7 @@ export default async function ProductPage({ params }: Props) {
         <span>›</span>
         {p.category && (
           <>
-            <Link href={`/category/${p.category.slug}`} className="hover:text-brand">{p.category.name}</Link>
+            <Link href={categoryHref(p.category.slug)} className="hover:text-brand">{p.category.name}</Link>
             <span>›</span>
           </>
         )}
@@ -55,7 +56,7 @@ export default async function ProductPage({ params }: Props) {
               <ShareButton title={p.name} />
             </div>
             <p className="mt-2.5 sm:mt-3 text-xs text-muted">SKU: <span className="ml-1 text-ink/80">{p.sku}</span></p>
-            {p.category && <p className="mt-1 text-xs text-muted">Product Type: <Link href={`/category/${p.category.slug}`} className="ml-1 text-ink/80 hover:text-brand">{p.category.name}</Link></p>}
+            {p.category && <p className="mt-1 text-xs text-muted">Product Type: <Link href={categoryHref(p.category.slug)} className="ml-1 text-ink/80 hover:text-brand">{p.category.name}</Link></p>}
             {p.brand && <p className="mt-1 text-xs text-muted">Brand: <span className="ml-1 text-ink/80">{p.brand}</span></p>}
             <div className="mt-4 sm:mt-5" />
           </>

@@ -5,6 +5,8 @@ import { db } from "./supabase";
 import { effectivePrice } from "./format";
 import { normalizeHeroBanners } from "./hero-banners";
 
+const SITE_CONTENT_REVALIDATE = 60;
+
 export type Category = {
   id: string; name: string; slug: string; description: string | null;
   image_url: string | null; parent_id: string | null; display_order: number | null;
@@ -121,7 +123,7 @@ async function toCards(rows: RawProduct[]): Promise<ProductCardData[]> {
   });
 }
 
-export const getCategories = cache(async (): Promise<Category[]> => {
+export const getCategories = unstable_cache(async (): Promise<Category[]> => {
   const { data } = await db
     .from("categories")
     .select("id,name,slug,description,image_url,parent_id,display_order")
@@ -129,9 +131,9 @@ export const getCategories = cache(async (): Promise<Category[]> => {
     .order("display_order", { ascending: true, nullsFirst: false })
     .order("name");
   return (data ?? []) as Category[];
-});
+}, ["site-categories-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-export const getSettings = cache(async () => {
+export const getSettings = unstable_cache(async () => {
   const { data } = await db
     .from("business_settings")
     .select("company_name,brand_name,company_logo,website,phone,email,support_phone,support_email,whatsapp,address,office_address,business_hours,description")
@@ -139,35 +141,35 @@ export const getSettings = cache(async () => {
     .limit(1)
     .maybeSingle();
   return data;
-});
+}, ["site-settings-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-export const getBrands = cache(async (): Promise<BrandData[]> => {
+export const getBrands = unstable_cache(async (): Promise<BrandData[]> => {
   const { data } = await db
     .from("brands")
     .select("id,name,slug,description,logo_url,status")
     .eq("status", "active")
     .order("name");
   return (data ?? []) as BrandData[];
-});
+}, ["site-brands-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-export const getPaymentMethods = cache(async (): Promise<PaymentMethod[]> => {
+export const getPaymentMethods = unstable_cache(async (): Promise<PaymentMethod[]> => {
   const { data } = await db
     .from("payment_gateways_config")
     .select("gateway_id,name,is_enabled")
     .eq("is_enabled", true)
     .order("name");
   return (data ?? []).map(({ gateway_id, name }) => ({ gateway_id, name }));
-});
+}, ["site-payment-methods-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-export const getSocial = cache(async () => {
+export const getSocial = unstable_cache(async () => {
   const { data } = await db.from("website_content").select("content_data").eq("section_key", "social_links").maybeSingle();
   return (data?.content_data ?? {}) as Record<string, string>;
-});
+}, ["site-social-links-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-export const getPolicies = cache(async () => {
+export const getPolicies = unstable_cache(async () => {
   const { data } = await db.from("website_content").select("content_data").eq("section_key", "policies").maybeSingle();
   return (data?.content_data ?? {}) as Record<string, string>;
-});
+}, ["site-policies-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 export const getBanners = unstable_cache(async () => {
   const { data, error } = await db

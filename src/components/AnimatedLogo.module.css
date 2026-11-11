@@ -18,26 +18,34 @@
   gap: var(--logo-gap, 8px);
 }
 
-/* Variants */
+/* Variants - fluid sizing for zoom/viewport responsiveness */
 .desktop {
-  --logo-size: 1.32rem;
-  --letter-spacing: 0.28em;
+  --logo-size: clamp(1.62rem, 1.22rem + 0.9vw, 2.5rem);
+  --letter-spacing: 0.32em;
   --logo-color: #111111;
-  --logo-gap: 10px;
+  --logo-gap: clamp(10px, 0.45rem + 0.35vw, 14px);
 }
 
 .mobile {
-  --logo-size: 0.95rem;
-  --letter-spacing: 0.20em;
+  --logo-size: clamp(1.2rem, 0.72rem + 2.8vw, 1.8rem);
+  --letter-spacing: 0.16em;
   --logo-color: #111111;
-  --logo-gap: 7.5px;
+  --logo-gap: clamp(5px, 0.25rem + 0.3vw, 8px);
+}
+
+@media (max-width: 360px) {
+  .mobile {
+    --logo-size: clamp(1.05rem, 0.75rem + 2.2vw, 1.3rem);
+    --letter-spacing: 0.12em;
+    --logo-gap: 4px;
+  }
 }
 
 .compact {
-  --logo-size: 0.9rem;
+  --logo-size: clamp(1rem, 0.85rem + 0.6vw, 1.3rem);
   --letter-spacing: 0.18em;
   --logo-color: #ffffff;
-  --logo-gap: 6.5px;
+  --logo-gap: clamp(5px, 0.25rem + 0.25vw, 8px);
 }
 
 /* Geometric Accent Mark */
@@ -59,7 +67,7 @@
   letter-spacing: var(--letter-spacing, 0.28em);
   text-transform: uppercase;
   display: inline-flex;
-  overflow: hidden;
+  overflow: visible;
   white-space: nowrap;
   line-height: 1;
 }
