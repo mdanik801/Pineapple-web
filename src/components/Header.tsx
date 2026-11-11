@@ -15,8 +15,8 @@ export default async function Header() {
 
   return (
     <header className="w-full">
-      {/* 1. Top Announcement Bar (matching reference dark navy bar - slim compact height) */}
-      <div className="bg-[#1c2237] py-1 sm:py-1.5 px-3 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.16em] text-white/95 leading-normal">
+      {/* 1. Top Announcement Bar */}
+      <div className="bg-brand py-1 sm:py-1.5 px-3 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.16em] text-white/95 leading-normal">
         Step Into The Festive Season With {brandName}
       </div>
 
@@ -57,7 +57,7 @@ export default async function Header() {
       </div>
 
       {/* 3. Category Nav bar (sticky on desktop) with mega menu - slim compact height */}
-      <nav aria-label="Main" className="sticky top-0 z-40 hidden bg-[#0A3C2A] text-white shadow-xs md:block">
+      <nav aria-label="Main" className="sticky top-0 z-40 hidden border-b border-line/60 bg-white text-brand shadow-xs md:block">
         <NavCompact name={me?.first_name ?? null} popular={popular} brandName={brandName} />
         <ul className="container-x flex items-center justify-center gap-1.5 lg:gap-5 xl:gap-7">
           <li className="group">
@@ -79,7 +79,7 @@ export default async function Header() {
               <li key={c.id} className="group">
                 <Link
                   href={`/category/${c.slug}`}
-                  className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-white transition-colors hover:text-[#C49A3E] lg:px-3.5 lg:py-2 lg:text-[12px]"
+                  className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-brand transition-colors hover:text-[#C49A3E] lg:px-3.5 lg:py-2 lg:text-[12px]"
                 >
                   {c.name}
                 </Link>

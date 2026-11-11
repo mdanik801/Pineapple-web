@@ -121,7 +121,7 @@ body {
 .btn:hover:not(:disabled) svg { transform: scale(1.12); }
 
 /* compact sticky-nav extras */
-.nav-icon { position: relative; display: grid; height: 2.5rem; width: 2.5rem; place-items: center; color: #fff; transition: color .2s, transform .25s; }
+.nav-icon { position: relative; display: grid; height: 2.5rem; width: 2.5rem; place-items: center; color: inherit; transition: color .2s, transform .25s; }
 .nav-icon:hover { color: var(--color-gold); transform: translateY(-2px); }
 
 @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }

@@ -1,39 +1,52 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { getQuickView } from "@/actions/catalog";
 import AddToCart from "./AddToCart";
 import SmartImage from "./SmartImage";
 
 type Q = NonNullable<Awaited<ReturnType<typeof getQuickView>>>;
+const subscribe = () => () => {};
 
 export default function QuickAdd({ slug, onClose }: { slug: string; onClose: () => void }) {
   const [q, setQ] = useState<Q | null | undefined>(undefined);
   const [img, setImg] = useState<string | null>(null);
+  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
 
   useEffect(() => {
     let live = true;
     getQuickView(slug).then((r) => live && setQ(r));
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     window.addEventListener("keydown", esc);
-    return () => { live = false; window.removeEventListener("keydown", esc); };
+    return () => {
+      live = false;
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", esc);
+    };
   }, [slug, onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs [animation:fadeIn_.25s_ease]"
       onClick={onClose}
       onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Quick add"
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl [animation:popIn_.35s_cubic-bezier(.22,1,.36,1)] sm:max-h-[90vh] sm:rounded-xl sm:p-6 md:p-7"
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        className="relative max-h-[92dvh] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-t-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl [animation:popIn_.35s_cubic-bezier(.22,1,.36,1)] sm:max-h-[90dvh] sm:rounded-xl sm:p-6 sm:pb-6 md:p-7"
       >
-        {/* Mobile bottom-sheet drag pill */}
         <div className="mx-auto mb-2 mt-0.5 h-1.5 w-12 rounded-full bg-neutral-300 sm:hidden" />
 
         <button
@@ -72,6 +85,7 @@ export default function QuickAdd({ slug, onClose }: { slug: string; onClose: () 
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

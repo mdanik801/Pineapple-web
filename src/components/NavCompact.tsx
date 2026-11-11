@@ -33,11 +33,11 @@ export default function NavCompact({ name, popular, brandName }: { name: string 
     <>
       <div className={`container-x pointer-events-none absolute inset-0 hidden items-center justify-between md:flex ${scrolled ? "" : "invisible delay-500"}`} aria-hidden={!scrolled}>
         <div className="h-full overflow-hidden py-1.5 flex items-center">
-          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full max-w-52 items-center px-2 text-white transition-transform duration-300 hover:scale-105">
-            <AnimatedLogo variant="compact" textColor="#ffffff" />
+          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} style={slide(0)} tabIndex={scrolled ? 0 : -1} className="pointer-events-auto flex h-full max-w-52 items-center px-2 text-brand transition-transform duration-300 hover:scale-105">
+            <AnimatedLogo variant="compact" textColor="var(--color-brand)" />
           </Link>
         </div>
-        <div className="flex h-full items-center gap-1 overflow-hidden">
+        <div className="flex h-full items-center gap-1 overflow-hidden text-brand">
           <button style={slide(60)} tabIndex={scrolled ? 0 : -1} aria-label="Search" title="Search" onClick={() => setSearch(true)} className="nav-icon pointer-events-auto"><Search size={19} /></button>
           <Link style={slide(120)} tabIndex={scrolled ? 0 : -1} href="/wishlist" aria-label="My wish list" title="My Wish List" className="nav-icon pointer-events-auto"><Heart size={19} />{mounted && wish > 0 && <span className={badge}>{wish}</span>}</Link>
           <button style={slide(180)} tabIndex={scrolled ? 0 : -1} aria-label="Shopping cart" title="Shopping Cart" onClick={() => setDrawer(true)} className="nav-icon pointer-events-auto"><ShoppingBag size={19} />{mounted && cart > 0 && <span className={badge}>{cart}</span>}</button>

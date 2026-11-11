@@ -18,7 +18,7 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function imageSource(value: unknown, _allowedHost?: string): string | null {
+function imageSource(value: unknown): string | null {
   const source = text(value);
   if (!source) return null;
   if (source.startsWith("/") && !source.startsWith("//")) return source;
@@ -68,7 +68,8 @@ export function normalizeHeroBanners(contentData: unknown, allowedImageHost?: st
     const status = text(value.status)?.toLowerCase();
     if (!active || status === "inactive") return [];
 
-    const image = imageSource(value.banner_url ?? value.image_url, allowedImageHost);
+    void allowedImageHost;
+    const image = imageSource(value.banner_url ?? value.image_url);
     if (!image) return [];
 
     const headline = text(value.headline) ?? text(value.title) ?? "";
@@ -78,7 +79,7 @@ export function normalizeHeroBanners(contentData: unknown, allowedImageHost?: st
       title,
       subtitle: text(value.subheadline) ?? text(value.subtitle),
       image_url: image,
-      mobile_image_url: imageSource(value.mobile_image_url, allowedImageHost),
+      mobile_image_url: imageSource(value.mobile_image_url),
       cta_text: text(value.cta_text),
       cta_link: safeLink(value.cta_link),
     }];
