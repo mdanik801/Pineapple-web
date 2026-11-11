@@ -14,52 +14,58 @@ export default async function Header() {
   const supportPhone = settings?.support_phone?.trim() || settings?.phone?.trim() || "01777702000";
 
   return (
-    <header className="w-full">
-      {/* 1. Top Announcement Bar */}
-      <div className="bg-brand py-1 sm:py-1.5 px-3 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.16em] text-white/95 leading-normal">
-        Step Into The Festive Season With {brandName}
-      </div>
+    <>
+      <header className="w-full">
+        {/* 1. Top Announcement Bar */}
+        <div className="bg-white py-1 sm:py-1.5 px-3 text-center text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.16em] text-brand leading-normal">
+          Step Into The Festive Season With {brandName}
+        </div>
 
-      {/* 2. Main Header Row (Logo, Search Pill with Categories, Phone & Action Icons) */}
-      <div className="sticky top-0 z-40 border-b border-black/5 bg-white md:static md:border-b-0">
-        <div className="container-x relative flex h-[58px] sm:h-[62px] items-center justify-between gap-2 sm:gap-4 md:h-[72px] lg:h-[76px]">
-          {/* Mobile hamburger menu: Left side */}
-          <div className="flex items-center shrink-0 z-10 md:hidden">
+        {/* 2. Main Header Row (Logo, Search Pill with Categories, Phone & Action Icons) */}
+        <div className="border-b border-black/5 bg-white md:border-b-0">
+          <div className="container-x relative flex h-[58px] sm:h-[62px] items-center justify-between gap-2 sm:gap-4 md:h-[72px] lg:h-[76px]">
+            {/* Mobile Animated Logo: Left side in main header (hidden on scroll as header scrolls away) */}
+            <Link
+              href="/"
+              aria-label={brandName ? `${brandName} home` : "Home"}
+              className="flex items-center justify-center shrink-0 md:hidden"
+            >
+              <AnimatedLogo variant="mobile" />
+            </Link>
+
+            {/* Desktop & Tablet Animated Logo (Left side) */}
+            <Link
+              href="/"
+              aria-label={brandName ? `${brandName} home` : "Home"}
+              className="hidden md:flex items-center shrink-0 py-1"
+            >
+              <AnimatedLogo variant="desktop" />
+            </Link>
+
+            {/* Center Search Pill & Right Actions (Phone + User, Wishlist, Cart) */}
+            <HeaderActions
+              name={me?.first_name ?? null}
+              popular={popular}
+              categories={top.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
+              supportPhone={supportPhone}
+            />
+          </div>
+        </div>
+      </header>
+
+      {/* 3. Category Nav bar (sticky) with mega menu - slim compact height */}
+      <nav aria-label="Main" className="sticky top-0 z-40 bg-brand text-white shadow-xs">
+        <NavCompact name={me?.first_name ?? null} popular={popular} brandName={brandName} />
+        <div className="container-x flex h-[42px] items-center justify-between md:hidden">
+          <div className="flex items-center text-white [&_button]:text-white">
             <MobileMenu cats={top.map((c) => ({ ...c, children: kids(c.id).map((k) => ({ name: k.name, slug: k.slug })) }))} />
           </div>
-
-          {/* Mobile Animated Logo: Exactly centered horizontally relative to full mobile viewport */}
-          <Link
-            href="/"
-            aria-label={brandName ? `${brandName} home` : "Home"}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center shrink-0 z-10 md:hidden"
-          >
-            <AnimatedLogo variant="mobile" />
+          <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} className="flex items-center py-1 text-white">
+            <AnimatedLogo variant="compact" textColor="#ffffff" />
           </Link>
-
-          {/* Desktop & Tablet Animated Logo (Left side) */}
-          <Link
-            href="/"
-            aria-label={brandName ? `${brandName} home` : "Home"}
-            className="hidden md:flex items-center shrink-0 py-1"
-          >
-            <AnimatedLogo variant="desktop" />
-          </Link>
-
-          {/* Center Search Pill & Right Actions (Phone + User, Wishlist, Cart) */}
-          <HeaderActions
-            name={me?.first_name ?? null}
-            popular={popular}
-            categories={top.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
-            supportPhone={supportPhone}
-          />
+          <div className="w-9" aria-hidden="true" />
         </div>
-      </div>
-
-      {/* 3. Category Nav bar (sticky on desktop) with mega menu - slim compact height */}
-      <nav aria-label="Main" className="sticky top-0 z-40 hidden border-b border-line/60 bg-white text-brand shadow-xs md:block">
-        <NavCompact name={me?.first_name ?? null} popular={popular} brandName={brandName} />
-        <ul className="container-x flex items-center justify-center gap-1.5 lg:gap-5 xl:gap-7">
+        <ul className="container-x hidden items-center justify-center gap-1.5 md:flex lg:gap-5 xl:gap-7">
           <li className="group">
             <Link
               href="/shop?sort=new"
@@ -79,7 +85,7 @@ export default async function Header() {
               <li key={c.id} className="group">
                 <Link
                   href={`/category/${c.slug}`}
-                  className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-brand transition-colors hover:text-[#C49A3E] lg:px-3.5 lg:py-2 lg:text-[12px]"
+                  className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-white transition-colors hover:text-[#C49A3E] lg:px-3.5 lg:py-2 lg:text-[12px]"
                 >
                   {c.name}
                 </Link>
@@ -107,6 +113,6 @@ export default async function Header() {
           })}
         </ul>
       </nav>
-    </header>
+    </>
   );
 }
