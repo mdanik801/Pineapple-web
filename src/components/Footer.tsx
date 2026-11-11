@@ -3,7 +3,6 @@ import Image from "next/image";
 import { getCategories, getPaymentMethods, getSettings, getSocial } from "@/lib/data";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { categoryHref } from "@/lib/slug";
-import AnimatedLogo from "./AnimatedLogo";
 
 export default async function Footer() {
   const [settings, social, paymentMethods, cats] = await Promise.all([

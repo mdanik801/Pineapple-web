@@ -1,0 +1,905 @@
+
+> pineapple@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 16212, using available port 3002 instead.
+▲ Next.js 16.4.5 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.108.54:3002
+- Environments: .env.local
+✓ Ready in 1540ms
+⚠ Warning: Next.js ignored package-lock.json in C:\Users\Anik because it is outside the current Git repository (C:\Users\Anik\Desktop\Client\Pineapple-web).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 109ms
+
+○ Compiling / ...
+ GET / 200 in 3.6s (next.js: 362ms, application-code: 3.2s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET / 200 in 1520ms (next.js: 6ms, application-code: 1514ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET / 200 in 2.8s (next.js: 4ms, application-code: 2.8s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+○ Compiling /shop ...
+ GET /shop?sort=new 200 in 6.3s (next.js: 802ms, application-code: 5.5s)
+ GET /category/men-fashion 200 in 11.7s (next.js: 9.5s, application-code: 2.2s)
+✓ Compiled in 550ms
+ GET / 200 in 1850ms (next.js: 25ms, application-code: 1825ms)
+ GET /category/men-fashion 200 in 1444ms (next.js: 89ms, application-code: 1354ms)
+✓ Compiled in 1396ms
+ GET / 200 in 2.2s (next.js: 39ms, application-code: 2.2s)
+ GET /category/men-fashion 200 in 1785ms (next.js: 60ms, application-code: 1725ms)
+✓ Compiled in 1061ms
+✓ Compiled in 1082ms
+✓ Compiled in 839ms
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+○ Compiling /product/[slug] ...
+ GET /category/men-fashion?page=2 200 in 2.1s (next.js: 53ms, application-code: 2.1s)
+ GET /category/men-fashion?page=2 200 in 1517ms (next.js: 37ms, application-code: 1480ms)
+ GET /product/handloom-khadi-cotton-comfort-panjabi 200 in 8.0s (next.js: 5.5s, application-code: 2.5s)
+ GET / 200 in 2.1s (next.js: 16ms, application-code: 2.1s)
+ GET /category/men-fashion?page=2 200 in 1592ms (next.js: 100ms, application-code: 1492ms)
+✓ Compiled in 314ms
+ GET /category/men-fashion?page=2 200 in 6.5s (next.js: 52ms, application-code: 6.5s)
+✓ Compiled in 324ms
+✓ Compiled in 352ms
+ GET / 200 in 2.1s (next.js: 32ms, application-code: 2.1s)
+ GET /category/men-fashion?page=2 200 in 1583ms (next.js: 70ms, application-code: 1512ms)
+✓ Compiled in 482ms
+ GET / 200 in 1517ms (next.js: 52ms, application-code: 1465ms)
+ GET /category/men-fashion?page=2 200 in 747ms (next.js: 29ms, application-code: 719ms)
+ GET /category/men-fashion?page=2 200 in 3.5s (next.js: 39ms, application-code: 3.5s)
+ GET /category/men-fashion?page=2 200 in 11.2s (next.js: 54ms, application-code: 11.2s)
+ POST /category/men-fashion?page=2 200 in 3.0s (next.js: 119ms, application-code: 2.9s)
+  └─ ƒ getQuickView("vintage-wash-slim-straight-stretch-denim-jeans") in 1710ms src/actions/catalog.ts
+ POST /category/men-fashion?page=2 200 in 859ms (next.js: 13ms, application-code: 846ms)
+  └─ ƒ getQuickView("vintage-wash-slim-straight-stretch-denim-jeans") in 604ms src/actions/catalog.ts
+ POST /category/men-fashion?page=2 200 in 3.1s (next.js: 45ms, application-code: 3.1s)
+  └─ ƒ getQuickView("vintage-wash-slim-straight-stretch-denim-jeans") in 1867ms src/actions/catalog.ts
+ POST /category/men-fashion?page=2 200 in 1762ms (next.js: 35ms, application-code: 1727ms)
+  └─ ƒ getQuickView("vintage-wash-slim-straight-stretch-denim-jeans") in 1062ms src/actions/catalog.ts
+ GET /product/fine-herringbone-textured-slim-fit-formal-shirt 200 in 3.4s (next.js: 119ms, application-code: 3.3s)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✓ Compiled in 558ms
+ GET / 200 in 2.2s (next.js: 13ms, application-code: 2.2s)
+ GET /product/fine-herringbone-textured-slim-fit-formal-shirt 200 in 1614ms (next.js: 52ms, application-code: 1561ms)
+✓ Compiled in 788ms
+[browser] Uncaught ReferenceError: logoUrl is not defined
+    at NavCompact (src/components/NavCompact.tsx:14:3)
+    at Set.forEach (<anonymous>)
+    at Header (src\components\Header.tsx:61:9)
+    at RootLayout (src\app\layout.tsx:33:21)
+  12 |   void popular;
+  13 |   void brandName;
+> 14 |   void logoUrl;
+     |   ^
+  15 |   return null;
+  16 | }
+  17 |
+✓ Compiled in 616ms
+⨯ ReferenceError: logoUrl is not defined
+    at NavCompact (src\components\NavCompact.tsx:14:3)
+  12 |   void popular;
+  13 |   void brandName;
+> 14 |   void logoUrl;
+     |   ^
+  15 |   return null;
+  16 | }
+  17 | {
+  digest: '242660524'
+}
+ GET / 500 in 3.9s (next.js: 32ms, application-code: 3.9s)
+[browser] Uncaught ReferenceError: logoUrl is not defined
+    at NavCompact (src/components/NavCompact.tsx:14:3)
+  12 |   void popular;
+  13 |   void brandName;
+> 14 |   void logoUrl;
+     |   ^
+  15 |   return null;
+  16 | }
+  17 |
+⨯ ReferenceError: logoUrl is not defined
+    at NavCompact (src\components\NavCompact.tsx:14:3)
+  12 |   void popular;
+  13 |   void brandName;
+> 14 |   void logoUrl;
+     |   ^
+  15 |   return null;
+  16 | }
+  17 | {
+  digest: '3063415724'
+}
+ GET /product/fine-herringbone-textured-slim-fit-formal-shirt 500 in 5.4s (next.js: 30ms, application-code: 5.4s)
+ GET /product/fine-herringbone-textured-slim-fit-formal-shirt 200 in 2.4s (next.js: 37ms, application-code: 2.3s)
+ GET / 200 in 1704ms (next.js: 7ms, application-code: 1697ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET /product/fine-herringbone-textured-slim-fit-formal-shirt 200 in 3.4s (next.js: 29ms, application-code: 3.4s)
+ GET / 200 in 526ms (next.js: 7ms, application-code: 520ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+✓ Compiled in 378ms
+ GET / 200 in 1354ms (next.js: 131ms, application-code: 1222ms)
+ GET / 200 in 1361ms (next.js: 12ms, application-code: 1350ms)
+✓ Compiled in 1047ms
+ GET / 200 in 3.2s (next.js: 3ms, application-code: 3.2s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 1380ms
+ GET / 200 in 1938ms (next.js: 20ms, application-code: 1918ms)
+✓ Compiled in 1259ms
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215589102-s8nzsr.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 689ms
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [0, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }]
+Incoming: [0, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+ GET / 200 in 580ms (next.js: 6ms, application-code: 574ms)
+✓ Compiled in 1713ms
+ GET / 200 in 1588ms (next.js: 86ms, application-code: 1502ms)
+ GET / 200 in 1156ms (next.js: 31ms, application-code: 1126ms)
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [1, 2, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }]
+Incoming: [1, 2, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }]
+Incoming: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215589102-s8nzsr.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 6.7s (next.js: 51ms, application-code: 6.7s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215589102-s8nzsr.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 5.9s (next.js: 13ms, application-code: 5.9s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215587857-d2wfp2.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215612476-98sysg.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215640840-99bqmq.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 4.9s (next.js: 19ms, application-code: 4.9s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215587857-d2wfp2.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215612476-98sysg.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215640840-99bqmq.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 1444ms
+⨯ ReferenceError: MobileMenu is not defined
+    at Header (src\components\Header.tsx:32:16)
+  30 |           <div className="container-x grid grid-cols-[1fr_auto_1fr] items-center gap-1 py-2 md:hidden">
+  31 |             <div className="flex items-center justify-start">
+> 32 |               <MobileMenu cats={topTree.map((c) => ({ id: c.id, name: c.name, slug: c.slug, children: c.children.map((k) => ({ name: k.name, slug: k.slug })) }))} />
+     |                ^
+  33 |             </div>
+  34 |             <Link
+  35 |               href="/" {
+  digest: '3061497114'
+}
+ GET / 200 in 1992ms (next.js: 17ms, application-code: 1975ms)
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: MobileMenu is not defined
+    at Header (src\components\Header.tsx:32:16)
+  30 |           <div className="container-x grid grid-cols-[1fr_auto_1fr] items-center gap-1 py-2 md:hidden">
+  31 |             <div className="flex items-center justify-start">
+> 32 |               <MobileMenu cats={topTree.map((c) => ({ id: c.id, name: c.name, slug: c.slug, children: c.children.map((k) => ({ name: k.name, slug: k.slug })) }))} />
+     |                ^
+  33 |             </div>
+  34 |             <Link
+  35 |               href="/"
+[browser] Uncaught ReferenceError: MobileMenu is not defined
+    at Header (src\components\Header.tsx:32:16)
+  30 |           <div className="container-x grid grid-cols-[1fr_auto_1fr] items-center gap-1 py-2 md:hidden">
+  31 |             <div className="flex items-center justify-start">
+> 32 |               <MobileMenu cats={topTree.map((c) => ({ id: c.id, name: c.name, slug: c.slug, children: c.children.map((k) => ({ name: k.name, slug: k.slug })) }))} />
+     |                ^
+  33 |             </div>
+  34 |             <Link
+  35 |               href="/"
+✓ Compiled in 2s
+✓ Compiled in 388ms
+⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[browser] Uncaught ReferenceError: MobileMenu is not defined
+    at Header (src\components\Header.tsx:32:16)
+  30 |           <div className="container-x grid grid-cols-[1fr_auto_1fr] items-center gap-1 py-2 md:hidden">
+  31 |             <div className="flex items-center justify-start">
+> 32 |               <MobileMenu cats={topTree.map((c) => ({ id: c.id, name: c.name, slug: c.slug, children: c.children.map((k) => ({ name: k.name, slug: k.slug })) }))} />
+     |                ^
+  33 |             </div>
+  34 |             <Link
+  35 |               href="/"
+ GET / 200 in 2.8s (next.js: 5ms, application-code: 2.8s)
+ GET / 200 in 2.0s (next.js: 48ms, application-code: 1969ms)
+ GET / 200 in 3.4s (next.js: 49ms, application-code: 3.3s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215589102-s8nzsr.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 1960ms (next.js: 11ms, application-code: 1949ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794215589102-s8nzsr.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 203ms
+✓ Compiled in 1377ms
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [1, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500]
+Incoming: [1, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500]
+Incoming: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+ GET / 200 in 1948ms (next.js: 29ms, application-code: 1919ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 540ms (next.js: 5ms, application-code: 536ms)
+✓ Compiled in 1017ms
+ GET / 200 in 580ms (next.js: 5ms, application-code: 576ms)
+ GET / 200 in 484ms (next.js: 4ms, application-code: 480ms)
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [2, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500]
+Incoming: [0, 3, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+[browser] The final argument passed to useEffect changed size between renders. The order and size of this array must remain constant.
+
+Previous: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }, 6500]
+Incoming: [0, 1, (to)=>{
+            if (to === cur.current) return;
+            setPrev(cur.current);
+            cur.current = to;
+            setI(to);
+            clearTimeout(timer.current);
+            timer.current = setTimeout({
+                "HeroSlider.useCallback[go]": ()=>setPrev(null)
+            }["HeroSlider.useCallback[go]"], DUR + 50);
+        }] 
+    at HeroSlider (src/components/HeroSlider.tsx:27:12)
+    at Set.forEach (<anonymous>)
+  25 |   }, []);
+  26 |
+> 27 |   useEffect(() => {
+     |            ^
+  28 |     if (n < 2 || autoMs <= 0) return;
+  29 |     const t = setTimeout(() => go((i + 1) % n), autoMs);
+  30 |     return () => clearTimeout(t); (src/components/HeroSlider.tsx:27:12)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 7.8s (next.js: 9ms, application-code: 7.8s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 2.1s
+ GET / 200 in 14.0s (next.js: 16ms, application-code: 14.0s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /category/men-fashion 200 in 3.8s (next.js: 138ms, application-code: 3.7s)
+✓ Compiled in 463ms
+✓ Compiled in 2.2s
+ GET / 200 in 4.6s (next.js: 121ms, application-code: 4.4s)
+ GET /category/men-fashion 200 in 4.4s (next.js: 376ms, application-code: 4.0s)
+✓ Compiled in 813ms
+✓ Compiled in 689ms
+ GET / 200 in 1174ms (next.js: 5ms, application-code: 1169ms)
+ GET /category/men-fashion 200 in 697ms (next.js: 118ms, application-code: 579ms)
+ GET / 200 in 11.0s (next.js: 86ms, application-code: 10.9s)
+ GET /category/men-fashion 200 in 20.1s (next.js: 442ms, application-code: 19.6s)
+ GET / 200 in 2.6s (next.js: 17ms, application-code: 2.6s)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET / 200 in 1198ms (next.js: 19ms, application-code: 1179ms)
+ GET / 200 in 5.8s (next.js: 15ms, application-code: 5.8s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 2.9s
+ GET / 200 in 2.2s (next.js: 8ms, application-code: 2.2s)
+ GET / 200 in 1038ms (next.js: 13ms, application-code: 1025ms)
+✓ Compiled in 1315ms
+ GET / 200 in 1502ms (next.js: 186ms, application-code: 1316ms)
+ GET / 200 in 516ms (next.js: 12ms, application-code: 503ms)
+ GET / 200 in 3.4s (next.js: 3ms, application-code: 3.4s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 2.3s (next.js: 3ms, application-code: 2.3s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 416ms
+✓ Compiled in 416ms
+ GET / 200 in 1439ms (next.js: 7ms, application-code: 1432ms)
+ GET / 200 in 539ms (next.js: 5ms, application-code: 534ms)
+ GET / 200 in 3.2s (next.js: 4ms, application-code: 3.2s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 1060ms
+✓ Compiled in 1399ms
+ GET / 200 in 2.9s (next.js: 65ms, application-code: 2.8s)
+ GET / 200 in 1950ms (next.js: 16ms, application-code: 1934ms)
+ GET / 200 in 4.4s (next.js: 3ms, application-code: 4.4s)
+ GET / 200 in 4.7s (next.js: 10ms, application-code: 4.7s)
+ GET / 200 in 3.0s (next.js: 14ms, application-code: 3.0s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /category/men-fashion 200 in 2.7s (next.js: 42ms, application-code: 2.7s)
+ GET /category/mens-denim-wear 200 in 2.2s (next.js: 23ms, application-code: 2.2s)
+ GET /category/mens-denim-wear 200 in 2.3s (next.js: 36ms, application-code: 2.3s)
+✓ Compiled in 269ms
+✓ Compiled in 143ms
+ GET /category/mens-denim-wear 200 in 490ms (next.js: 29ms, application-code: 462ms)
+ GET / 200 in 2.7s (next.js: 8ms, application-code: 2.7s)
+✓ Compiled in 475ms
+ GET /category/mens-denim-wear 200 in 720ms (next.js: 54ms, application-code: 666ms)
+ GET / 200 in 706ms (next.js: 194ms, application-code: 511ms)
+✓ Compiled in 373ms
+ GET /category/mens-denim-wear 200 in 604ms (next.js: 30ms, application-code: 574ms)
+ GET / 200 in 452ms (next.js: 12ms, application-code: 439ms)
+✓ Compiled in 660ms
+ GET /category/mens-denim-wear 200 in 564ms (next.js: 34ms, application-code: 530ms)
+ GET / 200 in 569ms (next.js: 11ms, application-code: 559ms)
+ GET /category/mens-denim-wear 200 in 1877ms (next.js: 31ms, application-code: 1846ms)
+✓ Compiled in 181ms
+ GET /category/mens-denim-wear 200 in 259ms (next.js: 24ms, application-code: 235ms)
+ GET / 200 in 1114ms (next.js: 21ms, application-code: 1093ms)
+✓ Compiled in 523ms
+ GET / 200 in 590ms (next.js: 6ms, application-code: 584ms)
+ GET /category/mens-denim-wear 200 in 307ms (next.js: 6ms, application-code: 301ms)
+✓ Compiled in 228ms
+ GET / 200 in 726ms (next.js: 8ms, application-code: 719ms)
+ GET /category/mens-denim-wear 200 in 477ms (next.js: 53ms, application-code: 424ms)
+✓ Compiled in 911ms
+ GET / 200 in 507ms (next.js: 13ms, application-code: 495ms)
+ GET /category/mens-denim-wear 200 in 271ms (next.js: 32ms, application-code: 238ms)
+✓ Compiled in 256ms
+ GET / 200 in 1678ms (next.js: 5ms, application-code: 1673ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+ GET /category/mens-denim-wear 200 in 2.5s (next.js: 31ms, application-code: 2.5s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+✓ Compiled in 852ms
+ GET /category/mens-denim-wear 200 in 680ms (next.js: 56ms, application-code: 624ms)
+ GET / 200 in 944ms (next.js: 11ms, application-code: 934ms)
+✓ Compiled in 501ms
+ GET /category/mens-denim-wear 200 in 1513ms (next.js: 170ms, application-code: 1344ms)
+✓ Compiled in 369ms
+ GET /category/mens-denim-wear 200 in 1141ms (next.js: 22ms, application-code: 1119ms)
+ GET / 200 in 506ms (next.js: 8ms, application-code: 499ms)
+ GET / 200 in 424ms (next.js: 4ms, application-code: 419ms)
+✓ Compiled in 449ms
+ GET /category/mens-denim-wear 200 in 1306ms (next.js: 35ms, application-code: 1271ms)
+✓ Compiled in 942ms
+ GET /category/mens-denim-wear 200 in 538ms (next.js: 7ms, application-code: 532ms)
+✓ Compiled in 300ms
+ GET /category/mens-denim-wear 200 in 761ms (next.js: 9ms, application-code: 752ms)
+ GET / 200 in 983ms (next.js: 6ms, application-code: 978ms)
+ GET / 200 in 738ms (next.js: 29ms, application-code: 708ms)
+ GET / 200 in 400ms (next.js: 8ms, application-code: 392ms)
+✓ Compiled in 539ms
+ GET /category/mens-denim-wear 200 in 453ms (next.js: 38ms, application-code: 416ms)
+✓ Compiled in 804ms
+ GET /category/mens-denim-wear 200 in 1083ms (next.js: 92ms, application-code: 991ms)
+✓ Compiled in 871ms
+✓ Compiled in 738ms
+ GET /category/mens-denim-wear 200 in 1802ms (next.js: 50ms, application-code: 1752ms)
+ GET /category/mens-denim-wear 200 in 1034ms (next.js: 19ms, application-code: 1015ms)
+ GET / 200 in 519ms (next.js: 6ms, application-code: 512ms)
+ GET / 200 in 1249ms (next.js: 4ms, application-code: 1245ms)
+ GET / 200 in 1016ms (next.js: 4ms, application-code: 1012ms)
+ GET / 200 in 872ms (next.js: 4ms, application-code: 868ms)
+✓ Compiled in 546ms
+✓ Compiled in 467ms
+ GET /category/mens-denim-wear 200 in 540ms (next.js: 38ms, application-code: 502ms)
+ GET /category/mens-denim-wear 200 in 770ms (next.js: 5ms, application-code: 764ms)
+ GET / 200 in 612ms (next.js: 8ms, application-code: 604ms)
+ GET / 200 in 586ms (next.js: 4ms, application-code: 583ms)
+✓ Compiled in 635ms
+ GET /category/mens-denim-wear 200 in 823ms (next.js: 35ms, application-code: 788ms)
+ GET / 200 in 450ms (next.js: 6ms, application-code: 444ms)
+✓ Compiled in 521ms
+ GET /category/mens-denim-wear 200 in 1432ms (next.js: 33ms, application-code: 1400ms)
+ GET / 200 in 445ms (next.js: 8ms, application-code: 437ms)
+✓ Compiled in 918ms
+ GET /category/mens-denim-wear 200 in 1125ms (next.js: 67ms, application-code: 1058ms)
+✓ Compiled in 626ms
+ GET /category/mens-denim-wear 200 in 640ms (next.js: 8ms, application-code: 631ms)
+ GET / 200 in 877ms (next.js: 7ms, application-code: 870ms)
+ GET / 200 in 952ms (next.js: 4ms, application-code: 948ms)
+✓ Compiled in 877ms
+✓ Compiled in 766ms
+ GET /category/mens-denim-wear 200 in 1905ms (next.js: 29ms, application-code: 1876ms)
+ GET /category/mens-denim-wear 200 in 950ms (next.js: 206ms, application-code: 743ms)
+ GET / 200 in 372ms (next.js: 5ms, application-code: 367ms)
+ GET / 200 in 305ms (next.js: 5ms, application-code: 300ms)
+✓ Compiled in 547ms
+✓ Compiled in 458ms
+ GET /category/mens-denim-wear 200 in 2.5s (next.js: 34ms, application-code: 2.5s)
+ GET / 200 in 1703ms (next.js: 33ms, application-code: 1670ms)
+ GET /category/mens-denim-wear 200 in 896ms (next.js: 40ms, application-code: 856ms)
+ GET / 200 in 418ms (next.js: 5ms, application-code: 413ms)
+✓ Compiled in 1167ms
+✓ Compiled in 546ms
+ GET /category/mens-denim-wear 200 in 1270ms (next.js: 245ms, application-code: 1026ms)
+✓ Compiled in 385ms
+ GET / 200 in 2.3s (next.js: 489ms, application-code: 1814ms)
+ GET /category/mens-denim-wear 200 in 1771ms (next.js: 35ms, application-code: 1736ms)
+✓ Compiled in 410ms
+ GET /category/mens-denim-wear 200 in 768ms (next.js: 55ms, application-code: 713ms)
+ GET /category/mens-denim-wear 200 in 548ms (next.js: 6ms, application-code: 543ms)
+✓ Compiled in 354ms
+ GET /category/mens-denim-wear 200 in 814ms (next.js: 8ms, application-code: 806ms)
+ GET / 200 in 461ms (next.js: 10ms, application-code: 451ms)
+ GET / 200 in 392ms (next.js: 5ms, application-code: 387ms)
+ GET / 200 in 530ms (next.js: 7ms, application-code: 524ms)
+ GET / 200 in 466ms (next.js: 35ms, application-code: 431ms)
+✓ Compiled in 714ms
+ GET /category/mens-denim-wear 200 in 1100ms (next.js: 33ms, application-code: 1068ms)
+✓ Compiled in 496ms
+ GET /category/mens-denim-wear 200 in 534ms (next.js: 7ms, application-code: 528ms)
+✓ Compiled in 935ms
+ GET /category/mens-denim-wear 200 in 1157ms (next.js: 149ms, application-code: 1008ms)
+✓ Compiled in 883ms
+ GET /category/mens-denim-wear 200 in 894ms (next.js: 95ms, application-code: 799ms)
+✓ Compiled in 653ms
+ GET /category/mens-denim-wear 200 in 879ms (next.js: 6ms, application-code: 873ms)
+✓ Compiled in 996ms
+ GET /category/mens-denim-wear 200 in 1587ms (next.js: 91ms, application-code: 1496ms)
+✓ Compiled in 984ms
+ GET /category/mens-denim-wear 200 in 1488ms (next.js: 159ms, application-code: 1329ms)
+✓ Compiled in 1121ms
+✓ Compiled in 736ms
+ GET /category/mens-denim-wear 200 in 1824ms (next.js: 42ms, application-code: 1781ms)
+ GET /category/mens-denim-wear 200 in 1063ms (next.js: 17ms, application-code: 1047ms)
+✓ Compiled in 698ms
+✓ Compiled in 470ms
+ GET /category/mens-denim-wear 200 in 1296ms (next.js: 52ms, application-code: 1244ms)
+ GET /category/mens-denim-wear 200 in 523ms (next.js: 35ms, application-code: 488ms)
+✓ Compiled in 424ms
+ GET /category/mens-denim-wear 200 in 795ms (next.js: 10ms, application-code: 785ms)
+ GET / 200 in 1656ms (next.js: 6ms, application-code: 1650ms)
+ GET / 200 in 1877ms (next.js: 10ms, application-code: 1867ms)
+ GET / 200 in 1363ms (next.js: 4ms, application-code: 1358ms)
+ GET / 200 in 1165ms (next.js: 9ms, application-code: 1157ms)
+ GET / 200 in 753ms (next.js: 15ms, application-code: 738ms)
+ GET / 200 in 447ms (next.js: 37ms, application-code: 410ms)
+ GET / 200 in 400ms (next.js: 4ms, application-code: 396ms)
+ GET / 200 in 1098ms (next.js: 4ms, application-code: 1094ms)
+ GET / 200 in 997ms (next.js: 10ms, application-code: 987ms)
+ GET / 200 in 725ms (next.js: 6ms, application-code: 719ms)
+ GET / 200 in 490ms (next.js: 8ms, application-code: 481ms)
+ GET / 200 in 404ms (next.js: 6ms, application-code: 398ms)
+ GET / 200 in 737ms (next.js: 3ms, application-code: 733ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+✓ Compiled in 442ms
+ GET / 200 in 569ms (next.js: 7ms, application-code: 562ms)
+✓ Compiled in 326ms
+ GET / 200 in 560ms (next.js: 10ms, application-code: 549ms)
+✓ Compiled in 301ms
+ GET / 200 in 449ms (next.js: 11ms, application-code: 438ms)
+✓ Compiled in 624ms
+ GET / 200 in 1037ms (next.js: 57ms, application-code: 979ms)
+✓ Compiled in 286ms
+ GET / 200 in 486ms (next.js: 28ms, application-code: 458ms)
+✓ Compiled in 448ms
+ GET / 200 in 674ms (next.js: 12ms, application-code: 662ms)
+ GET / 200 in 1505ms (next.js: 2ms, application-code: 1502ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 3.0s (next.js: 32ms, application-code: 3.0s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 193ms
+✓ Compiled in 698ms
+ GET / 200 in 1476ms (next.js: 6ms, application-code: 1471ms)
+✓ Compiled in 369ms
+ GET / 200 in 441ms (next.js: 6ms, application-code: 434ms)
+ GET / 200 in 2.3s (next.js: 3ms, application-code: 2.3s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+ GET / 200 in 1931ms (next.js: 4ms, application-code: 1927ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+✓ Compiled in 1395ms
+✓ Compiled in 1680ms
+ GET / 200 in 1997ms (next.js: 10ms, application-code: 1987ms)
+ GET / 200 in 1121ms (next.js: 21ms, application-code: 1100ms)
+✓ Compiled in 635ms
+ GET / 200 in 836ms (next.js: 65ms, application-code: 771ms)
+✓ Compiled in 838ms
+ GET / 200 in 956ms (next.js: 99ms, application-code: 857ms)
+✓ Compiled in 1272ms
+✓ Compiled in 531ms
+ GET / 200 in 1442ms (next.js: 21ms, application-code: 1421ms)
+ GET / 200 in 802ms (next.js: 31ms, application-code: 770ms)
+✓ Compiled in 760ms
+✓ Compiled in 372ms
+ GET / 200 in 1191ms (next.js: 63ms, application-code: 1128ms)
+ GET / 200 in 707ms (next.js: 4ms, application-code: 703ms)
+✓ Compiled in 522ms
+✓ Compiled in 438ms
+✓ Compiled in 833ms
+ GET / 200 in 1681ms (next.js: 12ms, application-code: 1668ms)
+ GET / 200 in 1435ms (next.js: 57ms, application-code: 1378ms)
+ GET / 200 in 1018ms (next.js: 12ms, application-code: 1006ms)
+✓ Compiled in 815ms
+✓ Compiled in 287ms
+ GET / 200 in 601ms (next.js: 17ms, application-code: 584ms)
+ GET / 200 in 1380ms (next.js: 16ms, application-code: 1364ms)
+✓ Compiled in 442ms
+✓ Compiled in 487ms
+ GET / 200 in 2.0s (next.js: 7ms, application-code: 2.0s)
+ GET / 200 in 1624ms (next.js: 7ms, application-code: 1617ms)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 710ms
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET / 200 in 453ms (next.js: 14ms, application-code: 438ms)
+✓ Compiled in 162ms
+✓ Compiled in 209ms
+ GET / 200 in 2.0s (next.js: 3ms, application-code: 2.0s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/settings/1794213779833-3pcy2t.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+✓ Compiled in 466ms
+✓ Compiled in 789ms
+ GET / 200 in 2.2s (next.js: 7ms, application-code: 2.2s)
+ GET / 200 in 1916ms (next.js: 15ms, application-code: 1901ms)
+✓ Compiled in 787ms
+✓ Compiled in 1061ms
+ GET / 200 in 2.1s (next.js: 7ms, application-code: 2.1s)
+ GET / 200 in 1068ms (next.js: 8ms, application-code: 1059ms)
+✓ Compiled in 528ms
+ GET / 200 in 1378ms (next.js: 34ms, application-code: 1344ms)
+✓ Compiled in 533ms
+ GET / 200 in 535ms (next.js: 6ms, application-code: 529ms)
+✓ Compiled in 442ms
+ GET / 200 in 690ms (next.js: 32ms, application-code: 658ms)
+✓ Compiled in 226ms
+ GET / 200 in 522ms (next.js: 6ms, application-code: 515ms)
+✓ Compiled in 606ms
+ GET / 200 in 793ms (next.js: 14ms, application-code: 779ms)
+✓ Compiled in 696ms
+ GET / 200 in 893ms (next.js: 6ms, application-code: 887ms)
+✓ Compiled in 790ms
+ GET / 200 in 761ms (next.js: 6ms, application-code: 755ms)
+✓ Compiled in 555ms
+ GET / 200 in 1275ms (next.js: 11ms, application-code: 1264ms)
+✓ Compiled in 446ms
+✓ Compiled in 1275ms
+ GET / 200 in 2.1s (next.js: 14ms, application-code: 2.1s)
+ GET / 200 in 812ms (next.js: 7ms, application-code: 804ms)
+✓ Compiled in 579ms
+✓ Compiled in 542ms
+ GET / 200 in 1217ms (next.js: 30ms, application-code: 1187ms)
+ GET / 200 in 720ms (next.js: 33ms, application-code: 687ms)
+✓ Compiled in 570ms
+ GET / 200 in 653ms (next.js: 18ms, application-code: 635ms)
+✓ Compiled in 639ms
+ GET / 200 in 1328ms (next.js: 10ms, application-code: 1318ms)
+✓ Compiled in 462ms
+ GET / 200 in 650ms (next.js: 9ms, application-code: 641ms)
+✓ Compiled in 489ms
+✓ Compiled in 700ms
+ GET / 200 in 2.7s (next.js: 7ms, application-code: 2.7s)
+ GET / 200 in 1323ms (next.js: 144ms, application-code: 1179ms)
+✓ Compiled in 248ms
+ GET / 200 in 468ms (next.js: 39ms, application-code: 429ms)
+✓ Compiled in 235ms
+ GET / 200 in 605ms (next.js: 7ms, application-code: 598ms)
+✓ Compiled in 849ms
+ GET / 200 in 2.1s (next.js: 4ms, application-code: 2.1s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /shop?sort=new 200 in 1611ms (next.js: 17ms, application-code: 1593ms)
+⨯ upstream image response failed for https://images.unsplash.com/photo-1530047625168-4b29bf811a4a?auto=format&fit=crop&w=800&q=80 404
+ GET / 200 in 6.5s (next.js: 17ms, application-code: 6.5s)
+ GET /shop?sort=new 200 in 18.3s (next.js: 91ms, application-code: 18.2s)
+ GET /shop?sort=new 200 in 1198ms (next.js: 65ms, application-code: 1132ms)
+ GET / 200 in 1034ms (next.js: 56ms, application-code: 978ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+✓ Compiled in 570ms
+✓ Compiled in 1125ms
+ GET / 200 in 629ms (next.js: 17ms, application-code: 612ms)
+✓ Compiled in 210ms
+✓ Compiled in 1316ms
+✓ Compiled in 267ms
+✓ Compiled in 377ms
+ GET / 200 in 510ms (next.js: 13ms, application-code: 496ms)
+✓ Compiled in 564ms
+ GET / 200 in 417ms (next.js: 6ms, application-code: 411ms)
+✓ Compiled in 260ms
+✓ Compiled in 311ms
+✓ Compiled in 171ms
+✓ Compiled in 1358ms
+ GET / 200 in 687ms (next.js: 6ms, application-code: 682ms)
+✓ Compiled in 177ms
+✓ Compiled in 263ms
+ GET / 200 in 994ms (next.js: 4ms, application-code: 990ms)
+✓ Compiled in 208ms
+ GET / 200 in 1637ms (next.js: 5ms, application-code: 1632ms)
+✓ Compiled in 293ms
+ GET / 200 in 872ms (next.js: 9ms, application-code: 863ms)
+ GET / 200 in 2.4s (next.js: 4ms, application-code: 2.4s)
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277373043-dl0zaw.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277390467-jitlt8.png" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/website/1794277452453-tyshj6.jpg" has "fill" prop and "sizes" prop of "100vw", but image is not rendered at full viewport width. Please adjust "sizes" to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/al-muslim-premium-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/heritage-khadi-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[browser] Image with src "https://dyrptcmnmuajeizdwvic.supabase.co/storage/v1/object/public/almuslim-media/brands/urban-silk-logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+✓ Compiled in 766ms
+ GET / 200 in 468ms (next.js: 7ms, application-code: 461ms)
+ GET / 200 in 1136ms (next.js: 14ms, application-code: 1122ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/hmr from "192.168.108.54".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['192.168.108.54'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET / 200 in 1145ms (next.js: 5ms, application-code: 1140ms)
+✓ Compiled in 480ms
+ GET / 200 in 1805ms (next.js: 6ms, application-code: 1799ms)
+✓ Compiled in 804ms
+✓ Compiled in 630ms
+ GET / 200 in 1029ms (next.js: 11ms, application-code: 1018ms)
+[browser] ./src/app/page.tsx:138:1
+Error: Expected ')', got '<eof>'
+  136 |         const visible = bool(brandsCfg.visible, true) && isSectionVisible(cms, "our_brand...
+  137 |         if (!visible || !brands.s
+> 138 |
+      | ^
+
+Parsing ecmascript source code failed 
+[browser] ./src/app/page.tsx:138:1
+Error: Expected ')', got '<eof>'
+  136 |         const visible = bool(brandsCfg.visible, true) && isSectionVisible(cms, "our_brand...
+  137 |         if (!visible || !brands.s
+> 138 |
+      | ^
+
+Parsing ecmascript source code failed 
+✓ Compiled in 242ms
+ GET / 200 in 1018ms (next.js: 9ms, application-code: 1009ms)
+✓ Compiled in 457ms
+ GET / 200 in 374ms (next.js: 4ms, application-code: 370ms)
+ GET / 200 in 1689ms (next.js: 4ms, application-code: 1686ms)
+ GET / 200 in 975ms (next.js: 4ms, application-code: 971ms)
+✓ Compiled in 680ms
+ GET / 200 in 1670ms (next.js: 8ms, application-code: 1662ms)

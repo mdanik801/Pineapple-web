@@ -76,6 +76,30 @@ export const getPublishedHomepageCms = unstable_cache(async (): Promise<Homepage
   }
 }, ["homepage-cms-published-v1"], { revalidate: 60, tags: ["homepage-cms"] });
 
+export type WebsiteContentSection = Record<string, unknown>;
+
+export const getWebsiteContentSection = unstable_cache(async (sectionKey: string): Promise<WebsiteContentSection | null> => {
+  try {
+    const { data, error } = await db
+      .from("website_content")
+      .select("content_data")
+      .eq("section_key", sectionKey)
+      .maybeSingle();
+    if (error || !data || !isRecord(data.content_data)) return null;
+    return data.content_data as WebsiteContentSection;
+  } catch {
+    return null;
+  }
+}, ["website-content-section-v1"], { revalidate: 60, tags: ["homepage-cms", "site-content"] });
+
+export async function getHomepageSectionsConfig(): Promise<WebsiteContentSection | null> {
+  return getWebsiteContentSection("homepage_sections");
+}
+
+export async function getHeroSettingsConfig(): Promise<WebsiteContentSection | null> {
+  return getWebsiteContentSection("hero_settings");
+}
+
 export function isSectionVisible(cfg: HomepageCmsConfig, id: string): boolean {
   const sec = (cfg.sections || []).find((s) => s.id === id);
   return sec ? sec.enabled !== false : true;

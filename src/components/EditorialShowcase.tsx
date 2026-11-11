@@ -3,7 +3,21 @@ import SmartImage from "@/components/SmartImage";
 import { money } from "@/lib/format";
 import type { ProductCardData } from "@/lib/data";
 
-export default function EditorialShowcase({ products }: { products: ProductCardData[] }) {
+type Props = {
+  products: ProductCardData[];
+  label?: string;
+  heading?: string;
+  shopAllText?: string;
+  shopAllHref?: string;
+};
+
+export default function EditorialShowcase({
+  products,
+  label = "Selected from the collection",
+  heading = "Featured pieces",
+  shopAllText = "Shop all",
+  shopAllHref = "/shop",
+}: Props) {
   const [lead, ...supporting] = products;
   if (!lead) return null;
 
@@ -12,10 +26,12 @@ export default function EditorialShowcase({ products }: { products: ProductCardD
       <div className="container-x">
         <div className="mb-8 flex items-end justify-between border-b border-black/10 pb-4 sm:mb-10">
           <div>
-            <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">Selected from the collection</p>
-            <h2 className="font-serif text-3xl text-neutral-950 sm:text-4xl">Featured pieces</h2>
+            {label ? <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{label}</p> : null}
+            {heading ? <h2 className="font-serif text-3xl text-neutral-950 sm:text-4xl">{heading}</h2> : null}
           </div>
-          <Link href="/shop" className="text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black">Shop all</Link>
+          {shopAllText && shopAllHref ? (
+            <Link href={shopAllHref} className="text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black">{shopAllText}</Link>
+          ) : null}
         </div>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">

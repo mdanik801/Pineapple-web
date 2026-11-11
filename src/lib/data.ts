@@ -1,5 +1,4 @@
 import "server-only";
-import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { db } from "./supabase";
 import { effectivePrice } from "./format";
@@ -325,7 +324,7 @@ export async function getProductDetail(slug: string) {
   };
 }
 
-export const getShippingZones = cache(async () => {
+export const getShippingZones = unstable_cache(async () => {
   const { data } = await db.from("shipping_zones").select("name,rate,estimated_days,free_shipping_threshold").eq("is_active", true).order("rate");
   const seen = new Set<string>();
   return (data ?? [])
@@ -334,7 +333,7 @@ export const getShippingZones = cache(async () => {
       name: z.name as string, rate: Number(z.rate), estimated_days: z.estimated_days as string | null,
       free_shipping_threshold: z.free_shipping_threshold == null ? null : Number(z.free_shipping_threshold),
     }));
-});
+}, ["site-shipping-zones-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 /** Category + all descendants ids */
 export function descendantIds(all: Category[], id: string): string[] {
@@ -343,7 +342,7 @@ export function descendantIds(all: Category[], id: string): string[] {
   return out;
 }
 
-export const getSizes = cache(async (): Promise<string[]> => {
+export const getSizes = unstable_cache(async (): Promise<string[]> => {
   const { data } = await db.from("product_variants").select("size").eq("status", "active").not("size", "is", null);
   const uniq = [...new Set((data ?? []).map((r) => String(r.size)))];
   const order = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "3XL"];
@@ -353,10 +352,10 @@ export const getSizes = cache(async (): Promise<string[]> => {
     const ia = order.indexOf(a.toUpperCase()), ib = order.indexOf(b.toUpperCase());
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
   });
-});
+}, ["site-sizes-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 /** Most common meaningful words across published product names — used as "popular search terms". */
-export const getPopularTerms = cache(async (): Promise<string[]> => {
+export const getPopularTerms = unstable_cache(async (): Promise<string[]> => {
   const { data } = await db.from("products").select("name").eq("status", "published").is("deleted_at", null).limit(300);
   const stop = new Set(["with", "and", "for", "the", "fit", "men", "mens", "women", "womens", "years", "pack", "set"]);
   const count = new Map<string, number>();
@@ -366,15 +365,15 @@ export const getPopularTerms = cache(async (): Promise<string[]> => {
     }
   }
   return [...count].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([w]) => w);
-});
+}, ["site-popular-terms-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 /** ids of products that currently have sellable stock */
-export const inStockSet = cache(async (): Promise<Set<string>> => {
+export const inStockSet = unstable_cache(async (): Promise<Set<string>> => {
   const { data } = await db.from("inventory").select("product_id,current_stock,reserved_stock").limit(5000);
   const sum = new Map<string, number>();
   for (const r of data ?? []) sum.set(r.product_id, (sum.get(r.product_id) ?? 0) + Math.max(0, r.current_stock - r.reserved_stock));
   return new Set([...sum].filter(([, n]) => n > 0).map(([id]) => id));
-});
+}, ["site-instock-set-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 const esc = (s: string) => s.replace(/[%,()]/g, " ").trim();
 
