@@ -24,7 +24,6 @@ export default function MobileMenu({ cats }: { cats: Cat[] }) {
           <button aria-label="Close menu" onClick={close} className="grid h-8 w-8 place-items-center rounded-full hover:bg-white/10"><X size={20} /></button>
         </div>
         <ul className="divide-y divide-line">
-          <li><Link href="/shop?sort=new" onClick={close} className="block px-5 py-3.5 font-bold uppercase tracking-wider text-[#C49A3E]">New Arrivals</Link></li>
           <li><Link href="/shop" onClick={close} className="block px-5 py-3.5 font-semibold text-brand uppercase tracking-wider text-xs">All Products</Link></li>
           {cats.map((c) => (
             <li key={c.id}>

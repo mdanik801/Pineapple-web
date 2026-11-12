@@ -53,14 +53,7 @@ export default function HeaderNav({
         <div className="w-9" aria-hidden="true" />
       </div>
       <ul className="container-x hidden items-center justify-center gap-1.5 md:flex lg:gap-5 xl:gap-7">
-        <li className="group">
-          <Link
-            href="/shop?sort=new"
-            className="nav-link block px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.05em] text-[#C49A3E] transition-colors hover:text-[#deb250] lg:px-3.5 lg:py-2 lg:text-[12px]"
-          >
-            New Arrivals
-          </Link>
-        </li>
+        
         {top.map((c) => {
           const children = c.children;
           const groups = children.map((k) => ({ k, items: k.children }));

@@ -44,6 +44,7 @@ export type HomepageBottomCarouselItem = {
   button_text: string;
   button_url: string;
   image_url: string;
+  mobile_image_url: string | null;
   active: true;
   sort_order: number | null;
 };
@@ -171,19 +172,61 @@ export const getPolicies = unstable_cache(async () => {
 }, ["site-policies-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 export const getBanners = unstable_cache(async () => {
+  let allowedImageHost: string | undefined;
+  try {
+    allowedImageHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
+  } catch {}
+
+  // Prefer existing homepage_banners table records when available (canonical legacy source), preserving order/schedule/active states.
+  try {
+    const nowIso = new Date().toISOString();
+    const { data: rows, error } = await db
+      .from("homepage_banners")
+      .select("id,title,subtitle,description,image_url,mobile_image_url,cta_text,cta_link,button_text,button_url,display_order,is_active,start_date,end_date")
+      .order("display_order", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true });
+    if (!error && Array.isArray(rows) && rows.length > 0) {
+      type BannerRow = {
+        id?: unknown; title?: unknown; subtitle?: unknown; description?: unknown;
+        image_url?: unknown; mobile_image_url?: unknown; cta_text?: unknown; cta_link?: unknown;
+        button_text?: unknown; button_url?: unknown; display_order?: unknown;
+        is_active?: unknown; start_date?: unknown; end_date?: unknown;
+      };
+      const mapped = (rows as BannerRow[])
+        .filter((r) => r && r.is_active !== false)
+        .filter((r) => {
+          const start = r.start_date ? String(r.start_date) : null;
+          const end = r.end_date ? String(r.end_date) : null;
+          if (start && start > nowIso) return false;
+          if (end && end < nowIso) return false;
+          return true;
+        })
+        .map((r) => ({
+          id: r.id,
+          title: r.title ?? '',
+          subtitle: r.subtitle ?? null,
+          description: r.description ?? null,
+          image_url: r.image_url ?? null,
+          mobile_image_url: r.mobile_image_url ?? null,
+          cta_text: r.cta_text ?? r.button_text ?? null,
+          cta_link: r.cta_link ?? r.button_url ?? null,
+          active: r.is_active !== false,
+          display_order: r.display_order ?? null,
+        }));
+      const normalized = normalizeHeroBanners(mapped, allowedImageHost);
+      if (normalized.length > 0) return normalized;
+    }
+  } catch {}
+
+  // Fallback: website_content.hero_banner (JSON/multi-slide) preserves existing content when table unavailable.
   const { data, error } = await db
     .from("website_content")
     .select("content_data")
     .eq("section_key", "hero_banner")
     .maybeSingle();
   if (error || !data) return [];
-
-  let allowedImageHost: string | undefined;
-  try {
-    allowedImageHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname;
-  } catch {}
   return normalizeHeroBanners(data.content_data, allowedImageHost);
-}, ["website-content-hero-banner-v3"], { revalidate: 60, tags: ["hero-banners"] });
+}, ["website-content-hero-banner-v6"], { revalidate: 60, tags: ["hero-banners"] });
 
 function normalizeHomepageBottomCarousel(value: unknown): HomepageBottomCarouselItem[] {
   if (!value || typeof value !== "object" || !Array.isArray((value as { items?: unknown }).items)) return [];
@@ -211,6 +254,7 @@ function normalizeHomepageBottomCarousel(value: unknown): HomepageBottomCarousel
         button_text: text(row.button_text),
         button_url: text(row.button_url),
         image_url: text(row.image_url),
+        mobile_image_url: typeof row.mobile_image_url === "string" && row.mobile_image_url.trim() ? row.mobile_image_url.trim() : null,
         active: true as const,
         sort_order: typeof order === "number" && Number.isFinite(order) ? order : null,
       };
@@ -284,7 +328,25 @@ export async function getProductsByIds(ids: string[]) {
   if (!ids.length) return [];
   const { data } = await db
     .from("products").select(PRODUCT_COLS).in("id", ids).eq("status", "published").is("deleted_at", null);
-  return toCards((data ?? []) as unknown as RawProduct[]);
+  const rows = (data ?? []) as unknown as RawProduct[];
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const ordered = ids.map((id) => byId.get(id)).filter((r): r is RawProduct => !!r);
+  return toCards(ordered);
+}
+
+export async function getFeaturedPiecesProducts(limit = 6): Promise<ProductCardData[]> {
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 6));
+  const { data, error } = await db
+    .from("products")
+    .select(PRODUCT_COLS)
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .eq("is_featured", true)
+    .order("display_order", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  const cards = await toCards((data ?? []) as unknown as RawProduct[]);
+  return cards.filter((p) => p.in_stock || p.price >= 0).slice(0, safeLimit);
 }
 
 export async function getProductDetail(slug: string) {

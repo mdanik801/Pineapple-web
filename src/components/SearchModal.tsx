@@ -102,7 +102,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
                 )}
               </div>
               <section>
-                <div className="mb-4 flex items-end justify-between"><h2 className="font-serif text-lg sm:text-xl text-brand">Featured products</h2><Link href="/shop" onClick={onClose} className="group flex items-center gap-1 text-xs sm:text-sm font-semibold text-gold-dark">Shop all <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link></div>
+                <div className="mb-4 flex items-end justify-between"><h2 className="font-serif text-lg sm:text-xl text-brand">Suggested products</h2><Link href="/shop" onClick={onClose} className="group flex items-center gap-1 text-xs sm:text-sm font-semibold text-gold-dark">Shop all <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" /></Link></div>
                 {featured.length ? <Grid items={featured} onPick={pick} cols="grid-cols-1 md:grid-cols-4" /> : <Skeletons cols="grid-cols-1 md:grid-cols-4" n={4} />}
               </section>
             </div>

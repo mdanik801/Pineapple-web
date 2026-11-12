@@ -14,7 +14,7 @@ export default async function HomepageBottomCarousel() {
         subtitle: item.subtitle || null,
         description: item.description || null,
         image_url: item.image_url || null,
-        mobile_image_url: null,
+        mobile_image_url: item.mobile_image_url || null,
         cta_text: item.button_text || null,
         cta_link: item.button_url || null,
       }))}

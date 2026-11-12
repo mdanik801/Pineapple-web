@@ -5,7 +5,7 @@ import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
 import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
 import EditorialShowcase from "@/components/EditorialShowcase";
-import { getBanners, getBrands, getCategories, getProductsByIds, getSettings, getShippingZones, listProducts } from "@/lib/data";
+import { getBanners, getBrands, getCategories, getFeaturedPiecesProducts, getProductsByIds, getSettings, getShippingZones } from "@/lib/data";
 import { getPublishedHomepageCms, isSectionVisible, orderedSections } from "@/lib/homepage-cms";
 import { money } from "@/lib/format";
 import { categoryHref } from "@/lib/slug";
@@ -23,14 +23,14 @@ function arr<T = unknown>(v: unknown): T[] {
 }
 
 export default async function Home() {
-  const [cms, banners, categories, settings, brands, zones, featuredFallback] = await Promise.all([
+  const [cms, banners, categories, settings, brands, zones, featuredByProduct] = await Promise.all([
     getPublishedHomepageCms(),
     getBanners(),
     getCategories(),
     getSettings(),
     getBrands(),
     getShippingZones(),
-    listProducts({ flag: "featured", limit: 6 }),
+    getFeaturedPiecesProducts(12),
   ]);
 
   const topCategories = categories.filter((category) => !category.parent_id);
@@ -40,16 +40,29 @@ export default async function Home() {
   const deliveryRate = zones.length ? Math.min(...zones.map((zone) => zone.rate)) : null;
 
   const featuredCfg = (cms.featured_pieces || {}) as Record<string, unknown>;
-  const featuredIds = arr<string>(featuredCfg.product_ids).filter((x) => typeof x === "string");
-  const featuredFromCms = featuredIds.length ? await getProductsByIds(featuredIds) : [];
-  const featuredProducts = (featuredFromCms.length ? featuredFromCms : featuredFallback.products).slice(
-    0,
-    Math.max(1, Number(featuredCfg.display_limit || 6) || 6),
-  );
+  const displayLimit = Math.max(1, Number(featuredCfg.display_limit || 6) || 6);
+  const featuredIds = arr<string>(featuredCfg.product_ids).filter((x): x is string => typeof x === "string" && x.length > 0);
   const mainId = typeof featuredCfg.main_product_id === "string" ? featuredCfg.main_product_id : null;
-  const orderedFeatured = mainId
-    ? [...featuredProducts.filter((p) => p.id === mainId), ...featuredProducts.filter((p) => p.id !== mainId)]
-    : featuredProducts;
+  // Primary source of truth: product-level "Show in Homepage Featured Pieces" (products.is_featured), ordered by display_order desc then newest.
+  // Legacy CMS selected IDs are used as fallback/order hints to preserve existing selections safely if product-level selection is not yet populated.
+  let orderedFeatured = featuredByProduct.slice(0, displayLimit);
+  if (orderedFeatured.length === 0 && featuredIds.length > 0) {
+    const legacy = await getProductsByIds(featuredIds);
+    orderedFeatured = legacy.slice(0, displayLimit);
+  } else if (orderedFeatured.length > 0 && featuredIds.length > 0) {
+    const rank = new Map<string, number>();
+    if (mainId) rank.set(mainId, -1);
+    featuredIds.forEach((id, i) => { if (!rank.has(id)) rank.set(id, i); });
+    orderedFeatured = [...orderedFeatured].sort((a, b) => (rank.get(a.id) ?? 1_000_000) - (rank.get(b.id) ?? 1_000_000));
+  }
+  if (mainId) {
+    const idx = orderedFeatured.findIndex((p) => p.id === mainId);
+    if (idx > 0) {
+      const [main] = orderedFeatured.splice(idx, 1);
+      if (main) orderedFeatured.unshift(main);
+    }
+  }
+  orderedFeatured = orderedFeatured.slice(0, displayLimit);
 
   const categoriesCfg = (cms.categories || {}) as Record<string, unknown>;
   const brandIntroCfg = (cms.brand_intro || {}) as Record<string, unknown>;
@@ -143,35 +156,35 @@ export default async function Home() {
           </section>
         );
       }
-      case "our_brands": {
-        const visible = bool(brandsCfg.visible, true) && isSectionVisible(cms, "our_brands");
-        if (!visible || !brands.some((brand) => brand.logo_url)) return null;
-        return (
-          <section key="our_brands" className="container-x py-14 sm:py-20">
-            <div className="mb-8 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{text(brandsCfg.label, "The label portfolio")}</p>
-              <h2 className="mt-2 font-serif text-2xl text-neutral-950 sm:text-3xl">{text(brandsCfg.heading, "Our brands")}</h2>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8 border-y border-black/10 py-8 sm:gap-x-16 sm:py-10">
-              {brands.map((brand) =>
-                brand.logo_url ? (
-                  <div key={brand.id} className="flex h-12 min-w-24 items-center justify-center sm:h-16 sm:min-w-32">
-                    <Image
-                      src={brand.logo_url}
-                      alt={brand.name}
-                      width={160}
-                      height={64}
-                      unoptimized={brand.logo_url.toLowerCase().endsWith(".svg")}
-                      style={{ width: "auto", height: "auto" }}
-                      className="max-h-12 max-w-36 object-contain sm:max-h-16 sm:max-w-44"
-                    />
-                  </div>
-                ) : null,
-              )}
-            </div>
-          </section>
-        );
-      }
+      // case "our_brands": {
+      //   const visible = bool(brandsCfg.visible, true) && isSectionVisible(cms, "our_brands");
+      //   if (!visible || !brands.some((brand) => brand.logo_url)) return null;
+      //   return (
+      //     <section key="our_brands" className="container-x py-14 sm:py-20">
+      //       <div className="mb-8 text-center">
+      //         <p className="text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{text(brandsCfg.label, "The label portfolio")}</p>
+      //         <h2 className="mt-2 font-serif text-2xl text-neutral-950 sm:text-3xl">{text(brandsCfg.heading, "Our brands")}</h2>
+      //       </div>
+      //       <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-8 border-y border-black/10 py-8 sm:gap-x-16 sm:py-10">
+      //         {brands.map((brand) =>
+      //           brand.logo_url ? (
+      //             <div key={brand.id} className="flex h-12 min-w-24 items-center justify-center sm:h-16 sm:min-w-32">
+      //               <Image
+      //                 src={brand.logo_url}
+      //                 alt={brand.name}
+      //                 width={160}
+      //                 height={64}
+      //                 unoptimized={brand.logo_url.toLowerCase().endsWith(".svg")}
+      //                 style={{ width: "auto", height: "auto" }}
+      //                 className="max-h-12 max-w-36 object-contain sm:max-h-16 sm:max-w-44"
+      //               />
+      //             </div>
+      //           ) : null,
+      //         )}
+      //       </div>
+      //     </section>
+      //   );
+      // }
       case "promotional_banner": {
         const visible = bool(promoCfg.visible, false) && isSectionVisible(cms, "promotional_banner");
         const img = text(promoCfg.image_desktop) || text(promoCfg.image_mobile);

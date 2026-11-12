@@ -3,7 +3,16 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import SmartImage from "./SmartImage";
 
-type B = { id: string; title: string; subtitle: string | null; description?: string | null; image_url: string | null; mobile_image_url: string | null; cta_text: string | null; cta_link: string | null };
+type B = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description?: string | null;
+  image_url: string | null;
+  mobile_image_url: string | null;
+  cta_text: string | null;
+  cta_link: string | null;
+};
 
 const DUR = 1200; // ms, must match shutter animation length
 
@@ -34,19 +43,30 @@ export default function HeroSlider({ banners, ariaLabel = "Featured", priority =
   const hasMobile = banners.some((b) => b.mobile_image_url);
 
   return (
-    <section aria-roledescription="carousel" aria-label={ariaLabel}
+    <section
+      aria-roledescription="carousel"
+      aria-label={ariaLabel}
       onTouchStart={(e) => { touch.current = e.touches[0].clientX; }}
-      onTouchEnd={(e) => { if (touch.current == null) return; const d = e.changedTouches[0].clientX - touch.current; touch.current = null; if (Math.abs(d) > 50) go((i + (d < 0 ? 1 : -1) + n) % n); }}
-      className={`relative w-full overflow-hidden bg-brand ${hasMobile ? "aspect-[4/5]" : "aspect-[16/10]"} sm:aspect-[16/8] lg:aspect-[16/7]`}>
+      onTouchEnd={(e) => {
+        if (touch.current == null) return;
+        const d = e.changedTouches[0].clientX - touch.current;
+        touch.current = null;
+        if (Math.abs(d) > 50) go((i + (d < 0 ? 1 : -1) + n) % n);
+      }}
+      className={`relative w-full overflow-hidden bg-brand ${hasMobile ? "aspect-[4/5]" : "aspect-[16/10]"} sm:aspect-[16/8] lg:aspect-[16/7]`}
+    >
       {banners.map((b, k) => {
-        const active = k === i, leaving = k === prev;
+        const active = k === i;
+        const leaving = k === prev;
         const title = b.title.trim();
         const motion = prev === null && active ? "" : active ? "[animation:shutterOpen_1.2s_cubic-bezier(.77,0,.18,1)_both]" : leaving ? "[animation:shutterClose_1.2s_cubic-bezier(.77,0,.18,1)_forwards]" : "";
+        const desktopSrc = b.image_url || b.mobile_image_url;
+        const mobileSrc = b.mobile_image_url || b.image_url;
         return (
           <div key={b.id} aria-hidden={!active} className={`absolute inset-0 will-change-[clip-path] ${active ? "z-[1]" : leaving ? "z-[2]" : "invisible z-0"} ${motion}`}>
             <div className={`absolute inset-0 ${active && prev !== null ? "[animation:kenburns_6s_ease-out_both]" : ""}`}>
-              <SmartImage src={b.image_url} alt={title || "Pineapple banner"} priority={priority && k === 0} sizes="100vw" className="hidden object-cover sm:block" />
-              <SmartImage src={b.mobile_image_url || b.image_url} alt="" priority={priority && k === 0} sizes="100vw" className="object-cover sm:hidden" />
+              <SmartImage src={desktopSrc} alt={title || "Pineapple banner"} priority={priority && k === 0} sizes="100vw" className="hidden object-cover sm:block" />
+              <SmartImage src={mobileSrc} alt="" priority={priority && k === 0} sizes="100vw" className="object-cover sm:hidden" />
             </div>
             {(title || b.subtitle || b.description) && <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/15 to-transparent" />}
             {(title || b.subtitle || b.description || (b.cta_text && b.cta_link)) && (
@@ -62,7 +82,9 @@ export default function HeroSlider({ banners, ariaLabel = "Featured", priority =
       })}
       {n > 1 && (
         <div className="absolute bottom-4 left-1/2 z-[3] flex -translate-x-1/2 gap-2">
-          {banners.map((b, k) => <button key={b.id} aria-label={`Slide ${k + 1}`} onClick={() => go(k)} className={`h-2 rounded-full transition-all duration-500 ${k === i ? "w-7 bg-gold" : "w-2 bg-white/70 hover:bg-white"}`} />)}
+          {banners.map((b, k) => (
+            <button key={b.id} aria-label={`Slide ${k + 1}`} onClick={() => go(k)} className={`h-2 rounded-full transition-all duration-500 ${k === i ? "w-7 bg-gold" : "w-2 bg-white/70 hover:bg-white"}`} />
+          ))}
         </div>
       )}
     </section>

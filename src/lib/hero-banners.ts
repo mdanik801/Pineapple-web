@@ -1,11 +1,40 @@
+export type HeroSettings = {
+  background?: {
+    image_url?: string | null;
+    mobile_image_url?: string | null;
+    color?: string | null;
+    overlay_color?: string | null;
+    overlay_opacity?: number | null;
+    position?: string | null;
+    custom_position?: string | null;
+    size?: string | null;
+    repeat?: string | null;
+  };
+  layout?: {
+    height_type?: string | null;
+    desktop_height?: string | null;
+    min_height?: string | null;
+    max_height?: string | null;
+    mobile_height?: string | null;
+    content_alignment?: string | null;
+    text_alignment?: string | null;
+    banner_image_fit?: string | null;
+    banner_image_position?: string | null;
+    desktop_layout?: string | null;
+    mobile_layout?: string | null;
+  };
+};
+
 export type HeroBanner = {
   id: string;
   title: string;
   subtitle: string | null;
+  description: string | null;
   image_url: string;
   mobile_image_url: string | null;
   cta_text: string | null;
   cta_link: string | null;
+  settings?: HeroSettings | null;
 };
 
 type JsonObject = Record<string, unknown>;
@@ -74,14 +103,17 @@ export function normalizeHeroBanners(contentData: unknown, allowedImageHost?: st
 
     const headline = text(value.headline) ?? text(value.title) ?? "";
     const title = /[\p{L}\p{N}]/u.test(headline) ? headline : "";
+    const settings = isObject(value.settings) ? (value.settings as HeroSettings) : null;
     return [{
       id: text(value.id) ?? `hero-banner-${index}`,
       title,
       subtitle: text(value.subheadline) ?? text(value.subtitle),
+      description: text(value.description),
       image_url: image,
       mobile_image_url: imageSource(value.mobile_image_url),
       cta_text: text(value.cta_text),
       cta_link: safeLink(value.cta_link),
+      settings,
     }];
   });
 }
