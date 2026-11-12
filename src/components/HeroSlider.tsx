@@ -66,7 +66,7 @@ export default function HeroSlider({ banners, ariaLabel = "Featured", priority =
           <div key={b.id} aria-hidden={!active} className={`absolute inset-0 will-change-[clip-path] ${active ? "z-[1]" : leaving ? "z-[2]" : "invisible z-0"} ${motion}`}>
             <div className={`absolute inset-0 ${active && prev !== null ? "[animation:kenburns_6s_ease-out_both]" : ""}`}>
               <SmartImage src={desktopSrc} alt={title || "Pineapple banner"} priority={priority && k === 0} sizes="100vw" className="hidden object-cover sm:block" />
-              <SmartImage src={mobileSrc} alt="" priority={priority && k === 0} sizes="100vw" className="object-cover sm:hidden" />
+              <SmartImage src={mobileSrc} alt="" priority={priority && k === 0} sizes="100vw" className="object-cover object-top sm:hidden" />
             </div>
             {(title || b.subtitle || b.description) && <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/15 to-transparent" />}
             {(title || b.subtitle || b.description || (b.cta_text && b.cta_link)) && (

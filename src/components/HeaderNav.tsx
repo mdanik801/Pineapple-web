@@ -44,7 +44,7 @@ export default function HeaderNav({
       }`}
     >
       <div className="container-x flex h-[42px] items-center justify-between md:hidden">
-        <div className="flex items-center text-white [&_button]:text-white">
+        <div className="flex items-center text-white [&>button]:text-white">
           <MobileMenu cats={mobileCats} />
         </div>
         <Link href="/" aria-label={brandName ? `${brandName} home` : "Home"} className="flex items-center py-1 text-white">
