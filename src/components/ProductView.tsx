@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import SmartImage from "./SmartImage";
 import AddToCart from "./AddToCart";
@@ -16,10 +17,15 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
   const [idx, setIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
   const n = p.images.length;
   const safeIdx = n ? Math.min(idx, n - 1) : 0;
   const main = override ?? p.images[safeIdx] ?? null;
   const gallery = useMemo(() => (p.images || []).filter(Boolean), [p.images]);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const step = (d: number) => {
     if (!n) return;
@@ -38,21 +44,81 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
 
   useEffect(() => {
     if (!lightboxOpen) return;
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxOpen(false);
       if (e.key === "ArrowRight") stepLightbox(1);
       if (e.key === "ArrowLeft") stepLightbox(-1);
     };
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    // Robust scroll lock for mobile (iOS/Android) while modal is open.
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const prev = {
+      bodyOverflow: body.style.overflow,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+      bodyTouchAction: body.style.touchAction,
+      htmlOverflow: html.style.overflow,
+      htmlOverscroll: html.style.overscrollBehavior,
+    };
+
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.touchAction = "none";
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
+      body.style.overflow = prev.bodyOverflow;
+      body.style.position = prev.bodyPosition;
+      body.style.top = prev.bodyTop;
+      body.style.left = prev.bodyLeft;
+      body.style.right = prev.bodyRight;
+      body.style.width = prev.bodyWidth;
+      body.style.touchAction = prev.bodyTouchAction;
+      html.style.overflow = prev.htmlOverflow;
+      html.style.overscrollBehavior = prev.htmlOverscroll;
+      window.scrollTo(0, scrollY);
     };
   }, [lightboxOpen, gallery.length]);
 
   const lightboxSrc = gallery.length ? (gallery[lightboxIdx] ?? gallery[0]) : main;
+
+  const onLightboxTouchStart = (e: React.TouchEvent) => {
+    touchEndX.current = null;
+    touchStartX.current = e.targetTouches[0]?.clientX ?? null;
+  };
+  const onLightboxTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0]?.clientX ?? null;
+  };
+  const onLightboxTouchEnd = () => {
+    if (override || gallery.length <= 1) return;
+    const start = touchStartX.current;
+    const end = touchEndX.current;
+    if (start == null || end == null) return;
+    const delta = start - end;
+    if (Math.abs(delta) > 40) {
+      if (delta > 0) stepLightbox(1);
+      else stepLightbox(-1);
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  const showVariantPreview = Boolean(override && !gallery.includes(override));
+  const showThumbStrip = gallery.length > 1 && !showVariantPreview;
+  const previewSrc = showVariantPreview ? (override as string) : (lightboxSrc || "/placeholder.svg");
 
   return (
     <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-12 xl:gap-14">
@@ -107,49 +173,93 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
         {details}
       </div>
 
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-label="Product image preview">
-          <button type="button" className="absolute inset-0 bg-black/80 backdrop-blur-[1px]" aria-label="Close preview" onClick={() => setLightboxOpen(false)} />
-          <div className="relative z-10 w-full max-w-6xl max-h-[92vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="relative flex-1 min-h-0 rounded-lg bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
+      {lightboxOpen && mounted && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] m-0 flex items-center justify-center overscroll-contain touch-manipulation"
+          style={{ height: "100dvh", minHeight: "100vh" }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Product image preview"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/90"
+            aria-label="Close preview"
+            onClick={() => setLightboxOpen(false)}
+          />
+
+          <div
+            className="relative z-10 flex h-full w-full max-w-[100vw] flex-col items-center justify-center"
+            style={{
+              paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+              paddingRight: "max(0.5rem, env(safe-area-inset-right))",
+              paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+              paddingLeft: "max(0.5rem, env(safe-area-inset-left))",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              aria-label="Close preview"
+              onClick={() => setLightboxOpen(false)}
+              className="absolute z-30 grid h-11 w-11 place-items-center rounded-full bg-white/95 text-brand shadow-lg hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              style={{ top: "max(0.5rem, env(safe-area-inset-top))", right: "max(0.5rem, env(safe-area-inset-right))" }}
+            >
+              <X size={20} />
+            </button>
+
+            <div
+              className="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden px-12 sm:px-16"
+              onTouchStart={onLightboxTouchStart}
+              onTouchMove={onLightboxTouchMove}
+              onTouchEnd={onLightboxTouchEnd}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={override && !gallery.includes(override) ? override : (lightboxSrc || "/placeholder.svg")}
+                src={previewSrc}
                 alt={`${p.name} preview`}
-                className="max-h-[82vh] w-auto max-w-full object-contain select-none"
+                className="block max-h-full max-w-full w-auto h-auto object-contain select-none"
+                style={{ touchAction: "pan-y pinch-zoom" }}
+                draggable={false}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
               />
-              {gallery.length > 1 && !override && (
+
+              {showThumbStrip && (
                 <>
-                  <button type="button" aria-label="Previous image" onClick={() => stepLightbox(-1)} className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white/90 text-brand shadow hover:bg-white">
+                  <button type="button" aria-label="Previous image" onClick={() => stepLightbox(-1)} className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white/95 text-brand shadow hover:bg-white touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
                     <ChevronLeft size={20} />
                   </button>
-                  <button type="button" aria-label="Next image" onClick={() => stepLightbox(1)} className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white/90 text-brand shadow hover:bg-white">
+                  <button type="button" aria-label="Next image" onClick={() => stepLightbox(1)} className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white/95 text-brand shadow hover:bg-white touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
                     <ChevronRight size={20} />
                   </button>
                 </>
               )}
-              <button type="button" aria-label="Close preview" onClick={() => setLightboxOpen(false)} className="absolute top-2 right-2 sm:top-3 sm:right-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-brand shadow hover:bg-white">
-                <X size={18} />
-              </button>
             </div>
-            {gallery.length > 1 && !override && (
-              <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-white/90">
-                <span>{lightboxIdx + 1} / {gallery.length}</span>
-              </div>
-            )}
-            {gallery.length > 1 && !override && (
-              <div className="mt-2 no-scrollbar flex gap-2 overflow-x-auto justify-center pb-1">
-                {gallery.map((u, i) => (
-                  <button key={`${u}-lb-${i}`} type="button" onClick={() => setLightboxIdx(i)} className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded border bg-white ${i === lightboxIdx ? "border-brand ring-1 ring-brand" : "border-white/30"}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={u} alt="" className="h-full w-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }} />
-                  </button>
-                ))}
+
+            {showThumbStrip && (
+              <div className="mt-2 flex w-full max-w-4xl shrink-0 flex-col items-center">
+                <div className="flex items-center justify-center text-xs text-white/90">
+                  <span>{lightboxIdx + 1} / {gallery.length}</span>
+                </div>
+                <div className="mt-2 no-scrollbar flex w-full gap-2 overflow-x-auto justify-start sm:justify-center pb-1 px-1">
+                  {gallery.map((u, i) => (
+                    <button
+                      key={`${u}-lb-${i}`}
+                      type="button"
+                      onClick={() => setLightboxIdx(i)}
+                      className={`relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded border bg-white touch-manipulation ${i === lightboxIdx ? "border-brand ring-1 ring-brand" : "border-white/30"}`}
+                      aria-label={`Preview image ${i + 1}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={u} alt="" className="h-full w-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }} />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

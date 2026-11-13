@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Listing, { type SP } from "@/components/Listing";
+import CategoryAnalytics from "@/components/CategoryAnalytics";
 import { getCategories, descendantIds } from "@/lib/data";
 import { categoryHref, normalizeSlugPathSegment } from "@/lib/slug";
 
@@ -19,6 +20,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const parent = cat.parent_id ? cats.find((c) => c.id === cat.parent_id) : null;
   return (
     <div className="container-x w-full min-w-0 py-6 sm:py-10">
+      <CategoryAnalytics categoryId={cat.id} categorySlug={cat.slug} />
       <nav aria-label="Breadcrumb" className="mb-4 text-xs sm:text-sm text-muted">
         <Link href="/" className="hover:text-brand">Home</Link> / {parent && <><Link href={categoryHref(parent.slug)} className="hover:text-brand">{parent.name}</Link> / </>}
         <span className="text-brand font-medium">{cat.name}</span>

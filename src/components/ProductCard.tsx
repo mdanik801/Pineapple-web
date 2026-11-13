@@ -33,7 +33,8 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
         <WishlistButton productId={p.id} className="absolute right-2 top-2 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-brand shadow transition-[translate,opacity,scale,background-color] duration-300 hover:scale-110 hover:bg-white md:translate-y-1 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" />
       </div>
       <Link href={`/product/${p.slug}`} className="block px-1 pt-3 text-center">
-        <h3 className="line-clamp-2 min-h-[2.4rem] text-[13px] leading-[1.2rem] font-medium tracking-[.06em] text-ink transition-colors duration-300 group-hover:text-brand sm:text-sm">{p.name}</h3>
+        <h3 className="line-clamp-2 min-h-[2.4rem] text-[13px] leading-[1.2rem] font-medium tracking-[.06em] text-ink transition-colors duration-300 group-hover:text-brand sm:text-sm">{p.name || "Unnamed product"}</h3>
+        {(p.brand || p.sku) && <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted line-clamp-1">{[p.brand, p.sku].filter(Boolean).join(" • ")}</p>}
         <p className="mt-0.5 text-sm">
           <span className="font-semibold text-brand">{money(p.price)}</span>
           {p.price < p.regular_price && <span className="ml-2 text-muted line-through">{money(p.regular_price)}</span>}

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Cinzel } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ChromeGate from "@/components/ChromeGate";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { getSettings, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 
@@ -34,6 +36,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <main className="flex-1 w-full min-w-0">{children}</main>
         <ChromeGate><Footer /></ChromeGate>
         <CartDrawer note={note} />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
       </body>
     </html>
   );

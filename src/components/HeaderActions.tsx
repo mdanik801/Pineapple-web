@@ -127,7 +127,7 @@ export default function HeaderActions({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const term = searchQuery.trim();
+    const term = searchQuery.replace(/\s+/g, " ").trim().slice(0, 120);
     if (term) {
       if (selectedCategory) {
         router.push(`/shop?category=${selectedCategory.slug}&q=${encodeURIComponent(term)}`);

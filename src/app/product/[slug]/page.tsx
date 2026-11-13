@@ -6,6 +6,7 @@ import ProductView from "@/components/ProductView";
 import ProductGrid from "@/components/ProductGrid";
 import Accordion from "@/components/Accordion";
 import ShareButton from "@/components/ShareButton";
+import ProductAnalytics from "@/components/ProductAnalytics";
 import { getProductDetail, listProducts, getPolicies, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 import { categoryHref } from "@/lib/slug";
@@ -33,6 +34,12 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="container-x py-6 sm:py-8 md:py-12">
+      <ProductAnalytics
+        productId={p.id}
+        productSlug={p.slug}
+        categoryId={p.category?.id ?? null}
+        categorySlug={p.category?.slug ?? null}
+      />
       <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8 flex flex-wrap items-center justify-start gap-x-1.5 sm:gap-x-2 text-[11px] sm:text-xs text-muted">
         <Link href="/" className="hover:text-brand">Home</Link>
         <span>›</span>

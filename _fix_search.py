@@ -1,0 +1,443 @@
+from pathlib import Path
+
+path = Path('src/lib/data.ts')
+text = path.read_text(encoding='utf-8')
+marker = "\nexport async function listProducts(o: ListOpts = {}) {"
+idx = text.find(marker)
+if idx == -1:
+    raise SystemExit('marker not found')
+head = text[:idx+1]
+
+tail = r'''export async function listProducts(o: ListOpts = {}): Promise<{ products: ProductCardData[]; total: number; pages: number }> {
+  const limit = Math.max(1, Math.min(60, o.limit ?? 24));
+  const page = Math.max(1, o.page ?? 1);
+  const qText = normalizeSearchQuery(o.q);
+
+  let base = db
+    .from("products")
+    .select(PRODUCT_COLS, { count: "exact" })
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  if (o.categoryIds?.length) base = base.in("category_id", o.categoryIds);
+  if (qText) base = base.ilike("name", `%${escapeIlikeTerm(qText)}%`);
+  if (o.min != null) base = base.gte("regular_price", o.min);
+  if (o.max != null) base = base.lte("regular_price", o.max);
+  if (o.flag === "new") base = base.eq("is_new_arrival", true);
+  if (o.flag === "featured") base = base.eq("is_featured", true);
+  if (o.flag === "trending") base = base.eq("is_trending", true);
+  if (o.excludeId) base = base.neq("id", o.excludeId);
+  if (o.collectionId) base = base.eq("collection_id", o.collectionId);
+
+  try {
+    if (o.avail) {
+      const s = await inStockSet();
+      if (o.avail === "in") {
+        if (!s.size) return { products: [], total: 0, pages: 1 };
+        base = base.in("id", [...s]);
+      } else if (s.size) base = base.not("id", "in", `(${[...s].join(",")})`);
+    }
+    if (o.size) {
+      const { data: vs, error: vsErr } = await db.from("product_variants").select("product_id").eq("size", o.size).eq("status", "active");
+      if (vsErr) throw vsErr;
+      const ids = [...new Set((vs ?? []).map((v) => v.product_id))];
+      if (!ids.length) return { products: [], total: 0, pages: 1 };
+      base = base.in("id", ids);
+    }
+    switch (o.sort) {
+      case "price-asc": base = base.order("regular_price", { ascending: true }); break;
+      case "price-desc": base = base.order("regular_price", { ascending: false }); break;
+      case "name": base = base.order("name", { ascending: true }); break;
+      default: base = base.order("created_at", { ascending: false });
+    }
+    const from = (page - 1) * limit;
+    const { data, count, error } = await base.range(from, from + limit - 1);
+    if (error) throw error;
+    return { products: await toCards((data ?? []) as unknown as RawProduct[]), total: count ?? 0, pages: Math.max(1, Math.ceil((count ?? 0) / limit)) };
+  } catch (e) {
+    logSearchError("listProducts", e, { q: qText });
+    return { products: [], total: 0, pages: 1 };
+  }
+}
+
+export async function getProductsByIds(ids: string[]) {
+  if (!ids.length) return [];
+  try {
+    const { data, error } = await db.from("products").select(PRODUCT_COLS).in("id", ids).eq("status", "published").is("deleted_at", null);
+    if (error) throw error;
+    const rows = (data ?? []) as unknown as RawProduct[];
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return toCards(ids.map((id) => byId.get(id)).filter((r): r is RawProduct => !!r));
+  } catch (e) {
+    logSearchError("getProductsByIds", e);
+    return [];
+  }
+}
+
+export async function getFeaturedPiecesProducts(limit = 6): Promise<ProductCardData[]> {
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 6));
+  try {
+    const { data, error } = await db.from("products").select(PRODUCT_COLS).eq("status", "published").is("deleted_at", null).eq("is_featured", true).order("display_order", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
+    if (error || !data) return [];
+    const cards = await toCards((data ?? []) as unknown as RawProduct[]);
+    return cards.filter((p) => p.in_stock || p.price >= 0).slice(0, safeLimit);
+  } catch (e) {
+    logSearchError("getFeaturedPiecesProducts", e);
+    return [];
+  }
+}
+
+export async function getProductDetail(slug: string) {
+  try {
+    const { data: p, error } = await db
+      .from("products")
+      .select(`${PRODUCT_COLS},description,short_description,seo_title,seo_description,brand_id,is_new_arrival,brands(name),categories(id,name,slug)`)
+      .eq("slug", slug).eq("status", "published").is("deleted_at", null).maybeSingle();
+    if (error) throw error;
+    if (!p) return null;
+    const raw = p as unknown as RawProduct & {
+      description: string | null; short_description: string | null;
+      seo_title: string | null; seo_description: string | null;
+      brands: { name: string } | { name: string }[] | null;
+      categories: { id: string; name: string; slug: string } | null;
+    };
+    const [{ data: vars, error: vErr }, { data: inv, error: iErr }] = await Promise.all([
+      db.from("product_variants").select("id,sku,size,color,regular_price,sale_price,image_url,attribute_summary").eq("product_id", raw.id).eq("status", "active").order("created_at"),
+      db.from("inventory").select("variant_id,current_stock,reserved_stock").eq("product_id", raw.id),
+    ]);
+    if (vErr) throw vErr;
+    if (iErr) throw iErr;
+    const avail = (variantId: string | null) =>
+      (inv ?? []).filter((r) => r.variant_id === variantId).reduce((s, r) => s + Math.max(0, (r.current_stock || 0) - (r.reserved_stock || 0)), 0);
+    const variants: Variant[] = (vars ?? []).map((v) => ({
+      id: v.id, sku: v.sku, size: v.size, color: v.color,
+      regular_price: Number(v.regular_price), sale_price: v.sale_price == null ? null : Number(v.sale_price),
+      price: effectivePrice(v.regular_price, v.sale_price),
+      image_url: validProductImage(v.image_url), stock: avail(v.id),
+    }));
+    const baseStock = avail(null);
+    const brandObj = raw.brands;
+    const brand = Array.isArray(brandObj) ? (brandObj[0]?.name ?? null) : (brandObj?.name ?? null);
+    return {
+      id: raw.id, name: raw.name, slug: raw.slug, sku: raw.sku || "",
+      description: raw.description, short_description: raw.short_description,
+      seo_title: raw.seo_title, seo_description: raw.seo_description,
+      regular_price: Number(raw.regular_price),
+      sale_price: raw.sale_price == null ? null : Number(raw.sale_price),
+      price: effectivePrice(raw.regular_price, raw.sale_price),
+      images: pickImages(raw), brand: brandNameOf(raw) ?? brand, category: raw.categories,
+      variants, stock: variants.length ? variants.reduce((s, v) => s + v.stock, 0) : baseStock,
+      baseStock,
+    };
+  } catch (e) {
+    logSearchError("getProductDetail", e, { slug });
+    return null;
+  }
+}
+
+export const getShippingZones = unstable_cache(async () => {
+  try {
+    const { data, error } = await db.from("shipping_zones").select("name,rate,estimated_days,free_shipping_threshold").eq("is_active", true).order("rate");
+    if (error) throw error;
+    const seen = new Set<string>();
+    return (data ?? [])
+      .filter((z) => (seen.has(z.name) ? false : (seen.add(z.name), true)))
+      .map((z) => ({
+        name: z.name as string, rate: Number(z.rate), estimated_days: z.estimated_days as string | null,
+        free_shipping_threshold: z.free_shipping_threshold == null ? null : Number(z.free_shipping_threshold),
+      }));
+  } catch (e) {
+    logSearchError("getShippingZones", e);
+    return [];
+  }
+}, ["site-shipping-zones-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+/** Category + all descendants ids */
+export function descendantIds(all: Category[], id: string): string[] {
+  const out = [id];
+  for (const c of all) if (c.parent_id === id) out.push(...descendantIds(all, c.id));
+  return out;
+}
+
+export const getSizes = unstable_cache(async (): Promise<string[]> => {
+  try {
+    const { data, error } = await db.from("product_variants").select("size").eq("status", "active").not("size", "is", null);
+    if (error) throw error;
+    const uniq = [...new Set((data ?? []).map((r) => String(r.size)).filter(Boolean))];
+    const order = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "3XL"];
+    return uniq.sort((a, b) => {
+      const na = parseFloat(a), nb = parseFloat(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      const ia = order.indexOf(a.toUpperCase()), ib = order.indexOf(b.toUpperCase());
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+    });
+  } catch (e) {
+    logSearchError("getSizes", e);
+    return [];
+  }
+}, ["site-sizes-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+/** Most common meaningful words across published product names — used as "popular search terms". */
+export const getPopularTerms = unstable_cache(async (): Promise<string[]> => {
+  try {
+    const { data, error } = await db.from("products").select("name").eq("status", "published").is("deleted_at", null).limit(300);
+    if (error) throw error;
+    const stop = new Set(["with", "and", "for", "the", "fit", "men", "mens", "women", "womens", "years", "pack", "set", "new", "from"]);
+    const count = new Map<string, number>();
+    for (const row of (data ?? []) as { name?: string | null }[]) {
+      const name = String(row.name || "");
+      for (const w of new Set(name.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/))) {
+        if (w.length >= 4 && !stop.has(w)) count.set(w, (count.get(w) ?? 0) + 1);
+      }
+    }
+    return [...count].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([w]) => w);
+  } catch (e) {
+    logSearchError("getPopularTerms", e);
+    return [];
+  }
+}, ["site-popular-terms-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+/** ids of products that currently have sellable stock */
+export const inStockSet = unstable_cache(async (): Promise<Set<string>> => {
+  try {
+    const { data, error } = await db.from("inventory").select("product_id,current_stock,reserved_stock").limit(5000);
+    if (error) throw error;
+    const sum = new Map<string, number>();
+    for (const r of (data ?? []) as { product_id: string; current_stock: number; reserved_stock: number }[]) {
+      sum.set(r.product_id, (sum.get(r.product_id) ?? 0) + Math.max(0, (r.current_stock || 0) - (r.reserved_stock || 0)));
+    }
+    return new Set([...sum].filter(([, n]) => n > 0).map(([id]) => id));
+  } catch (e) {
+    logSearchError("inStockSet", e);
+    return new Set();
+  }
+}, ["site-instock-set-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+// --- Universal Search -------------------------------------------------------
+
+function isUuidLike(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s); }
+
+async function resolveSearchContext(q: string) {
+  const term = escapeIlikeTerm(q);
+  try {
+    const [brandsRes, catsRes, variantsRes] = await Promise.all([
+      db.from("brands").select("id,name").eq("status", "active").ilike("name", `%${term}%`).limit(30),
+      db.from("categories").select("id,name,slug,parent_id").eq("status", "active").ilike("name", `%${term}%`).limit(40),
+      db.from("product_variants").select("product_id,sku,size,color,attribute_summary").eq("status", "active").or(`sku.ilike.%${term}%,size.ilike.%${term}%,color.ilike.%${term}%,attribute_summary.ilike.%${term}%`).limit(300),
+    ]);
+    return {
+      brandIds: (brandsRes.data ?? []).map((b: any) => b.id).filter(Boolean) as string[],
+      catIds: (catsRes.data ?? []).map((c: any) => c.id).filter(Boolean) as string[],
+      variantProductIds: [...new Set((variantsRes.data ?? []).map((v: any) => v.product_id).filter(Boolean))] as string[],
+    };
+  } catch (e) {
+    logSearchError("resolveSearchContext", e, { q });
+    return { brandIds: [] as string[], catIds: [] as string[], variantProductIds: [] as string[] };
+  }
+}
+
+function scoreSearchHit(row: RawProduct, tokens: string[], ctx: { brandIds: Set<string>; catIds: Set<string>; variantProductIds: Set<string> }) {
+  const name = (row.name || "").toLowerCase();
+  const sku = (row.sku || "").toLowerCase();
+  const brand = (brandNameOf(row) || "").toLowerCase();
+  const any = row as any;
+  const desc = `${any.description || ""} ${any.short_description || ""}`.toLowerCase();
+  const variants = (row.product_variants ?? []).map((v) => `${v.sku || ""} ${v.size || ""} ${v.color || ""} ${v.attribute_summary || ""}`).join(" ").toLowerCase();
+  let score = 0;
+  for (const tRaw of tokens) {
+    const t = tRaw.toLowerCase();
+    if (!t) continue;
+    if (sku === t) score += 140; else if (sku.startsWith(t)) score += 95; else if (sku.includes(t)) score += 70;
+    if (name === t) score += 90; else if (name.startsWith(t)) score += 55; else if (name.includes(t)) score += 35;
+    if (brand && (brand === t || brand.includes(t))) score += 30;
+    if (desc.includes(t)) score += 8;
+    if (variants.includes(t)) score += 22;
+  }
+  if (row.brand_id && ctx.brandIds.has(row.brand_id)) score += 18;
+  if (row.category_id && ctx.catIds.has(row.category_id)) score += 14;
+  if (ctx.variantProductIds.has(row.id)) score += 18;
+  return score;
+}
+
+async function fetchSearchCandidates(tokens: string[], opts: { categoryIds?: string[]; collectionId?: string }) {
+  const termPrimary = tokens[0] || "";
+  const escPrimary = escapeIlikeTerm(termPrimary);
+  if (!escPrimary) return [] as RawProduct[];
+  const selects = PRODUCT_COLS + ",description,short_description,seo_title,seo_description,barcode,product_type,seo_keywords,tags,keywords,focus_keyword,search_keywords,search_tags";
+  const queries: Promise<any>[] = [];
+  const base = () => {
+    let q = db.from("products").select(selects).eq("status", "published").is("deleted_at", null);
+    if (opts.categoryIds?.length) q = q.in("category_id", opts.categoryIds);
+    if (opts.collectionId) q = q.eq("collection_id", opts.collectionId);
+    return q;
+  };
+
+  queries.push(Promise.resolve(base().or([
+    `name.ilike.%${escPrimary}%`,
+    `sku.ilike.%${escPrimary}%`,
+    `slug.ilike.%${escPrimary}%`,
+    `description.ilike.%${escPrimary}%`,
+    `short_description.ilike.%${escPrimary}%`,
+    `product_type.ilike.%${escPrimary}%`,
+    `seo_keywords.ilike.%${escPrimary}%`,
+  ].join(",")).limit(160)));
+
+  for (const cond of [
+    `barcode.ilike.%${escPrimary}%`,
+    `tags.ilike.%${escPrimary}%`,
+    `keywords.ilike.%${escPrimary}%`,
+    `search_keywords.ilike.%${escPrimary}%`,
+    `search_tags.ilike.%${escPrimary}%`,
+    `focus_keyword.ilike.%${escPrimary}%`,
+  ]) {
+    queries.push(Promise.resolve(base().or(cond).limit(80)));
+  }
+
+  const ctx = await resolveSearchContext(termPrimary);
+  if (ctx.brandIds.length) queries.push(Promise.resolve(base().in("brand_id", ctx.brandIds).limit(160)));
+  if (ctx.catIds.length) queries.push(Promise.resolve(base().in("category_id", ctx.catIds).limit(160)));
+  if (ctx.variantProductIds.length) queries.push(Promise.resolve(base().in("id", ctx.variantProductIds.slice(0, 160)).limit(160)));
+  if (isUuidLike(termPrimary)) queries.push(Promise.resolve(base().eq("id", termPrimary).limit(5)));
+
+  const settled = await Promise.allSettled(queries);
+  const rows: RawProduct[] = [];
+  const seen = new Set<string>();
+  let hadSuccess = false;
+  let lastErr: unknown = null;
+  for (const s of settled) {
+    if (s.status !== "fulfilled") { lastErr = s.reason; continue; }
+    const { data, error } = s.value || {};
+    if (error) { lastErr = error; continue; }
+    hadSuccess = true;
+    for (const r of (data ?? []) as unknown as RawProduct[]) {
+      if (!r?.id || seen.has(r.id)) continue;
+      seen.add(r.id);
+      rows.push(r);
+    }
+  }
+  if (!hadSuccess && lastErr) throw lastErr;
+
+  const brandSet = new Set(ctx.brandIds);
+  const catSet = new Set(ctx.catIds);
+  const varSet = new Set(ctx.variantProductIds);
+
+  return rows.filter((row) => {
+    const any = row as any;
+    const vtxt = (row.product_variants ?? []).map((v) => [v.sku, v.size, v.color, v.attribute_summary].filter(Boolean).join(" ")).join(" ");
+    const hay = [
+      row.name || "", row.slug || "", row.sku || "", brandNameOf(row) || "",
+      any.description || "", any.short_description || "", any.product_type || "", any.seo_title || "", any.seo_description || "", any.seo_keywords || "",
+      any.barcode || "", any.tags || "", any.keywords || "", any.search_keywords || "", any.search_tags || "", any.focus_keyword || "",
+      vtxt,
+    ].join(" ").toLowerCase();
+
+    return tokens.every((t) => {
+      const tl = t.toLowerCase();
+      if (!tl) return true;
+      if (hay.includes(tl)) return true;
+      if (brandSet.size && row.brand_id && brandSet.has(row.brand_id)) return (brandNameOf(row)?.toLowerCase().includes(tl) ?? false);
+      if (catSet.size && row.category_id && catSet.has(row.category_id)) return true;
+      if (varSet.has(row.id) && vtxt.toLowerCase().includes(tl)) return true;
+      return false;
+    });
+  }).map((r) => ({ r, score: scoreSearchHit(r, tokens, { brandIds: brandSet, catIds: catSet, variantProductIds: varSet }) }))
+    .sort((a, b) => b.score - a.score || (a.r.name || "").localeCompare(b.r.name || ""))
+    .map((x) => x.r);
+}
+
+export async function searchProductsUniversal(opts: {
+  q: string; categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string;
+  sort?: string; limit?: number; page?: number; collectionId?: string;
+}): Promise<SearchResult> {
+  const query = normalizeSearchQuery(opts.q);
+  const limit = Math.max(1, Math.min(40, opts.limit ?? 20));
+  const page = Math.max(1, opts.page ?? 1);
+  if (!query) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
+  try {
+    const tokens = tokenizeSearchQuery(query);
+    if (!tokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
+
+    let candidates = await fetchSearchCandidates(tokens, { categoryIds: opts.categoryIds, collectionId: opts.collectionId });
+
+    if (opts.min != null) candidates = candidates.filter((r) => Number(r.regular_price) >= (opts.min as number));
+    if (opts.max != null) candidates = candidates.filter((r) => Number(r.regular_price) <= (opts.max as number));
+    if (opts.size) {
+      const want = opts.size.toLowerCase();
+      candidates = candidates.filter((r) => (r.product_variants ?? []).some((v) => v.status === "active" && (v.size || "").toLowerCase() === want));
+    }
+    if (opts.avail) {
+      const stock = await inStockSet();
+      candidates = candidates.filter((r) => opts.avail === "in" ? stock.has(r.id) : !stock.has(r.id));
+    }
+
+    if (opts.sort === "price-asc") candidates.sort((a, b) => Number(a.regular_price) - Number(b.regular_price));
+    else if (opts.sort === "price-desc") candidates.sort((a, b) => Number(b.regular_price) - Number(a.regular_price));
+    else if (opts.sort === "name") candidates.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+    const total = candidates.length;
+    const pages = Math.max(1, Math.ceil(total / limit));
+    const from = (page - 1) * limit;
+    const pageRows = candidates.slice(from, from + limit);
+    const products = await toCards(pageRows);
+    return { products, total, pages, error: null, query, unavailable: false };
+  } catch (e) {
+    logSearchError("searchProductsUniversal", e, { query });
+    return { products: [], total: 0, pages: 1, error: "Search is temporarily unavailable. Please try again.", query, unavailable: true };
+  }
+}
+
+/** Facet counts for a search term (ignores other active filters). */
+export async function searchFacets(term: string) {
+  const q = normalizeSearchQuery(term);
+  if (!q) return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+  try {
+    const tokens = tokenizeSearchQuery(q);
+    const candidates = await fetchSearchCandidates(tokens.length ? tokens : [q], {});
+    const stock = await inStockSet();
+    const inStock = candidates.filter((r) => stock.has(r.id)).length;
+    const byCategory = new Map<string, number>();
+    for (const r of candidates) if (r.category_id) byCategory.set(r.category_id, (byCategory.get(r.category_id) ?? 0) + 1);
+    return {
+      total: candidates.length,
+      inStock,
+      outStock: Math.max(0, candidates.length - inStock),
+      byCategory,
+      maxPrice: Math.ceil(Math.max(0, ...candidates.map((r) => Number(r.regular_price) || 0)) / 100) * 100,
+    };
+  } catch (e) {
+    logSearchError("searchFacets", e, { q });
+    return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+  }
+}
+
+export type CollectionLite = { id: string; name: string; slug: string; description: string | null; image_url: string | null };
+
+export async function searchCollections(term: string): Promise<CollectionLite[]> {
+  const q = normalizeSearchQuery(term);
+  if (!q) return [];
+  try {
+    const t = escapeIlikeTerm(q);
+    const { data, error } = await db.from("collections").select("id,name,slug,description,image_url")
+      .eq("status", "active").ilike("name", `%${t}%`).order("name").limit(60);
+    if (error) throw error;
+    return (data ?? []) as CollectionLite[];
+  } catch (e) {
+    logSearchError("searchCollections", e, { q });
+    return [];
+  }
+}
+
+export async function getCollection(slug: string): Promise<CollectionLite | null> {
+  try {
+    const { data, error } = await db.from("collections").select("id,name,slug,description,image_url").eq("slug", slug).eq("status", "active").maybeSingle();
+    if (error) throw error;
+    return (data as CollectionLite) ?? null;
+  } catch (e) {
+    logSearchError("getCollection", e, { slug });
+    return null;
+  }
+}
+'''
+
+path.write_text(head + tail + "\n", encoding='utf-8')
+print('patched', idx)
