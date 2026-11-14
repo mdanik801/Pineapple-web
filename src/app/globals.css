@@ -30,9 +30,15 @@ body {
   max-width: 100vw;
   width: 100%;
   background: #ffffff;
-  color: var(--color-ink);
-  font-family: var(--font-sans-var), system-ui, sans-serif;
+  color: #111827;
+  font-family: var(--font-sans-var), "Roboto", system-ui, sans-serif;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, button, input, select, textarea, label, a {
+  font-family: inherit;
 }
 
 ::selection { background: var(--color-gold); color: #fff; }
@@ -58,8 +64,8 @@ body {
 .input:focus { border-color: var(--color-brand); box-shadow: 0 0 0 3px rgba(10,60,42,.12); }
 .label { display: block; font-size: .78rem; font-weight: 600; margin-bottom: .35rem; color: var(--color-brand); letter-spacing: .03em; }
 
-.section-title { font-family: var(--font-serif-var), serif; font-size: 1.75rem; color: var(--color-brand); font-weight: 600; }
-@media (min-width: 768px) { .section-title { font-size: 2.1rem; } }
+.section-title { font-family: var(--font-sans-var), "Roboto", sans-serif; font-size: 1.875rem; line-height: 1.2; color: #111827; font-weight: 700; }
+@media (min-width: 768px) { .section-title { font-size: 2.25rem; } }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

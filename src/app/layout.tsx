@@ -10,7 +10,7 @@ import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { getSettings, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 
-const sans = Inter({ variable: "--font-sans-var", subsets: ["latin"] });
+const sans = Inter({ variable: "--font-sans-var", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const serif = Playfair_Display({ variable: "--font-serif-var", subsets: ["latin"] });
 const cinzel = Cinzel({ variable: "--font-cinzel-var", subsets: ["latin"], weight: ["600", "700"] });
 

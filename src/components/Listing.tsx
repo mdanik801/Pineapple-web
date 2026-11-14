@@ -44,12 +44,12 @@ export default async function Listing({ basePath, sp, categoryIds, types = [] }:
 
   return (
     <div className="w-full min-w-0">
-      <div className="border-b border-line pb-4">
+      <div className="border-b border-line pb-2.5">
         {/* Responsive meta row: product count and sort dropdown */}
-        <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
-          <p className="text-xs sm:text-sm font-medium text-neutral-600">
+        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+          <p className="text-[11px] sm:text-xs font-medium text-neutral-600">
             Showing <span className="font-semibold text-neutral-900">{total}</span> {total === 1 ? "product" : "products"}
-            {(sp.size || hasPrice) && <span className="ml-1 text-[11px] font-normal text-gold-dark">(filtered)</span>}
+            {(sp.size || hasPrice) && <span className="ml-1 text-[10px] sm:text-[11px] font-normal text-gold-dark">(filtered)</span>}
           </p>
           <div className="flex items-center gap-2">
             <SortSelect value={sp.sort ?? "new"} options={SORTS.map(([value, label]) => ({ value, label, href: qs({ sort: value === "new" ? undefined : value }) }))} />
@@ -57,7 +57,7 @@ export default async function Listing({ basePath, sp, categoryIds, types = [] }:
         </div>
 
         {/* Filter controls row */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           {types.length > 0 && (
             <FilterDropdown label="Product type">
               <ul className="max-h-60 space-y-1 overflow-y-auto">
@@ -119,7 +119,7 @@ export default async function Listing({ basePath, sp, categoryIds, types = [] }:
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-8">
+      <div className="mt-4 sm:mt-5">
         {products.length === 0 ? (
           <div className="py-16 sm:py-20 text-center text-muted px-4">
             <p className="text-base sm:text-lg">No products found.</p>

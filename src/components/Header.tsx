@@ -96,7 +96,7 @@ export default async function Header() {
       </header>
 
       {/* 3. Category Nav bar: sticky on desktop, shown on mobile after scroll */}
-      <HeaderNav brandName={brandName} top={topTree} />
+      <HeaderNav brandName={brandName} top={topTree} popular={popular} />
     </>
   );
 }

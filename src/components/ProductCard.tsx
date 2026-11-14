@@ -32,16 +32,16 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
         <CardAddButton p={p} />
         <WishlistButton productId={p.id} className="absolute right-2 top-2 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-brand shadow transition-[translate,opacity,scale,background-color] duration-300 hover:scale-110 hover:bg-white md:translate-y-1 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:focus-visible:opacity-100" />
       </div>
-      <Link href={`/product/${p.slug}`} className="block px-1 pt-3 text-center">
-        <h3 className="line-clamp-2 min-h-[2.4rem] text-[13px] leading-[1.2rem] font-medium tracking-[.06em] text-ink transition-colors duration-300 group-hover:text-brand sm:text-sm">{p.name || "Unnamed product"}</h3>
-        {(p.brand || p.sku) && <p className="mt-0.5 text-[10px] sm:text-[11px] text-muted line-clamp-1">{[p.brand, p.sku].filter(Boolean).join(" • ")}</p>}
-        <p className="mt-0.5 text-sm">
-          <span className="font-semibold text-brand">{money(p.price)}</span>
-          {p.price < p.regular_price && <span className="ml-2 text-muted line-through">{money(p.regular_price)}</span>}
+      <Link href={`/product/${p.slug}`} className="block px-1.5 pt-4 text-center sm:px-2 sm:pt-5">
+        <h3 className="line-clamp-2 min-h-[3rem] text-[15px] font-semibold leading-snug text-[#111827] transition-colors duration-300 group-hover:text-brand sm:min-h-[3.25rem] sm:text-[16px] md:text-[17px]">{p.name || "Unnamed product"}</h3>
+        {(p.brand || p.sku) && <p className="mt-1.5 line-clamp-1 text-[13px] font-medium text-[#4B5563] sm:text-sm">{[p.brand, p.sku].filter(Boolean).join(" • ")}</p>}
+        <p className="mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5">
+          <span className="text-[16px] font-medium text-[#111827] sm:text-[17px] md:text-[18px]">{money(p.price)}</span>
+          {p.price < p.regular_price && <span className="text-[13px] font-normal text-[#DC2626] line-through sm:text-sm">{money(p.regular_price)}</span>}
         </p>
       </Link>
       {sw.length > 1 && (
-        <div className="mt-1.5 flex items-center justify-center gap-1.5">
+        <div className="mt-2 flex items-center justify-center gap-1.5 sm:mt-2.5">
           {sw.map((s) => (
             <button key={s.color} type="button" title={s.color} aria-label={`Color ${s.color}`} aria-pressed={sel === s.color}
               onClick={(e) => {
@@ -57,7 +57,7 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
               {s.image && <SmartImage src={s.image} alt="" sizes="24px" className="object-cover" />}
             </button>
           ))}
-          {p.swatches.length > sw.length && <span className="text-xs text-muted">+{p.swatches.length - sw.length}</span>}
+          {p.swatches.length > sw.length && <span className="text-xs font-medium text-[#4B5563]">+{p.swatches.length - sw.length}</span>}
         </div>
       )}
     </div>

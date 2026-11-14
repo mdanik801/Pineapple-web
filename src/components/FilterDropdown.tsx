@@ -30,10 +30,10 @@ export default function FilterDropdown({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 border px-3 py-2 text-[11px] sm:px-4 sm:py-2.5 sm:text-xs font-bold uppercase tracking-wider transition-colors touch-manipulation rounded-xs ${active ? "border-brand bg-brand text-white" : "border-line text-ink hover:border-brand"}`}
+        className={`flex items-center gap-1.5 border px-2.5 py-1.5 text-[10px] sm:px-3 sm:py-1.5 sm:text-[11px] font-bold uppercase tracking-wider transition-colors touch-manipulation rounded-xs ${active ? "border-brand bg-brand text-white" : "border-line text-ink hover:border-brand"}`}
       >
         <span>{label}</span>
-        <ChevronDown size={14} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={13} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
       </button>
       <div
         className={`absolute top-full z-30 mt-1.5 min-w-48 max-w-[calc(100vw-2rem)] rounded-md border border-line bg-white p-3.5 shadow-xl transition-all duration-200 ease-out sm:min-w-56 sm:p-4 ${

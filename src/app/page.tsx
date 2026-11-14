@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, cloneElement, isValidElement } from "react";
 import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
 import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
@@ -42,25 +42,13 @@ export default async function Home() {
   const featuredCfg = (cms.featured_pieces || {}) as Record<string, unknown>;
   const displayLimit = Math.max(1, Number(featuredCfg.display_limit || 6) || 6);
   const featuredIds = arr<string>(featuredCfg.product_ids).filter((x): x is string => typeof x === "string" && x.length > 0);
-  const mainId = typeof featuredCfg.main_product_id === "string" ? featuredCfg.main_product_id : null;
-  // Primary source of truth: product-level "Show in Homepage Featured Pieces" (products.is_featured), ordered by display_order desc then newest.
-  // Legacy CMS selected IDs are used as fallback/order hints to preserve existing selections safely if product-level selection is not yet populated.
+  // Primary source of truth: product-level "Show in Homepage Featured Pieces" (products.is_featured).
+  // Server fetch returns: Priority 1 manually featured first, Priority 2 remaining eligible newest-created first (before limit).
   let orderedFeatured = featuredByProduct.slice(0, displayLimit);
   if (orderedFeatured.length === 0 && featuredIds.length > 0) {
+    // Legacy CMS fallback if product-level feed returns nothing.
     const legacy = await getProductsByIds(featuredIds);
     orderedFeatured = legacy.slice(0, displayLimit);
-  } else if (orderedFeatured.length > 0 && featuredIds.length > 0) {
-    const rank = new Map<string, number>();
-    if (mainId) rank.set(mainId, -1);
-    featuredIds.forEach((id, i) => { if (!rank.has(id)) rank.set(id, i); });
-    orderedFeatured = [...orderedFeatured].sort((a, b) => (rank.get(a.id) ?? 1_000_000) - (rank.get(b.id) ?? 1_000_000));
-  }
-  if (mainId) {
-    const idx = orderedFeatured.findIndex((p) => p.id === mainId);
-    if (idx > 0) {
-      const [main] = orderedFeatured.splice(idx, 1);
-      if (main) orderedFeatured.unshift(main);
-    }
   }
   orderedFeatured = orderedFeatured.slice(0, displayLimit);
 
@@ -70,7 +58,16 @@ export default async function Home() {
   const brandsCfg = (cms.our_brands || {}) as Record<string, unknown>;
   const promoCfg = (cms.promotional_banner || {}) as Record<string, unknown>;
 
-  const sections = orderedSections(cms).filter((s) => s.enabled !== false);
+  const sections = (() => {
+    const seen = new Set<string>();
+    return orderedSections(cms).filter((s) => {
+      if (s.enabled === false) return false;
+      const id = typeof s?.id === "string" ? s.id.trim() : "";
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  })();
 
   const renderSection = (id: string) => {
     switch (id) {
@@ -212,9 +209,17 @@ export default async function Home() {
     }
   };
 
+  const renderedSectionIds = new Set<string>();
   return (
     <>
-      {sections.map((s) => renderSection(s.id))}
+      {sections.map((s, i) => {
+        const id = typeof s.id === "string" ? s.id.trim() : String(s.id || "");
+        if (!id || renderedSectionIds.has(id)) return null;
+        const node = renderSection(id);
+        if (!node || !isValidElement(node)) return null;
+        renderedSectionIds.add(id);
+        return cloneElement(node, { key: `${id}-${i}` });
+      })}
       <Suspense fallback={<section aria-label="Loading homepage carousel" className="aspect-[4/5] w-full animate-pulse bg-neutral-100 sm:aspect-[16/8] lg:aspect-[16/7]" />}>
         <HomepageBottomCarousel />
       </Suspense>

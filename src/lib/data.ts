@@ -53,7 +53,7 @@ export type HomepageBottomCarouselItem = {
 };
 
 const PRODUCT_COLS =
-  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary)";
+  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,featured_added_at,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary)";
 
 type RawProduct = {
   id: string; name: string; slug: string; sku?: string | null;
@@ -383,10 +383,42 @@ export async function getProductsByIds(ids: string[]) {
 export async function getFeaturedPiecesProducts(limit = 6): Promise<ProductCardData[]> {
   const safeLimit = Math.max(1, Math.min(50, Number(limit) || 6));
   try {
-    const { data, error } = await db.from("products").select(PRODUCT_COLS).eq("status", "published").is("deleted_at", null).eq("is_featured", true).order("display_order", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false });
-    if (error || !data) return [];
-    const cards = await toCards((data ?? []) as unknown as RawProduct[]);
-    return cards.filter((p) => p.in_stock || p.price >= 0).slice(0, safeLimit);
+    // Homepage "Featured pieces" (actual DB data):
+    // Priority 1 - products manually marked Default Featured by Admin (is_featured) always first,
+    //             ordered by most recently added-to-featured (featured_added_at desc, fallback created_at desc).
+    // Priority 2 - remaining eligible published/non-deleted products after featured, newest created first.
+    // Server-side ordering before limit; no duplicates.
+    const base = () => db.from("products")
+      .select(PRODUCT_COLS)
+      .eq("status", "published")
+      .is("deleted_at", null);
+
+    const [featuredRes, restRes] = await Promise.all([
+      base()
+        .eq("is_featured", true)
+        .order("featured_added_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(safeLimit),
+      base()
+        .eq("is_featured", false)
+        .order("created_at", { ascending: false })
+        .limit(safeLimit),
+    ]);
+
+    if (featuredRes.error) throw featuredRes.error;
+    if (restRes.error) throw restRes.error;
+
+    const seen = new Set<string>();
+    const merged: RawProduct[] = [];
+    for (const r of [...((featuredRes.data ?? []) as unknown as RawProduct[]), ...((restRes.data ?? []) as unknown as RawProduct[])]) {
+      if (!r?.id || seen.has(r.id)) continue;
+      seen.add(r.id);
+      merged.push(r);
+      if (merged.length >= safeLimit) break;
+    }
+
+    const cards = await toCards(merged);
+    return cards.slice(0, safeLimit);
   } catch (e) {
     logSearchError("getFeaturedPiecesProducts", e);
     return [];
@@ -524,54 +556,104 @@ export const inStockSet = unstable_cache(async (): Promise<Set<string>> => {
 
 function isUuidLike(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s); }
 
-async function resolveSearchContext(q: string) {
-  const term = escapeIlikeTerm(q);
-  try {
-    const [brandsRes, catsRes, variantsRes] = await Promise.all([
-      db.from("brands").select("id,name").eq("status", "active").ilike("name", `%${term}%`).limit(30),
-      db.from("categories").select("id,name,slug,parent_id").eq("status", "active").ilike("name", `%${term}%`).limit(40),
-      db.from("product_variants").select("product_id,sku,size,color,attribute_summary").eq("status", "active").or(`sku.ilike.%${term}%,size.ilike.%${term}%,color.ilike.%${term}%,attribute_summary.ilike.%${term}%`).limit(300),
-    ]);
-    return {
-      brandIds: (brandsRes.data ?? []).map((b: any) => b.id).filter(Boolean) as string[],
-      catIds: (catsRes.data ?? []).map((c: any) => c.id).filter(Boolean) as string[],
-      variantProductIds: [...new Set((variantsRes.data ?? []).map((v: any) => v.product_id).filter(Boolean))] as string[],
-    };
-  } catch (e) {
-    logSearchError("resolveSearchContext", e, { q });
-    return { brandIds: [] as string[], catIds: [] as string[], variantProductIds: [] as string[] };
-  }
+type SearchCtx = {
+  brandIdsByToken: Map<string, Set<string>>;
+  catIdsByToken: Map<string, Set<string>>;
+  catNameById: Map<string, string>;
+  variantProductIdsByToken: Map<string, Set<string>>;
+  brandNameById: Map<string, string>;
+};
+
+function uniqStrings(values: (string | null | undefined)[]) {
+  return [...new Set(values.filter((v): v is string => typeof v === "string" && v.length > 0))];
 }
 
-function scoreSearchHit(row: RawProduct, tokens: string[], ctx: { brandIds: Set<string>; catIds: Set<string>; variantProductIds: Set<string> }) {
+async function resolveSearchContext(tokens: string[]): Promise<SearchCtx> {
+  const brandIdsByToken = new Map<string, Set<string>>();
+  const catIdsByToken = new Map<string, Set<string>>();
+  const variantProductIdsByToken = new Map<string, Set<string>>();
+  const catNameById = new Map<string, string>();
+  const brandNameById = new Map<string, string>();
+
+  const add = (map: Map<string, Set<string>>, token: string, values: string[]) => {
+    const set = map.get(token) ?? new Set<string>();
+    for (const v of values) if (v) set.add(v);
+    map.set(token, set);
+  };
+
+  await Promise.all(tokens.map(async (token) => {
+    const esc = escapeIlikeTerm(token);
+    if (!esc) return;
+    try {
+      const [brandsRes, catsRes, variantsRes] = await Promise.all([
+        db.from("brands").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(100),
+        db.from("categories").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(150),
+        db.from("product_variants").select("product_id,sku").eq("status", "active").ilike("sku", `%${esc}%`).limit(400),
+      ]);
+      if (!brandsRes.error) {
+        const rows = (brandsRes.data ?? []) as any[];
+        add(brandIdsByToken, token, uniqStrings(rows.map((b) => b.id)));
+        for (const b of rows) if (b?.id && b?.name) brandNameById.set(String(b.id), String(b.name));
+      }
+      if (!catsRes.error) {
+        const rows = (catsRes.data ?? []) as any[];
+        add(catIdsByToken, token, uniqStrings(rows.map((c) => c.id)));
+        for (const c of rows) if (c?.id && c?.name) catNameById.set(String(c.id), String(c.name));
+      }
+      if (!variantsRes.error) add(variantProductIdsByToken, token, uniqStrings((variantsRes.data ?? []).map((v: any) => v.product_id)));
+    } catch (e) {
+      logSearchError("resolveSearchContext.token", e, { token });
+    }
+  }));
+
+  return { brandIdsByToken, catIdsByToken, catNameById, variantProductIdsByToken, brandNameById };
+}
+
+function productHay(row: RawProduct, ctx: SearchCtx) {
+  const brand = brandNameOf(row) || (row.brand_id ? ctx.brandNameById.get(row.brand_id) : "") || "";
+  const catName = (row.category_id && ctx.catNameById.get(row.category_id)) || "";
+  const vtxt = (row.product_variants ?? []).map((v) => String(v.sku || "")).join(" ");
+  return [row.name || "", row.slug || "", row.sku || "", brand, catName, vtxt].join(" ").toLowerCase();
+}
+
+function tokenMatchesRow(row: RawProduct, token: string, hay: string, ctx: SearchCtx) {
+  const t = token.toLowerCase();
+  if (!t) return true;
+  if (hay.includes(t)) return true; // partial, case-insensitive (name/sku/slug/brand/category/variant sku text)
+  const bset = ctx.brandIdsByToken.get(token);
+  if (bset && row.brand_id && bset.has(row.brand_id)) return true; // brand name match
+  const cset = ctx.catIdsByToken.get(token);
+  if (cset && row.category_id && cset.has(row.category_id)) return true; // category name match
+  const vset = ctx.variantProductIdsByToken.get(token);
+  if (vset && vset.has(row.id)) return true; // variant SKU match
+  return false;
+}
+
+function scoreSearchHit(row: RawProduct, tokens: string[], ctx: SearchCtx) {
   const name = (row.name || "").toLowerCase();
   const sku = (row.sku || "").toLowerCase();
-  const brand = (brandNameOf(row) || "").toLowerCase();
-  const any = row as any;
-  const desc = `${any.description || ""} ${any.short_description || ""}`.toLowerCase();
-  const variants = (row.product_variants ?? []).map((v) => `${v.sku || ""} ${v.size || ""} ${v.color || ""} ${v.attribute_summary || ""}`).join(" ").toLowerCase();
+  const brand = (brandNameOf(row) || (row.brand_id ? ctx.brandNameById.get(row.brand_id) : "") || "").toLowerCase();
+  const catName = ((row.category_id && ctx.catNameById.get(row.category_id)) || "").toLowerCase();
+  const vtxt = (row.product_variants ?? []).map((v) => String(v.sku || "")).join(" ").toLowerCase();
   let score = 0;
   for (const tRaw of tokens) {
     const t = tRaw.toLowerCase();
     if (!t) continue;
-    if (sku === t) score += 140; else if (sku.startsWith(t)) score += 95; else if (sku.includes(t)) score += 70;
-    if (name === t) score += 90; else if (name.startsWith(t)) score += 55; else if (name.includes(t)) score += 35;
-    if (brand && (brand === t || brand.includes(t))) score += 30;
-    if (desc.includes(t)) score += 8;
-    if (variants.includes(t)) score += 22;
+    if (name === t) score += 140; else if (name.startsWith(t)) score += 90; else if (name.includes(t)) score += 55;
+    if (sku === t) score += 150; else if (sku.startsWith(t)) score += 110; else if (sku.includes(t)) score += 80;
+    if (brand === t) score += 80; else if (brand.startsWith(t)) score += 55; else if (brand.includes(t)) score += 35;
+    if (catName === t) score += 80; else if (catName.startsWith(t)) score += 55; else if (catName.includes(t)) score += 35;
+    if (vtxt === t) score += 70; else if (vtxt.startsWith(t)) score += 45; else if (vtxt.includes(t)) score += 25;
   }
-  if (row.brand_id && ctx.brandIds.has(row.brand_id)) score += 18;
-  if (row.category_id && ctx.catIds.has(row.category_id)) score += 14;
-  if (ctx.variantProductIds.has(row.id)) score += 18;
   return score;
 }
 
-async function fetchSearchCandidates(tokens: string[], opts: { categoryIds?: string[]; collectionId?: string }) {
-  const termPrimary = tokens[0] || "";
-  const escPrimary = escapeIlikeTerm(termPrimary);
-  if (!escPrimary) return [] as RawProduct[];
-  const selects = PRODUCT_COLS + ",description,short_description,seo_title,seo_description,barcode,product_type,seo_keywords,tags,keywords,focus_keyword,search_keywords,search_tags";
-  const queries: Promise<any>[] = [];
+async function fetchSearchCandidates(query: string, tokens: string[], opts: { categoryIds?: string[]; collectionId?: string }) {
+  const normalizedQuery = normalizeSearchQuery(query);
+  if (!normalizedQuery || !tokens.length) return [] as RawProduct[];
+
+  // Safe core select/filters only (avoid schema-dependent optional columns causing query failures)
+  const selects = PRODUCT_COLS;
   const base = () => {
     let q = db.from("products").select(selects).eq("status", "published").is("deleted_at", null);
     if (opts.categoryIds?.length) q = q.in("category_id", opts.categoryIds);
@@ -579,32 +661,34 @@ async function fetchSearchCandidates(tokens: string[], opts: { categoryIds?: str
     return q;
   };
 
-  queries.push(Promise.resolve(base().or([
-    `name.ilike.%${escPrimary}%`,
-    `sku.ilike.%${escPrimary}%`,
-    `slug.ilike.%${escPrimary}%`,
-    `description.ilike.%${escPrimary}%`,
-    `short_description.ilike.%${escPrimary}%`,
-    `product_type.ilike.%${escPrimary}%`,
-    `seo_keywords.ilike.%${escPrimary}%`,
-  ].join(",")).limit(160)));
+  const ctx = await resolveSearchContext(tokens);
+  const queries: Promise<any>[] = [];
 
-  for (const cond of [
-    `barcode.ilike.%${escPrimary}%`,
-    `tags.ilike.%${escPrimary}%`,
-    `keywords.ilike.%${escPrimary}%`,
-    `search_keywords.ilike.%${escPrimary}%`,
-    `search_tags.ilike.%${escPrimary}%`,
-    `focus_keyword.ilike.%${escPrimary}%`,
-  ]) {
-    queries.push(Promise.resolve(base().or(cond).limit(80)));
+  // DB-level partial, case-insensitive OR matching across core searchable fields (per token, supports 1-2+ chars)
+  for (const token of tokens.slice(0, 6)) {
+    const esc = escapeIlikeTerm(token);
+    if (!esc) continue;
+    queries.push(Promise.resolve(base().or([
+      `name.ilike.%${esc}%`,
+      `sku.ilike.%${esc}%`,
+      `slug.ilike.%${esc}%`,
+    ].join(",")).limit(500)));
   }
 
-  const ctx = await resolveSearchContext(termPrimary);
-  if (ctx.brandIds.length) queries.push(Promise.resolve(base().in("brand_id", ctx.brandIds).limit(160)));
-  if (ctx.catIds.length) queries.push(Promise.resolve(base().in("category_id", ctx.catIds).limit(160)));
-  if (ctx.variantProductIds.length) queries.push(Promise.resolve(base().in("id", ctx.variantProductIds.slice(0, 160)).limit(160)));
-  if (isUuidLike(termPrimary)) queries.push(Promise.resolve(base().eq("id", termPrimary).limit(5)));
+  // Full normalized query phrase for stronger exact/phrase relevance
+  const escFull = escapeIlikeTerm(normalizedQuery);
+  if (escFull) {
+    queries.push(Promise.resolve(base().or(`name.ilike.%${escFull}%,sku.ilike.%${escFull}%,slug.ilike.%${escFull}%`).limit(400)));
+  }
+
+  // Related-field matches (OR across supported field types): brand name, category name, variant SKU
+  const allBrandIds = uniqStrings([...ctx.brandIdsByToken.values()].flatMap((s) => [...s]));
+  const allCatIds = uniqStrings([...ctx.catIdsByToken.values()].flatMap((s) => [...s]));
+  const allVariantProductIds = uniqStrings([...ctx.variantProductIdsByToken.values()].flatMap((s) => [...s]));
+  if (allBrandIds.length) queries.push(Promise.resolve(base().in("brand_id", allBrandIds.slice(0, 300)).limit(500)));
+  if (allCatIds.length) queries.push(Promise.resolve(base().in("category_id", allCatIds.slice(0, 300)).limit(500)));
+  if (allVariantProductIds.length) queries.push(Promise.resolve(base().in("id", allVariantProductIds.slice(0, 400)).limit(500)));
+  if (isUuidLike(normalizedQuery)) queries.push(Promise.resolve(base().eq("id", normalizedQuery).limit(5)));
 
   const settled = await Promise.allSettled(queries);
   const rows: RawProduct[] = [];
@@ -624,30 +708,14 @@ async function fetchSearchCandidates(tokens: string[], opts: { categoryIds?: str
   }
   if (!hadSuccess && lastErr) throw lastErr;
 
-  const brandSet = new Set(ctx.brandIds);
-  const catSet = new Set(ctx.catIds);
-  const varSet = new Set(ctx.variantProductIds);
+  // Each token must match at least one supported field (OR across fields/types); supports partial & multi-word combos
+  const matched = rows.filter((row) => {
+    const hay = productHay(row, ctx);
+    return tokens.every((t) => tokenMatchesRow(row, t, hay, ctx));
+  });
 
-  return rows.filter((row) => {
-    const any = row as any;
-    const vtxt = (row.product_variants ?? []).map((v) => [v.sku, v.size, v.color, v.attribute_summary].filter(Boolean).join(" ")).join(" ");
-    const hay = [
-      row.name || "", row.slug || "", row.sku || "", brandNameOf(row) || "",
-      any.description || "", any.short_description || "", any.product_type || "", any.seo_title || "", any.seo_description || "", any.seo_keywords || "",
-      any.barcode || "", any.tags || "", any.keywords || "", any.search_keywords || "", any.search_tags || "", any.focus_keyword || "",
-      vtxt,
-    ].join(" ").toLowerCase();
-
-    return tokens.every((t) => {
-      const tl = t.toLowerCase();
-      if (!tl) return true;
-      if (hay.includes(tl)) return true;
-      if (brandSet.size && row.brand_id && brandSet.has(row.brand_id)) return (brandNameOf(row)?.toLowerCase().includes(tl) ?? false);
-      if (catSet.size && row.category_id && catSet.has(row.category_id)) return true;
-      if (varSet.has(row.id) && vtxt.toLowerCase().includes(tl)) return true;
-      return false;
-    });
-  }).map((r) => ({ r, score: scoreSearchHit(r, tokens, { brandIds: brandSet, catIds: catSet, variantProductIds: varSet }) }))
+  return matched
+    .map((r) => ({ r, score: scoreSearchHit(r, tokens, ctx) }))
     .sort((a, b) => b.score - a.score || (a.r.name || "").localeCompare(b.r.name || ""))
     .map((x) => x.r);
 }
@@ -662,9 +730,10 @@ export async function searchProductsUniversal(opts: {
   if (!query) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
   try {
     const tokens = tokenizeSearchQuery(query);
-    if (!tokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
+    const effectiveTokens = tokens.length ? tokens : [query.toLowerCase()];
+    if (!effectiveTokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
 
-    let candidates = await fetchSearchCandidates(tokens, { categoryIds: opts.categoryIds, collectionId: opts.collectionId });
+    let candidates = await fetchSearchCandidates(query, effectiveTokens, { categoryIds: opts.categoryIds, collectionId: opts.collectionId });
 
     if (opts.min != null) candidates = candidates.filter((r) => Number(r.regular_price) >= (opts.min as number));
     if (opts.max != null) candidates = candidates.filter((r) => Number(r.regular_price) <= (opts.max as number));
@@ -673,7 +742,8 @@ export async function searchProductsUniversal(opts: {
       candidates = candidates.filter((r) => (r.product_variants ?? []).some((v) => v.status === "active" && (v.size || "").toLowerCase() === want));
     }
     if (opts.avail) {
-      const stock = await inStockSet();
+      const stockRaw = await inStockSet();
+      const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
       candidates = candidates.filter((r) => opts.avail === "in" ? stock.has(r.id) : !stock.has(r.id));
     }
 
@@ -712,8 +782,10 @@ export async function searchFacets(term: string) {
   if (!q) return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
   try {
     const tokens = tokenizeSearchQuery(q);
-    const candidates = await fetchSearchCandidates(tokens.length ? tokens : [q], {});
-    const stock = await inStockSet();
+    const effectiveTokens = tokens.length ? tokens : [q.toLowerCase()];
+    const candidates = await fetchSearchCandidates(q, effectiveTokens, {});
+    const stockRaw = await inStockSet();
+    const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
     const inStock = candidates.filter((r) => stock.has(r.id)).length;
     const byCategory = new Map<string, number>();
     for (const r of candidates) if (r.category_id) byCategory.set(r.category_id, (byCategory.get(r.category_id) ?? 0) + 1);
