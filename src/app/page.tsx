@@ -30,7 +30,7 @@ export default async function Home() {
     getSettings(),
     getBrands(),
     getShippingZones(),
-    getFeaturedPiecesProducts(12),
+    getFeaturedPiecesProducts(8),
   ]);
 
   const topCategories = categories.filter((category) => !category.parent_id);
@@ -40,7 +40,9 @@ export default async function Home() {
   const deliveryRate = zones.length ? Math.min(...zones.map((zone) => zone.rate)) : null;
 
   const featuredCfg = (cms.featured_pieces || {}) as Record<string, unknown>;
-  const displayLimit = Math.max(1, Number(featuredCfg.display_limit || 6) || 6);
+  const HOME_FEATURED_MAX = 8;
+  // Home must show up to 8 (4x2) when eligible; ignore lower CMS/default caps that would hide featured products.
+  const displayLimit = HOME_FEATURED_MAX;
   const featuredIds = arr<string>(featuredCfg.product_ids).filter((x): x is string => typeof x === "string" && x.length > 0);
   // Primary source of truth: product-level "Show in Homepage Featured Pieces" (products.is_featured).
   // Server fetch returns: Priority 1 manually featured first, Priority 2 remaining eligible newest-created first (before limit).
@@ -50,7 +52,13 @@ export default async function Home() {
     const legacy = await getProductsByIds(featuredIds);
     orderedFeatured = legacy.slice(0, displayLimit);
   }
-  orderedFeatured = orderedFeatured.slice(0, displayLimit);
+  // Deduplicate by id while preserving priority/order, then cap to 8.
+  const seenFeatured = new Set<string>();
+  orderedFeatured = orderedFeatured.filter((p) => {
+    if (!p?.id || seenFeatured.has(p.id)) return false;
+    seenFeatured.add(p.id);
+    return true;
+  }).slice(0, displayLimit);
 
   const categoriesCfg = (cms.categories || {}) as Record<string, unknown>;
   const brandIntroCfg = (cms.brand_intro || {}) as Record<string, unknown>;

@@ -37,7 +37,7 @@ const defaultConfig: HomepageCmsConfig = {
   hero_banner: { use_banner_table: true, autoplay: true, interval_ms: 6500 },
   brand_intro: { label: "DELIVERY DIRECT FROM US", heading: "", description: "", text_align: "center", visible: true },
   categories: { label: "BROWSE OUR CATEGORIES", heading: "Categories", all_products_text: "ALL PRODUCTS", all_products_link: "/shop", items: [], visible: true },
-  featured_pieces: { label: "SELECTED FROM THE COLLECTION", heading: "Featured pieces", description: "", shop_all_text: "SHOP ALL", shop_all_link: "/shop", product_ids: [], main_product_id: null, display_limit: 6, visible: true },
+  featured_pieces: { label: "SELECTED FROM THE COLLECTION", heading: "Featured pieces", description: "", shop_all_text: "SHOP ALL", shop_all_link: "/shop", product_ids: [], main_product_id: null, display_limit: 8, visible: true },
   company_description: { label: "", description: "", text_align: "center", visible: true, spacing: "normal" },
   our_brands: { label: "THE LABEL PORTFOLIO", heading: "Our brands", items: [], visible: true },
   promotional_banner: { image_desktop: "", image_mobile: "", heading: "", description: "", button_text: "", button_url: "", image_position: "center", overlay_enabled: false, overlay_color: "#000000", overlay_opacity: 0.3, visible: false },
