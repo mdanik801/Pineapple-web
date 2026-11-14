@@ -17,7 +17,7 @@ export default async function Footer() {
     settings?.address?.trim() ||
     "Plot 14, Sector 3, Uttara Commercial Area, Dhaka-1230, Bangladesh";
   const phone = settings?.support_phone?.trim() || settings?.phone?.trim() || "+880 1700-000000";
-  const email = settings?.support_email?.trim() || settings?.email?.trim() || "support@almuslim.com";
+  const email = settings?.support_email?.trim() || settings?.email?.trim() || "support@pineapple.com";
 
   // Display existing Admin-managed contact values; support comma/newline separated multiple entries.
   const phones = phone.split(/[\n,;]+/).map((v: string) => v.trim()).filter(Boolean);
@@ -81,7 +81,7 @@ export default async function Footer() {
       {/* Bottom Copyright Row */}
       <div className="border-t border-[#2C5747]">
         <div className="container-x py-3 text-center text-xs text-white/70 sm:py-3.5">
-          <p>© 2026 Pineapple. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {brandName || "Pineapple"}. All rights reserved.</p>
         </div>
       </div>
     </footer>

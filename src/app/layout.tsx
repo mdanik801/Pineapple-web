@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: brandName
       ? { default: brandName, template: `%s | ${brandName}` }
-      : { default: "Store", template: "%s" },
+      : { default: "Pineapple", template: "%s | Pineapple" },
     ...(description ? { description } : {}),
   };
 }

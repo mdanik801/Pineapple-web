@@ -10,7 +10,6 @@ export type HomepageCmsConfig = {
   announcement_bar: CmsRecord;
   header: CmsRecord;
   hero_banner: CmsRecord;
-  brand_intro: CmsRecord;
   categories: CmsRecord;
   featured_pieces: CmsRecord;
   company_description: CmsRecord;
@@ -25,17 +24,15 @@ const defaultConfig: HomepageCmsConfig = {
     { id: "announcement_bar", enabled: true, order: 1 },
     { id: "header", enabled: true, order: 2 },
     { id: "hero_banner", enabled: true, order: 3 },
-    { id: "brand_intro", enabled: true, order: 4 },
-    { id: "categories", enabled: true, order: 5 },
-    { id: "featured_pieces", enabled: true, order: 6 },
-    { id: "company_description", enabled: true, order: 7 },
-    { id: "our_brands", enabled: true, order: 8 },
-    { id: "promotional_banner", enabled: true, order: 9 },
+    { id: "categories", enabled: true, order: 4 },
+    { id: "featured_pieces", enabled: true, order: 5 },
+    { id: "company_description", enabled: true, order: 6 },
+    { id: "our_brands", enabled: true, order: 7 },
+    { id: "promotional_banner", enabled: true, order: 8 },
   ],
   announcement_bar: { text: "", link: "/shop", bg_color: "#0A3C2A", text_color: "#FFFFFF", visible: true, start_date: null, end_date: null },
   header: { logo_url: "", contact_info: "", nav_items: [], show_search: true, show_account: true, show_wishlist: true, show_cart: true },
   hero_banner: { use_banner_table: true, autoplay: true, interval_ms: 6500 },
-  brand_intro: { label: "DELIVERY DIRECT FROM US", heading: "", description: "", text_align: "center", visible: true },
   categories: { label: "BROWSE OUR CATEGORIES", heading: "Categories", all_products_text: "ALL PRODUCTS", all_products_link: "/shop", items: [], visible: true },
   featured_pieces: { label: "SELECTED FROM THE COLLECTION", heading: "Featured pieces", description: "", shop_all_text: "SHOP ALL", shop_all_link: "/shop", product_ids: [], main_product_id: null, display_limit: 8, visible: true },
   company_description: { label: "", description: "", text_align: "center", visible: true, spacing: "normal" },

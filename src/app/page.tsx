@@ -5,9 +5,8 @@ import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
 import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
 import EditorialShowcase from "@/components/EditorialShowcase";
-import { getBanners, getBrands, getCategories, getFeaturedPiecesProducts, getProductsByIds, getSettings, getShippingZones } from "@/lib/data";
+import { getBanners, getBrands, getCategories, getFeaturedPiecesProducts, getProductsByIds } from "@/lib/data";
 import { getPublishedHomepageCms, isSectionVisible, orderedSections } from "@/lib/homepage-cms";
-import { money } from "@/lib/format";
 import { categoryHref } from "@/lib/slug";
 
 export const revalidate = 60;
@@ -23,21 +22,15 @@ function arr<T = unknown>(v: unknown): T[] {
 }
 
 export default async function Home() {
-  const [cms, banners, categories, settings, brands, zones, featuredByProduct] = await Promise.all([
+  const [cms, banners, categories, brands, featuredByProduct] = await Promise.all([
     getPublishedHomepageCms(),
     getBanners(),
     getCategories(),
-    getSettings(),
     getBrands(),
-    getShippingZones(),
     getFeaturedPiecesProducts(8),
   ]);
 
   const topCategories = categories.filter((category) => !category.parent_id);
-  const brandName = settings?.brand_name?.trim() || settings?.company_name?.trim() || "";
-  const brandDescription = settings?.description?.trim() || "";
-  const campaign = banners[0];
-  const deliveryRate = zones.length ? Math.min(...zones.map((zone) => zone.rate)) : null;
 
   const featuredCfg = (cms.featured_pieces || {}) as Record<string, unknown>;
   const HOME_FEATURED_MAX = 8;
@@ -61,7 +54,6 @@ export default async function Home() {
   }).slice(0, displayLimit);
 
   const categoriesCfg = (cms.categories || {}) as Record<string, unknown>;
-  const brandIntroCfg = (cms.brand_intro || {}) as Record<string, unknown>;
   const companyCfg = (cms.company_description || {}) as Record<string, unknown>;
   const brandsCfg = (cms.our_brands || {}) as Record<string, unknown>;
   const promoCfg = (cms.promotional_banner || {}) as Record<string, unknown>;
@@ -86,25 +78,6 @@ export default async function Home() {
         return banners.length > 0 && isSectionVisible(cms, "hero_banner")
           ? <HeroSlider key="hero" banners={banners} />
           : null;
-      case "brand_intro": {
-        const visible = bool(brandIntroCfg.visible, true) && isSectionVisible(cms, "brand_intro");
-        if (!visible) return null;
-        const hasExplicit = !!text(brandIntroCfg.label) || !!text(brandIntroCfg.heading) || !!text(brandIntroCfg.description);
-        const label = text(brandIntroCfg.label, deliveryRate !== null ? `Delivery rates from ${money(deliveryRate)}` : "");
-        const heading = text(brandIntroCfg.heading, brandName || campaign?.title || "");
-        const desc = text(brandIntroCfg.description, campaign?.subtitle || "");
-        if (!hasExplicit && !campaign && deliveryRate === null && !brandName) return null;
-        return (
-          <section key="brand_intro" className="container-x border-b border-black/10 py-12 text-center sm:py-16 lg:py-20">
-            {label && <p className="mb-5 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{label}</p>}
-            {brandName && !text(brandIntroCfg.heading) && heading && (
-              <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{brandName}</p>
-            )}
-            {heading && <h1 className="mx-auto max-w-3xl font-serif text-3xl leading-tight text-neutral-950 sm:text-4xl lg:text-5xl">{heading}</h1>}
-            {desc && <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-neutral-600 sm:text-base">{desc}</p>}
-          </section>
-        );
-      }
       case "categories": {
         const visible = bool(categoriesCfg.visible, true) && isSectionVisible(cms, "categories");
         if (!visible || topCategories.length === 0) return null;
@@ -151,9 +124,9 @@ export default async function Home() {
       }
       case "company_description": {
         const visible = bool(companyCfg.visible, true) && isSectionVisible(cms, "company_description");
-        const desc = text(companyCfg.description, brandDescription);
+        const desc = text(companyCfg.description);
         if (!visible || !desc) return null;
-        const label = text(companyCfg.label, brandName);
+        const label = text(companyCfg.label);
         return (
           <section key="company_description" className="border-y border-black/10 bg-[#f7f7f5] px-4 py-16 text-center sm:py-24">
             {label && <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{label}</p>}
