@@ -53,12 +53,13 @@ export type HomepageBottomCarouselItem = {
 };
 
 const PRODUCT_COLS =
-  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary)";
+  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary)";
 
 type RawProduct = {
   id: string; name: string; slug: string; sku?: string | null;
   regular_price: number; sale_price: number | null;
   category_id: string | null; featured_image: string | null; is_new_arrival: boolean | null;
+  show_first?: boolean | null; show_first_order?: number | null;
   brand_id?: string | null;
   brands?: { name: string | null } | { name: string | null }[] | null;
   product_images?: { url: string; is_primary: boolean | null; display_order: number | null }[];
@@ -343,6 +344,10 @@ export async function listProducts(o: ListOpts = {}): Promise<{ products: Produc
       if (!ids.length) return { products: [], total: 0, pages: 1 };
       base = base.in("id", ids);
     }
+    // "Show First / Default Priority" is additive and separate from is_featured.
+    // Pinned active/published products appear first within current listing context; others keep existing sort.
+    base = base.order("show_first", { ascending: false, nullsFirst: false })
+      .order("show_first_order", { ascending: false, nullsFirst: false });
     switch (o.sort) {
       case "price-asc": base = base.order("regular_price", { ascending: true }); break;
       case "price-desc": base = base.order("regular_price", { ascending: false }); break;
@@ -365,6 +370,8 @@ export async function getProductsByIds(ids: string[]) {
     const { data, error } = await db.from("products").select(PRODUCT_COLS).in("id", ids).eq("status", "published").is("deleted_at", null);
     if (error) throw error;
     const rows = (data ?? []) as unknown as RawProduct[];
+    const showFirstRank = (r: RawProduct) => (r.show_first ? 1 : 0);
+    rows.sort((a, b) => showFirstRank(b) - showFirstRank(a) || (Number(b.show_first_order) || 0) - (Number(a.show_first_order) || 0));
     const byId = new Map(rows.map((r) => [r.id, r]));
     return toCards(ids.map((id) => byId.get(id)).filter((r): r is RawProduct => !!r));
   } catch (e) {
@@ -670,9 +677,22 @@ export async function searchProductsUniversal(opts: {
       candidates = candidates.filter((r) => opts.avail === "in" ? stock.has(r.id) : !stock.has(r.id));
     }
 
-    if (opts.sort === "price-asc") candidates.sort((a, b) => Number(a.regular_price) - Number(b.regular_price));
-    else if (opts.sort === "price-desc") candidates.sort((a, b) => Number(b.regular_price) - Number(a.regular_price));
-    else if (opts.sort === "name") candidates.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    const sortCandidates = (arr: RawProduct[]) => {
+      const byExisting = (a: RawProduct, b: RawProduct) => {
+        if (opts.sort === "price-asc") return Number(a.regular_price) - Number(b.regular_price);
+        if (opts.sort === "price-desc") return Number(b.regular_price) - Number(a.regular_price);
+        if (opts.sort === "name") return (a.name || "").localeCompare(b.name || "");
+        return 0; // preserve relevance order from fetchSearchCandidates for default search
+      };
+      return arr.sort((a, b) => {
+        const sf = (b.show_first ? 1 : 0) - (a.show_first ? 1 : 0);
+        if (sf !== 0) return sf;
+        const so = (Number(b.show_first_order) || 0) - (Number(a.show_first_order) || 0);
+        if (so !== 0) return so;
+        return byExisting(a, b);
+      });
+    };
+    sortCandidates(candidates);
 
     const total = candidates.length;
     const pages = Math.max(1, Math.ceil(total / limit));
