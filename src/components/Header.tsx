@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCategories, getPopularTerms, getSettings } from "@/lib/data";
+import { getNavigationCategories, getPopularTerms, getSettings } from "@/lib/data";
 import { getCustomer } from "@/lib/session";
 import { normalizeSlugPathSegment } from "@/lib/slug";
 import HeaderActions from "./HeaderActions";
@@ -9,7 +9,7 @@ import MobileMenu from "./MobileMenu";
 import CompanySettingsLogo from "./CompanySettingsLogo";
 
 export default async function Header() {
-  const [cats, me, popular, settings] = await Promise.all([getCategories(), getCustomer(), getPopularTerms(), getSettings()]);
+  const [cats, me, popular, settings] = await Promise.all([getNavigationCategories(), getCustomer(), getPopularTerms(), getSettings()]);
   const normCats = cats.map((c) => ({ ...c, slug: normalizeSlugPathSegment(c.slug) }));
   const top = normCats.filter((c) => !c.parent_id);
   const kids = (id: string) => normCats.filter((c) => c.parent_id === id);

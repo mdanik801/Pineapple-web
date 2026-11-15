@@ -5,6 +5,7 @@ import { Minus, Plus, ShoppingBag, Check } from "lucide-react";
 import { useStore } from "@/lib/store";
 import WishlistButton from "./WishlistButton";
 import SmartImage from "./SmartImage";
+import ColorSwatch from "./ColorSwatch";
 import { money, discountPct } from "@/lib/format";
 import type { Variant } from "@/lib/data";
 
@@ -87,22 +88,24 @@ export default function AddToCart({ p, onVariantImage, hideBuyNow }: { p: P; onV
       {colors.length > 0 && (
         <div className="mt-4 sm:mt-5">
           <p className="mb-2 text-xs sm:text-sm font-medium">Color{color && <span className="uppercase text-brand"> — {color}</span>}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {colors.map((c) => {
+              const match = p.variants.find((v) => v.color === c) || null;
               const img = p.variants.find((v) => v.color === c && v.image_url)?.image_url ?? null;
               const out = !optionStock(size, c);
+              const selected = color === c;
               return (
                 <button
                   key={c}
                   type="button"
                   title={c}
-                  aria-label={c}
-                  aria-pressed={color === c}
+                  aria-label={`${c}${selected ? " selected" : ""}`}
+                  aria-pressed={selected}
                   onClick={() => { setColor(c); setErr(""); setQty(1); onVariantImage?.(img); }}
-                  className={`relative h-14 w-12 sm:h-[68px] sm:w-14 overflow-hidden rounded-xs border-2 bg-brand-100 transition-all duration-200 hover:scale-105 touch-manipulation ${color === c ? "border-brand ring-1 ring-brand" : "border-line"} ${out ? "opacity-40" : ""}`}
-                  style={img ? undefined : { background: c.toLowerCase().replace(/\s+/g, "") }}
+                  className={`group/swatch inline-flex items-center gap-2 rounded-md border px-2 py-1.5 transition-all duration-200 hover:border-brand touch-manipulation ${selected ? "border-brand bg-brand-50 ring-1 ring-brand/30" : "border-line bg-white"} ${out ? "opacity-45" : ""}`}
                 >
-                  {img ? <SmartImage src={img} alt="" sizes="56px" className="object-cover" /> : <span className="sr-only">{c}</span>}
+                  <ColorSwatch name={c} value={match?.color_value} selected={selected} size={22} />
+                  <span className={`text-xs sm:text-sm font-medium leading-none ${selected ? "text-brand" : "text-ink/85"}`}>{c}</span>
                 </button>
               );
             })}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { categoryHref } from "@/lib/slug";
@@ -29,8 +29,11 @@ export default function HeaderNav({
   const [scrolled, setScrolled] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<Record<string, { left: number; maxWidth: number }>>({});
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLLIElement | null>>({});
+  const panelRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 8);
@@ -60,6 +63,38 @@ export default function HeaderNav({
   const cancelClose = () => { if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; } };
   const scheduleClose = () => { cancelClose(); closeTimer.current = setTimeout(() => setOpenId(null), 140); };
   useEffect(() => () => cancelClose(), []);
+
+  useLayoutEffect(() => {
+    if (!openId) return;
+    const update = () => {
+      const nav = navRef.current;
+      const item = itemRefs.current[openId];
+      const panel = panelRefs.current[openId];
+      if (!nav || !item || !panel) return;
+      const navRect = nav.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const viewportW = window.innerWidth || navRect.width;
+      const margin = 8;
+      const desiredMax = Math.min(1120, Math.max(320, viewportW - margin * 2));
+      const panelW = Math.min(panel.offsetWidth || desiredMax, desiredMax, Math.max(320, navRect.width - margin * 2));
+      const center = (itemRect.left - navRect.left) + itemRect.width / 2;
+      const minLeft = margin;
+      const maxLeft = Math.max(minLeft, navRect.width - panelW - margin);
+      const left = Math.min(Math.max(center - panelW / 2, minLeft), maxLeft);
+      setPanelStyle((prev) => {
+        const cur = prev[openId];
+        if (cur && Math.abs(cur.left - left) < 0.5 && Math.abs(cur.maxWidth - desiredMax) < 0.5) return prev;
+        return { ...prev, [openId]: { left, maxWidth: desiredMax } };
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [openId, top]);
 
   const mobileCats = top.map((c) => ({
     id: c.id,
@@ -111,9 +146,11 @@ export default function HeaderNav({
               : Array.from({ length: Math.ceil(children.length / 8) }, (_, i) => ({ title: i === 0 ? "Shop by type" : "", href: null as string | null, items: children.slice(i * 8, i * 8 + 8) }));
             const isOpen = openId === c.id;
             const hasChildren = children.length > 0;
+            const pos = panelStyle[c.id];
             return (
               <li
                 key={c.id}
+                ref={(el) => { itemRefs.current[c.id] = el; }}
                 className="md:static"
                 onMouseEnter={() => { if (hasChildren) { cancelClose(); setOpenId(c.id); } }}
                 onMouseLeave={() => { if (hasChildren) scheduleClose(); }}
@@ -134,12 +171,17 @@ export default function HeaderNav({
                 </Link>
                 {hasChildren && (
                   <div
-                    className={`absolute left-0 right-0 top-full z-50 w-full border-t border-[#0A3C2A]/20 bg-white shadow-2xl transition-all duration-300 ease-out ${isOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0 pointer-events-none"}`}
+                    ref={(el) => { panelRefs.current[c.id] = el; }}
+                    className={`absolute top-full z-50 w-max border-t border-[#0A3C2A]/20 bg-white shadow-2xl transition-[opacity,transform] duration-200 ease-out ${isOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0 pointer-events-none"}`}
+                    style={{
+                      left: pos?.left ?? 0,
+                      maxWidth: pos?.maxWidth ? `${pos.maxWidth}px` : "min(90vw, 70rem)",
+                    }}
                     onMouseEnter={() => { cancelClose(); setOpenId(c.id); }}
                     onMouseLeave={scheduleClose}
                   >
                     <div
-                      className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-6 px-4 py-6 sm:px-6 sm:gap-x-8 sm:py-7 lg:px-8 lg:gap-x-10"
+                      className="mx-auto grid w-full gap-x-6 gap-y-6 px-4 py-6 sm:px-6 sm:gap-x-8 sm:py-7 lg:px-8 lg:gap-x-10"
                       style={{ gridTemplateColumns: `repeat(${Math.min(Math.max(columns.length, 1), 4)}, minmax(180px, 1fr))`, maxHeight: "min(70vh, 28rem)", overflowY: "auto" }}
                     >
                       {columns.map((col, i) => (

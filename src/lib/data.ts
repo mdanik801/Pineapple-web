@@ -4,6 +4,7 @@ import { db } from "./supabase";
 import { effectivePrice } from "./format";
 import { normalizeHeroBanners } from "./hero-banners";
 import { normalizeSearchQuery, tokenizeSearchQuery, escapeIlikeTerm, logSearchError } from "./search-utils";
+import { extractExplicitColorValue } from "./color";
 
 const SITE_CONTENT_REVALIDATE = 60;
 
@@ -18,7 +19,7 @@ export type ProductCardData = {
   image: string | null; image2: string | null;
   category_id: string | null; is_new: boolean; in_stock: boolean;
   stock: number; has_variants: boolean;
-  swatches: { color: string; image: string | null }[];
+  swatches: { color: string; image: string | null; value?: string | null }[];
   brand?: string | null;
   sku?: string | null;
 };
@@ -27,6 +28,8 @@ export type Variant = {
   id: string; sku: string; size: string | null; color: string | null;
   regular_price: number; sale_price: number | null; price: number;
   image_url: string | null; stock: number;
+  color_value?: string | null;
+  attributes?: Record<string, unknown> | null;
 };
 
 export type BrandData = {
@@ -53,7 +56,7 @@ export type HomepageBottomCarouselItem = {
 };
 
 const PRODUCT_COLS =
-  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,featured_added_at,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary)";
+  "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,featured_added_at,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary,regular_price,sale_price,attributes)";
 
 type RawProduct = {
   id: string; name: string; slug: string; sku?: string | null;
@@ -63,7 +66,7 @@ type RawProduct = {
   brand_id?: string | null;
   brands?: { name: string | null } | { name: string | null }[] | null;
   product_images?: { url: string; is_primary: boolean | null; display_order: number | null }[];
-  product_variants?: { id: string; status: string | null; color?: string | null; image_url?: string | null; sku?: string | null; size?: string | null; attribute_summary?: string | null }[];
+  product_variants?: { id: string; status: string | null; color?: string | null; image_url?: string | null; sku?: string | null; size?: string | null; attribute_summary?: string | null; regular_price?: number | null; sale_price?: number | null; attributes?: Record<string, unknown> | null; color_code?: string | null; color_hex?: string | null }[];
 };
 
 function validProductImage(value: unknown): string | null {
@@ -91,14 +94,39 @@ function pickImages(p: Pick<RawProduct, "featured_image" | "product_images">) {
   return [...new Set([primary, ...gallery.map((image) => image.url), featured].filter((url): url is string => !!url))];
 }
 
-function swatchesOf(p: RawProduct) {
-  const seen = new Map<string, string | null>();
-  for (const v of p.product_variants ?? []) {
-    if (v.status !== "active" || !v.color) continue;
-    const img = validProductImage(v.image_url);
-    if (!seen.has(v.color) || (!seen.get(v.color) && img)) seen.set(v.color, img);
+function variantColorName(v: any): string | null {
+  const direct = typeof v?.color === "string" && v.color.trim() ? v.color.trim() : null;
+  if (direct) return direct;
+  const attrs = v?.attributes && typeof v.attributes === "object" ? v.attributes : null;
+  if (!attrs) return null;
+  for (const k of Object.keys(attrs)) {
+    if (String(k).toLowerCase() === "color" || String(k).toLowerCase() === "colour") {
+      const val = attrs[k];
+      if (typeof val === "string" && val.trim()) return val.trim();
+    }
   }
-  return [...seen].map(([color, image]) => ({ color, image }));
+  return null;
+}
+
+function swatchesOf(p: RawProduct) {
+  const seen = new Map<string, { color: string; image: string | null; value: string | null }>();
+  for (const v of p.product_variants ?? []) {
+    if (v.status !== "active") continue;
+    const color = variantColorName(v);
+    if (!color) continue;
+    const img = validProductImage(v.image_url);
+    const value = extractExplicitColorValue(v?.attributes, (v as any)?.color_code || (v as any)?.color_hex || null);
+    const prev = seen.get(color);
+    if (!prev) {
+      seen.set(color, { color, image: img, value });
+    } else {
+      // prefer explicit hex/value and image if previously missing
+      if (!prev.image && img) prev.image = img;
+      if (!prev.value && value) prev.value = value;
+      seen.set(color, prev);
+    }
+  }
+  return [...seen.values()];
 }
 
 async function stockMap(productIds: string[]) {
@@ -118,15 +146,43 @@ function brandNameOf(p: RawProduct): string | null {
   return b.name ?? null;
 }
 
+
+function toNum(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function resolveDisplayPricing(p: RawProduct): { regular_price: number; sale_price: number | null } {
+  const pReg = toNum(p.regular_price);
+  const pSale = toNum(p.sale_price);
+  if (pReg != null && pReg > 0) return { regular_price: pReg, sale_price: pSale != null && pSale >= 0 ? pSale : null };
+
+  const active = (p.product_variants ?? []).filter((v) => v?.status === "active");
+  const priced = active
+    .map((v) => ({ reg: toNum(v.regular_price), sale: toNum(v.sale_price) }))
+    .filter((v): v is { reg: number; sale: number | null } => v.reg != null && v.reg > 0);
+  if (priced.length) {
+    const minReg = Math.min(...priced.map((v) => v.reg));
+    const candidates = priced.filter((v) => v.reg === minReg);
+    const sales = candidates.map((v) => (v.sale != null && v.sale >= 0 && v.sale < v.reg ? v.sale : null)).filter((v): v is number => v != null);
+    const sale = sales.length ? Math.min(...sales) : null;
+    return { regular_price: minReg, sale_price: sale };
+  }
+
+  return { regular_price: pReg ?? 0, sale_price: pSale };
+}
+
 async function toCards(rows: RawProduct[]): Promise<ProductCardData[]> {
   const stock = await stockMap(rows.map((r) => r.id));
   return rows.map((p) => {
     const imgs = pickImages(p);
+    const pricing = resolveDisplayPricing(p);
     return {
       id: p.id, name: p.name, slug: p.slug,
-      regular_price: Number(p.regular_price),
-      sale_price: p.sale_price == null ? null : Number(p.sale_price),
-      price: effectivePrice(p.regular_price, p.sale_price),
+      regular_price: pricing.regular_price,
+      sale_price: pricing.sale_price,
+      price: effectivePrice(pricing.regular_price, pricing.sale_price),
       image: imgs[0] ?? null, image2: imgs[1] ?? null,
       category_id: p.category_id, is_new: !!p.is_new_arrival,
       in_stock: (stock.get(p.id) ?? 0) > 0,
@@ -148,6 +204,50 @@ export const getCategories = unstable_cache(async (): Promise<Category[]> => {
     .order("name");
   return (data ?? []) as Category[];
 }, ["site-categories-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+/** Customer-facing navigation categories: hide subcategories (and nested descendants) that have no Active Products.
+ *  Active Products = status 'published' AND deleted_at IS NULL (existing visibility). Top-level categories always included.
+ *  Counts are by actual category_id relationship (no duplicates). Cached and revalidated with site-content.
+ */
+export const getNavigationCategories = unstable_cache(async (): Promise<Category[]> => {
+  const [cats, prodRes] = await Promise.all([
+    db.from("categories")
+      .select("id,name,slug,description,image_url,parent_id,display_order")
+      .eq("status", "active")
+      .order("display_order", { ascending: true, nullsFirst: false })
+      .order("name"),
+    db.from("products").select("category_id").eq("status", "published").is("deleted_at", null),
+  ]);
+  const all = (cats.data ?? []) as Category[];
+  const directCount = new Map<string, number>();
+  for (const p of (prodRes.data ?? []) as { category_id: string | null }[]) {
+    if (!p?.category_id) continue;
+    directCount.set(p.category_id, (directCount.get(p.category_id) ?? 0) + 1);
+  }
+  const childrenByParent = new Map<string, Category[]>();
+  for (const c of all) {
+    if (!c.parent_id) continue;
+    const arr = childrenByParent.get(c.parent_id) ?? [];
+    arr.push(c);
+    childrenByParent.set(c.parent_id, arr);
+  }
+  const visible = new Set<string>();
+  const canShowSub = (c: Category): boolean => {
+    const kids = childrenByParent.get(c.id) ?? [];
+    let anyChild = false;
+    for (const k of kids) if (canShowSub(k)) anyChild = true;
+    const ok = (directCount.get(c.id) ?? 0) > 0 || anyChild;
+    if (ok) visible.add(c.id);
+    return ok;
+  };
+  for (const c of all) {
+    if (!c.parent_id) {
+      visible.add(c.id); // parent categories / "Shop All" remain visible
+      for (const k of (childrenByParent.get(c.id) ?? [])) canShowSub(k);
+    }
+  }
+  return all.filter((c) => visible.has(c.id));
+}, ["site-nav-categories-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 export const getSettings = unstable_cache(async () => {
   const { data } = await db
@@ -441,19 +541,25 @@ export async function getProductDetail(slug: string) {
       categories: { id: string; name: string; slug: string } | null;
     };
     const [{ data: vars, error: vErr }, { data: inv, error: iErr }] = await Promise.all([
-      db.from("product_variants").select("id,sku,size,color,regular_price,sale_price,image_url,attribute_summary").eq("product_id", raw.id).eq("status", "active").order("created_at"),
+      db.from("product_variants").select("id,sku,size,color,regular_price,sale_price,image_url,attribute_summary,attributes").eq("product_id", raw.id).eq("status", "active").order("created_at"),
       db.from("inventory").select("variant_id,current_stock,reserved_stock").eq("product_id", raw.id),
     ]);
     if (vErr) throw vErr;
     if (iErr) throw iErr;
     const avail = (variantId: string | null) =>
       (inv ?? []).filter((r) => r.variant_id === variantId).reduce((s, r) => s + Math.max(0, (r.current_stock || 0) - (r.reserved_stock || 0)), 0);
-    const variants: Variant[] = (vars ?? []).map((v) => ({
-      id: v.id, sku: v.sku, size: v.size, color: v.color,
-      regular_price: Number(v.regular_price), sale_price: v.sale_price == null ? null : Number(v.sale_price),
-      price: effectivePrice(v.regular_price, v.sale_price),
-      image_url: validProductImage(v.image_url), stock: avail(v.id),
-    }));
+    const variants: Variant[] = (vars ?? []).map((v: any) => {
+      const colorName = variantColorName(v) || v.color || null;
+      const colorValue = extractExplicitColorValue(v?.attributes, v?.color_code || v?.color_hex || null);
+      return {
+        id: v.id, sku: v.sku, size: v.size, color: colorName,
+        regular_price: Number(v.regular_price), sale_price: v.sale_price == null ? null : Number(v.sale_price),
+        price: effectivePrice(v.regular_price, v.sale_price),
+        image_url: validProductImage(v.image_url), stock: avail(v.id),
+        color_value: colorValue,
+        attributes: (v?.attributes && typeof v.attributes === "object") ? v.attributes : null,
+      };
+    });
     const baseStock = avail(null);
     const brandObj = raw.brands;
     const brand = Array.isArray(brandObj) ? (brandObj[0]?.name ?? null) : (brandObj?.name ?? null);

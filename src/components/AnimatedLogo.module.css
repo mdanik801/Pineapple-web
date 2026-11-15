@@ -1,4 +1,4 @@
-/* Animated Logo Styles adapted from public/pinaple logo.html */
+/* Animated Logo Styles */
 
 .logoWrapper {
   background: transparent;
@@ -82,7 +82,7 @@
   will-change: transform, opacity, filter;
 }
 
-/* Keyframe Animations from public/pinaple logo.html */
+/* Keyframe Animations */
 @keyframes letterReveal {
   0% {
     opacity: 0;

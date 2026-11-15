@@ -6,6 +6,7 @@ import WishlistButton from "./WishlistButton";
 import CardAddButton from "./CardAddButton";
 import { money, discountPct } from "@/lib/format";
 import type { ProductCardData } from "@/lib/data";
+import { resolveSwatchBackground } from "@/lib/color";
 
 export default function ProductCard({ p, priority }: { p: ProductCardData; priority?: boolean }) {
   const [sel, setSel] = useState<string | null>(null); // selected swatch color
@@ -42,21 +43,25 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
       </Link>
       {sw.length > 1 && (
         <div className="mt-2 flex items-center justify-center gap-1.5 sm:mt-2.5">
-          {sw.map((s) => (
-            <button key={s.color} type="button" title={s.color} aria-label={`Color ${s.color}`} aria-pressed={sel === s.color}
-              onClick={(e) => {
-                if (typeof window !== "undefined" && window.matchMedia("(hover: none), (pointer: coarse)").matches) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return;
-                }
-                setSel(sel === s.color ? null : s.color);
-              }}
-              className={`relative h-6 w-6 overflow-hidden rounded-full border bg-brand-100 transition-all duration-200 hover:scale-110 ${sel === s.color ? "border-brand ring-1 ring-brand" : "border-line"}`}
-              style={s.image ? undefined : { background: s.color.toLowerCase().replace(/\s+/g, "") }}>
-              {s.image && <SmartImage src={s.image} alt="" sizes="24px" className="object-cover" />}
-            </button>
-          ))}
+          {sw.map((s) => {
+            const selected = sel === s.color;
+            const { background, border } = resolveSwatchBackground(s.color, s.value);
+            return (
+              <button key={s.color} type="button" title={s.color} aria-label={`Color ${s.color}${selected ? " selected" : ""}`} aria-pressed={selected}
+                onClick={(e) => {
+                  if (typeof window !== "undefined" && window.matchMedia("(hover: none), (pointer: coarse)").matches) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                  }
+                  setSel(sel === s.color ? null : s.color);
+                }}
+                className={`relative h-6 w-6 overflow-hidden rounded-full transition-all duration-200 hover:scale-110 ${selected ? "ring-2 ring-brand ring-offset-1" : ""}`}
+                style={{ background, border: `1.5px solid ${selected ? "#0A3C2A" : (border || "rgba(0,0,0,0.12)")}` }}>
+                {s.image ? <SmartImage src={s.image} alt="" sizes="24px" className="object-cover" /> : <span className="sr-only">{s.color}</span>}
+              </button>
+            );
+          })}
           {p.swatches.length > sw.length && <span className="text-xs font-medium text-[#4B5563]">+{p.swatches.length - sw.length}</span>}
         </div>
       )}
