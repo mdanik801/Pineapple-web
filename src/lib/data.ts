@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { db } from "./supabase";
 import { effectivePrice } from "./format";
 import { normalizeHeroBanners } from "./hero-banners";
@@ -525,7 +526,7 @@ export async function getFeaturedPiecesProducts(limit = 6): Promise<ProductCardD
   }
 }
 
-export async function getProductDetail(slug: string) {
+export const getProductDetail = cache(async (slug: string) => {
   try {
     // Note: PRODUCT_COLS already includes brand_id/is_new_arrival/brands(name); avoid duplicate relation aliases.
     const { data: p, error } = await db
@@ -578,8 +579,7 @@ export async function getProductDetail(slug: string) {
     logSearchError("getProductDetail", e, { slug });
     return null;
   }
-}
-
+});
 export const getShippingZones = unstable_cache(async () => {
   try {
     const { data, error } = await db.from("shipping_zones").select("name,rate,estimated_days,free_shipping_threshold").eq("is_active", true).order("rate");

@@ -122,13 +122,20 @@ export async function trackEvent(payload: TrackPayload): Promise<void> {
       } catch {}
     }
 
-    await fetch("/api/analytics/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: json,
-      keepalive: payload.event_type === "page_view" || payload.event_type === "heartbeat",
-      cache: "no-store",
-    }).catch(() => {});
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timeout = controller ? setTimeout(() => { try { controller.abort(); } catch {} }, 4000) : null;
+    try {
+      await fetch("/api/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: json,
+        keepalive: payload.event_type === "page_view" || payload.event_type === "heartbeat",
+        cache: "no-store",
+        ...(controller ? { signal: controller.signal } : {}),
+      }).catch(() => {});
+    } finally {
+      if (timeout) clearTimeout(timeout);
+    }
   } catch {
     // Never break customer site if tracking fails
   }

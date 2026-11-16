@@ -5,7 +5,12 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   : "dyrptcmnmuajeizdwvic.supabase.co";
 
 const nextConfig: NextConfig = {
+  compress: true,
   images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [360, 414, 640, 768, 828, 1080, 1200, 1536],
+    imageSizes: [16, 32, 48, 64, 96, 128, 180, 256, 320],
+    minimumCacheTTL: 60,
     remotePatterns: [
       { protocol: "https", hostname: supabaseHost },
       { protocol: "https", hostname: "images.unsplash.com" },

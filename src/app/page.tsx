@@ -1,11 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Suspense, cloneElement, isValidElement } from "react";
 import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
 import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
 import EditorialShowcase from "@/components/EditorialShowcase";
-import { getBanners, getBrands, getCategories, getFeaturedPiecesProducts, getProductsByIds } from "@/lib/data";
+import { getBanners, getCategories, getFeaturedPiecesProducts, getProductsByIds } from "@/lib/data";
 import { getPublishedHomepageCms, isSectionVisible, orderedSections } from "@/lib/homepage-cms";
 import { categoryHref } from "@/lib/slug";
 
@@ -22,11 +21,10 @@ function arr<T = unknown>(v: unknown): T[] {
 }
 
 export default async function Home() {
-  const [cms, banners, categories, brands, featuredByProduct] = await Promise.all([
+  const [cms, banners, categories, featuredByProduct] = await Promise.all([
     getPublishedHomepageCms(),
     getBanners(),
     getCategories(),
-    getBrands(),
     getFeaturedPiecesProducts(8),
   ]);
 
@@ -55,7 +53,6 @@ export default async function Home() {
 
   const categoriesCfg = (cms.categories || {}) as Record<string, unknown>;
   const companyCfg = (cms.company_description || {}) as Record<string, unknown>;
-  const brandsCfg = (cms.our_brands || {}) as Record<string, unknown>;
   const promoCfg = (cms.promotional_banner || {}) as Record<string, unknown>;
 
   const sections = (() => {
@@ -174,7 +171,7 @@ export default async function Home() {
         return (
           <section key="promotional_banner" className="relative w-full overflow-hidden bg-neutral-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img} alt={heading || "Promotional banner"} className="h-auto w-full object-cover" />
+            <img src={img} alt={heading || "Promotional banner"} loading="lazy" decoding="async" className="h-auto w-full object-cover" />
             {(heading || desc || btnText) && (
               <div className="container-x absolute inset-0 flex flex-col items-center justify-center text-center text-white">
                 {heading && <h2 className="font-serif text-3xl sm:text-4xl">{heading}</h2>}

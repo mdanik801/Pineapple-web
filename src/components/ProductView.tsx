@@ -218,6 +218,8 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
               <img
                 src={previewSrc}
                 alt={`${p.name} preview`}
+                loading="lazy"
+                decoding="async"
                 className="block max-h-full max-w-full w-auto h-auto object-contain select-none"
                 style={{ touchAction: "pan-y pinch-zoom" }}
                 draggable={false}
@@ -251,7 +253,7 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
                       aria-label={`Preview image ${i + 1}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={u} alt="" className="h-full w-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }} />
+                      <img src={u} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }} />
                     </button>
                   ))}
                 </div>
