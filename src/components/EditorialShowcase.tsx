@@ -21,7 +21,7 @@ export default function EditorialShowcase({
   if (!products.length) return null;
 
   return (
-    <section className="w-full border-y border-black/10 bg-[#f7f7f5] pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 lg:pb-10">
+    <section className="w-full border-t border-black/10 bg-[#f7f7f5] pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 lg:pb-10">
       <div className="content-full">
         <div className="relative mb-8 border-b border-black/10 pb-4 sm:mb-10">
           <div className="text-center px-1">
@@ -36,7 +36,7 @@ export default function EditorialShowcase({
         <div className="grid w-full grid-cols-1 gap-x-5 gap-y-9 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-7 lg:gap-y-10">
           {products.map((product, idx) => (
             <article key={product.id} className="group flex h-full min-h-0 min-w-0 flex-col">
-              <Link href={`/product/${product.slug}`} aria-label={product.name} className="relative block aspect-[4/5] w-full shrink-0 overflow-hidden bg-white">
+              <Link href={`/product/${product.slug}`} aria-label={product.name} className="relative block aspect-[4/5] w-full shrink-0 overflow-hidden rounded-[8px] bg-white">
                 {product.image
                   ? <SmartImage src={product.image} alt={product.name} sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 25vw" priority={idx < 4} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.025]" />
                   : <div aria-hidden="true" className="absolute inset-0 bg-neutral-100" />}

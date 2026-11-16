@@ -15,7 +15,7 @@ export default function BottomCategorySection({ categories }: Props) {
       {/* Mobile-only See All tile above banners */}
       <Link
         href="/shop"
-        className="md:hidden mb-2 flex w-full items-center justify-center border border-black/10 bg-[#f7f7f5] px-4 py-2.5 text-xs font-medium uppercase tracking-[.14em] text-neutral-800 transition-colors hover:bg-[#efefec] hover:text-black"
+        className="md:hidden mb-2 flex w-full items-center justify-center bg-[#f7f7f5] px-4 py-2.5 text-xs font-medium uppercase tracking-[.14em] text-neutral-800 transition-colors hover:bg-[#efefec] hover:text-black focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black/20"
         aria-label="See all products"
       >
         See All

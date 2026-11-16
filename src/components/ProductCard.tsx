@@ -10,7 +10,7 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
 
   return (
     <div className="group relative min-w-0">
-      <div className="relative aspect-[5/6] overflow-hidden bg-brand-50">
+      <div className="relative aspect-[5/6] overflow-hidden rounded-[8px] bg-brand-50">
         <Link href={`/product/${p.slug}`} aria-label={p.name} prefetch className="absolute inset-0 block">
           <SmartImage src={main} alt={p.name} priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 25vw"
