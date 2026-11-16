@@ -754,8 +754,11 @@ function scoreSearchHit(row: RawProduct, tokens: string[], ctx: SearchCtx) {
   return score;
 }
 
-async function fetchSearchCandidates(query: string, tokens: string[], opts: { categoryIds?: string[]; collectionId?: string }) {
+const fetchSearchCandidates = cache(async (query: string, tokensKey: string, categoryKey: string, collectionId: string) => {
   const normalizedQuery = normalizeSearchQuery(query);
+  const tokens = tokensKey ? tokensKey.split("\u0001").filter(Boolean) : [];
+  const categoryIds = categoryKey ? categoryKey.split(",").filter(Boolean) : [];
+  const opts = { categoryIds: categoryIds.length ? categoryIds : undefined, collectionId: collectionId || undefined };
   if (!normalizedQuery || !tokens.length) return [] as RawProduct[];
 
   // Safe core select/filters only (avoid schema-dependent optional columns causing query failures)
@@ -767,33 +770,35 @@ async function fetchSearchCandidates(query: string, tokens: string[], opts: { ca
     return q;
   };
 
-  const ctx = await resolveSearchContext(tokens);
+  const effectiveTokens = tokens.slice(0, 3); // cap token fanout for performance on slow/mobile networks
+  const ctx = await resolveSearchContext(effectiveTokens);
   const queries: Promise<any>[] = [];
+  const perQueryLimit = 120; // bounded candidate fetch; pagination/ranking applied after DB-filtered candidate retrieval
 
-  // DB-level partial, case-insensitive OR matching across core searchable fields (per token, supports 1-2+ chars)
-  for (const token of tokens.slice(0, 6)) {
+  // DB-level partial, case-insensitive OR matching across core searchable fields (per token)
+  for (const token of effectiveTokens) {
     const esc = escapeIlikeTerm(token);
     if (!esc) continue;
     queries.push(Promise.resolve(base().or([
       `name.ilike.%${esc}%`,
       `sku.ilike.%${esc}%`,
       `slug.ilike.%${esc}%`,
-    ].join(",")).limit(500)));
+    ].join(",")).limit(perQueryLimit)));
   }
 
   // Full normalized query phrase for stronger exact/phrase relevance
   const escFull = escapeIlikeTerm(normalizedQuery);
   if (escFull) {
-    queries.push(Promise.resolve(base().or(`name.ilike.%${escFull}%,sku.ilike.%${escFull}%,slug.ilike.%${escFull}%`).limit(400)));
+    queries.push(Promise.resolve(base().or(`name.ilike.%${escFull}%,sku.ilike.%${escFull}%,slug.ilike.%${escFull}%`).limit(perQueryLimit)));
   }
 
   // Related-field matches (OR across supported field types): brand name, category name, variant SKU
   const allBrandIds = uniqStrings([...ctx.brandIdsByToken.values()].flatMap((s) => [...s]));
   const allCatIds = uniqStrings([...ctx.catIdsByToken.values()].flatMap((s) => [...s]));
   const allVariantProductIds = uniqStrings([...ctx.variantProductIdsByToken.values()].flatMap((s) => [...s]));
-  if (allBrandIds.length) queries.push(Promise.resolve(base().in("brand_id", allBrandIds.slice(0, 300)).limit(500)));
-  if (allCatIds.length) queries.push(Promise.resolve(base().in("category_id", allCatIds.slice(0, 300)).limit(500)));
-  if (allVariantProductIds.length) queries.push(Promise.resolve(base().in("id", allVariantProductIds.slice(0, 400)).limit(500)));
+  if (allBrandIds.length) queries.push(Promise.resolve(base().in("brand_id", allBrandIds.slice(0, 150)).limit(perQueryLimit)));
+  if (allCatIds.length) queries.push(Promise.resolve(base().in("category_id", allCatIds.slice(0, 150)).limit(perQueryLimit)));
+  if (allVariantProductIds.length) queries.push(Promise.resolve(base().in("id", allVariantProductIds.slice(0, 200)).limit(perQueryLimit)));
   if (isUuidLike(normalizedQuery)) queries.push(Promise.resolve(base().eq("id", normalizedQuery).limit(5)));
 
   const settled = await Promise.allSettled(queries);
@@ -817,14 +822,14 @@ async function fetchSearchCandidates(query: string, tokens: string[], opts: { ca
   // Each token must match at least one supported field (OR across fields/types); supports partial & multi-word combos
   const matched = rows.filter((row) => {
     const hay = productHay(row, ctx);
-    return tokens.every((t) => tokenMatchesRow(row, t, hay, ctx));
+    return effectiveTokens.every((t) => tokenMatchesRow(row, t, hay, ctx));
   });
 
   return matched
-    .map((r) => ({ r, score: scoreSearchHit(r, tokens, ctx) }))
+    .map((r) => ({ r, score: scoreSearchHit(r, effectiveTokens, ctx) }))
     .sort((a, b) => b.score - a.score || (a.r.name || "").localeCompare(b.r.name || ""))
     .map((x) => x.r);
-}
+});
 
 export async function searchProductsUniversal(opts: {
   q: string; categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string;
@@ -839,7 +844,12 @@ export async function searchProductsUniversal(opts: {
     const effectiveTokens = tokens.length ? tokens : [query.toLowerCase()];
     if (!effectiveTokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
 
-    let candidates = await fetchSearchCandidates(query, effectiveTokens, { categoryIds: opts.categoryIds, collectionId: opts.collectionId });
+    let candidates = await fetchSearchCandidates(
+      query,
+      effectiveTokens.join("\u0001"),
+      (opts.categoryIds || []).join(","),
+      opts.collectionId || ""
+    );
 
     if (opts.min != null) candidates = candidates.filter((r) => Number(r.regular_price) >= (opts.min as number));
     if (opts.max != null) candidates = candidates.filter((r) => Number(r.regular_price) <= (opts.max as number));
@@ -888,8 +898,8 @@ export async function searchFacets(term: string) {
   if (!q) return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
   try {
     const tokens = tokenizeSearchQuery(q);
-    const effectiveTokens = tokens.length ? tokens : [q.toLowerCase()];
-    const candidates = await fetchSearchCandidates(q, effectiveTokens, {});
+    const effectiveTokens = (tokens.length ? tokens : [q.toLowerCase()]).slice(0, 3);
+    const candidates = await fetchSearchCandidates(q, effectiveTokens.join("\u0001"), "", "");
     const stockRaw = await inStockSet();
     const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
     const inStock = candidates.filter((r) => stock.has(r.id)).length;

@@ -196,7 +196,7 @@ export default function HeaderActions({
     const t = setTimeout(async () => {
       try {
         const out = await searchProducts(searchTerm, 6);
-        if (currentId !== acReqId.current) return;
+        if (currentId !== acReqId.current) return; // ignore stale/outdated responses
         setAcItems(out.items || []);
         setAcError(out.error || null);
       } catch {
@@ -206,7 +206,7 @@ export default function HeaderActions({
       } finally {
         if (currentId === acReqId.current) setAcLoading(false);
       }
-    }, 220);
+    }, 300);
     return () => clearTimeout(t);
   }, [searchTerm, acRetryTick]);
 

@@ -58,7 +58,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
     const t = setTimeout(async () => {
       try {
         const out = await searchProducts(term, 8);
-        if (currentId !== reqId.current) return;
+        if (currentId !== reqId.current) return; // ignore stale/outdated responses
         setRes({ ...out, for: term });
       } catch {
         if (currentId !== reqId.current) return;
@@ -66,7 +66,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
       } finally {
         if (currentId === reqId.current) setLoading(false);
       }
-    }, 220);
+    }, 300);
     return () => clearTimeout(t);
   }, [term, retryTick]);
 

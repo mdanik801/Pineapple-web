@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ChromeGate from "@/components/ChromeGate";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import ScrollRestoration from "@/components/ScrollRestoration";
 import { getSettings, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 
@@ -36,6 +37,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <main className="flex-1 w-full min-w-0">{children}</main>
         <ChromeGate><Footer /></ChromeGate>
         <CartDrawer note={note} />
+        <Suspense fallback={null}>
+          <ScrollRestoration />
+        </Suspense>
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>

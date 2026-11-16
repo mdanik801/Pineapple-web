@@ -6,6 +6,14 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const nextConfig: NextConfig = {
   compress: true,
+  experimental: {
+    // Keep visited route segments in client Router Cache longer to improve Back/Forward restoration
+    // (reduces refetch/loading on recent navigations, especially on slow mobile networks).
+    staleTimes: {
+      dynamic: 60,
+      static: 180,
+    },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 414, 640, 768, 828, 1080, 1200, 1536],

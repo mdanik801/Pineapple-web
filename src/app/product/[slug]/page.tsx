@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Truck } from "lucide-react";
 import ProductView from "@/components/ProductView";
-import ProductGrid from "@/components/ProductGrid";
 import Accordion from "@/components/Accordion";
 import ShareButton from "@/components/ShareButton";
 import ProductAnalytics from "@/components/ProductAnalytics";
-import { getProductDetail, listProducts, getPolicies, getShippingZones } from "@/lib/data";
+import RelatedProducts from "./RelatedProducts";
+import { getProductDetail, getPolicies, getShippingZones } from "@/lib/data";
 import { money } from "@/lib/format";
 import { categoryHref } from "@/lib/slug";
 
@@ -26,9 +27,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const p = await getProductDetail((await params).slug);
   if (!p) notFound();
-  const [related, policies, zones] = await Promise.all([
-    p.category ? listProducts({ categoryIds: [p.category.id], excludeId: p.id, limit: 5 }).then((r) => r.products) : Promise.resolve([]),
-    getPolicies(), getShippingZones(),
+  const [policies, zones] = await Promise.all([
+    getPolicies(),
+    getShippingZones(),
   ]);
   const free = zones.find((z) => z.free_shipping_threshold != null);
 
@@ -84,15 +85,22 @@ export default async function ProductPage({ params }: Props) {
         }
       />
 
-      {related.length > 0 && (
+      <Suspense fallback={
         <div className="mt-14 sm:mt-20">
-          <div className="mb-6 sm:mb-7">
-            <h2 className="section-title text-xl sm:text-2xl md:text-3xl">You may also like</h2>
-            <span className="mt-2 block h-0.5 w-14 bg-gold" />
+          <div className="mb-6 sm:mb-7"><div className="skeleton h-8 w-56 rounded" /></div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-7 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                <div className="skeleton aspect-[5/6] w-full rounded-sm" />
+                <div className="skeleton h-4 w-3/4 rounded" />
+                <div className="skeleton h-4 w-1/3 rounded" />
+              </div>
+            ))}
           </div>
-          <ProductGrid products={related} />
         </div>
-      )}
+      }>
+        <RelatedProducts categoryId={p.category?.id ?? null} excludeId={p.id} />
+      </Suspense>
     </div>
   );
 }
