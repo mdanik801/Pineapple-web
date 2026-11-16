@@ -132,6 +132,7 @@ export default function HeaderNav({
           <li>
             <Link
               href="/shop"
+              prefetch
               className="nav-link block px-3 py-2.5 text-[15px] font-semibold uppercase tracking-[0.08em] text-white transition-colors duration-200 hover:text-[#C49A3E] lg:px-4 lg:py-3 lg:text-base"
             >
               All Products
@@ -157,6 +158,7 @@ export default function HeaderNav({
               >
                 <Link
                   href={categoryHref(c.slug)}
+                  prefetch
                   onClick={(e) => {
                     if (!hasChildren) { setOpenId(null); return; }
                     // Desktop click toggles dropdown; second click on same open trigger navigates

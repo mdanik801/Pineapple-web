@@ -4,6 +4,7 @@ import { useState } from "react";
 import SmartImage from "./SmartImage";
 import WishlistButton from "./WishlistButton";
 import CardAddButton from "./CardAddButton";
+import ViewportPrefetch from "./ViewportPrefetch";
 import { money, discountPct } from "@/lib/format";
 import type { ProductCardData } from "@/lib/data";
 import { resolveSwatchBackground } from "@/lib/color";
@@ -19,10 +20,13 @@ export default function ProductCard({ p, priority }: { p: ProductCardData; prior
   return (
     <div className="group relative">
       <div className="relative aspect-[5/6] overflow-hidden bg-brand-50">
-        <Link href={`/product/${p.slug}`} aria-label={p.name} className="absolute inset-0 block">
+        {/* Conservative route prefetch when card enters viewport (skips data-saver/2g-like connections) */}
+        {!priority && <ViewportPrefetch href={`/product/${p.slug}`} />}
+        <Link href={`/product/${p.slug}`} aria-label={p.name} prefetch className="absolute inset-0 block">
           <SmartImage src={main} alt={p.name} priority={priority}
+            sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 25vw"
             className={`object-cover ${ease} will-change-[scale,opacity] group-hover:scale-110 ${second ? "group-hover:opacity-0" : ""}`} />
-          {second && <SmartImage src={second} alt="" className={`object-cover opacity-0 ${ease} will-change-[scale,opacity] group-hover:scale-110 group-hover:opacity-100`} />}
+          {second && <SmartImage src={second} alt="" sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, 25vw" className={`object-cover opacity-0 ${ease} will-change-[scale,opacity] group-hover:scale-110 group-hover:opacity-100`} />}
         </Link>
         <div className="pointer-events-none absolute left-2 top-2 flex flex-col gap-1">
           {off > 0 && <span className="bg-gold px-2 py-1 text-[11px] font-bold text-white">-{off}%</span>}
