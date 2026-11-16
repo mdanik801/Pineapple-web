@@ -34,25 +34,25 @@ export default async function ProductPage({ params }: Props) {
   const free = zones.find((z) => z.free_shipping_threshold != null);
 
   return (
-    <div className="container-x py-6 sm:py-8 md:py-12">
+    <div className="content-full py-6 sm:py-8 md:py-12">
       <ProductAnalytics
         productId={p.id}
         productSlug={p.slug}
         categoryId={p.category?.id ?? null}
         categorySlug={p.category?.slug ?? null}
       />
-      <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8 flex flex-wrap items-center justify-start gap-x-1.5 sm:gap-x-2 text-[11px] sm:text-xs text-muted">
-        <Link href="/" className="hover:text-brand">Home</Link>
-        <span>›</span>
-        <Link href="/shop" className="hover:text-brand">Products</Link>
-        <span>›</span>
+      <nav aria-label="Breadcrumb" className="mb-6 sm:mb-8 flex flex-wrap items-center justify-start gap-x-1.5 gap-y-1 sm:gap-x-2 text-[11px] sm:text-xs text-muted min-w-0">
+        <Link href="/" className="hover:text-brand shrink-0">Home</Link>
+        <span className="shrink-0">›</span>
+        <Link href="/shop" className="hover:text-brand shrink-0">Products</Link>
+        <span className="shrink-0">›</span>
         {p.category && (
           <>
-            <Link href={categoryHref(p.category.slug)} className="hover:text-brand">{p.category.name}</Link>
-            <span>›</span>
+            <Link href={categoryHref(p.category.slug)} className="hover:text-brand min-w-0 break-words">{p.category.name}</Link>
+            <span className="shrink-0">›</span>
           </>
         )}
-        <span className="text-ink/80 truncate max-w-[200px] sm:max-w-none">{p.name}</span>
+        <span className="text-ink/80 min-w-0 break-words">{p.name}</span>
       </nav>
 
       <ProductView

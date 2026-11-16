@@ -189,7 +189,7 @@ export default function ProductView({ p, header, details }: { p: P; header: Reac
           />
 
           <div
-            className="relative z-10 flex h-full w-full max-w-[100vw] flex-col items-center justify-center"
+            className="relative z-10 flex h-full w-full max-w-full flex-col items-center justify-center"
             style={{
               paddingTop: "max(0.5rem, env(safe-area-inset-top))",
               paddingRight: "max(0.5rem, env(safe-area-inset-right))",

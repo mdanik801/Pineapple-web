@@ -18,7 +18,7 @@ export default async function TrackOrder({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <div className="container-x max-w-3xl py-8 sm:py-12">
+    <div className="content-full w-full py-8 sm:py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6">
       <h1 className="section-title text-2xl sm:text-3xl">Track your order</h1>
       <p className="mt-2 text-xs sm:text-sm text-muted">No account needed. Enter your order number and the mobile number you used when ordering.</p>
       <form method="get" className="mt-6 grid gap-3.5 rounded-xl border border-line bg-brand-50/50 p-4 sm:p-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
@@ -43,6 +43,6 @@ export default async function TrackOrder({ searchParams }: { searchParams: Promi
           to see all your orders.
         </p>
       )}
-    </div>
+    </div></div>
   );
 }

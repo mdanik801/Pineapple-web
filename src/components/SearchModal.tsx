@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, Clock, TrendingUp, ArrowRight, AlertTriangle, RotateCcw } from "lucide-react";
-import { searchProducts, getSuggestedProducts, type SearchActionResult } from "@/actions/catalog";
+import { searchProductSuggestions, getSuggestedProducts, type SearchSuggestionResult } from "@/actions/catalog";
+import type { SearchSuggestion } from "@/lib/data";
 import SmartImage from "./SmartImage";
 import { money } from "@/lib/format";
 import type { ProductCardData } from "@/lib/data";
@@ -23,10 +24,11 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
   const [recent, setRecent] = useState<string[]>(read);
   const [featured, setFeatured] = useState<ProductCardData[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
-  const [res, setRes] = useState<(SearchActionResult & { for: string }) | null>(null);
+  const [res, setRes] = useState<(SearchSuggestionResult & { for: string }) | null>(null);
   const [loading, setLoading] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
   const reqId = useRef(0);
+  const lastKey = useRef<string>("");
   const term = normalizeSearchQuery(q);
 
   useEffect(() => {
@@ -51,14 +53,18 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
     if (!term) {
       setLoading(false);
       setRes(null);
+      lastKey.current = "";
       return;
     }
     const currentId = ++reqId.current;
+    const key = `${term}|8`;
+    if (key === lastKey.current && res?.for === term && !res.error) return; // avoid duplicate request for identical query
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const out = await searchProducts(term, 8);
+        const out = await searchProductSuggestions(term, 8);
         if (currentId !== reqId.current) return; // ignore stale/outdated responses
+        lastKey.current = key;
         setRes({ ...out, for: term });
       } catch {
         if (currentId !== reqId.current) return;
@@ -66,7 +72,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
       } finally {
         if (currentId === reqId.current) setLoading(false);
       }
-    }, 300);
+    }, 250);
     return () => clearTimeout(t);
   }, [term, retryTick]);
 
@@ -141,7 +147,7 @@ export default function SearchModal({ popular, onClose }: { popular: string[]; o
                 )}
                 <section className="p-2 sm:p-3">
                   <div className="mb-2 flex items-center justify-between px-1"><h2 className="text-xs font-bold uppercase tracking-wider text-brand">Popular products</h2><Link href="/shop" onClick={onClose} className="group flex items-center gap-1 text-xs font-semibold text-gold-dark">Shop all <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" /></Link></div>
-                  {featuredLoading ? <SuggestionSkeleton n={4} /> : featured.length ? <SuggestionList items={featured} onPick={onClose} /> : <p className="px-2 py-4 text-sm text-muted">No popular products available.</p>}
+                  {featuredLoading ? <SuggestionSkeleton n={4} /> : featured.length ?               <SuggestionList items={featured.map((p) => ({ id: p.id, name: p.name, slug: p.slug, sku: p.sku ?? null, brand: p.brand ?? null, image: p.image, regular_price: p.regular_price, sale_price: p.sale_price, price: p.price }))} onPick={onClose} /> : <p className="px-2 py-4 text-sm text-muted">No popular products available.</p>}
                 </section>
               </div>
             ) : (
@@ -196,7 +202,7 @@ function SuggestionSkeleton({ n }: { n: number }) {
   );
 }
 
-function SuggestionList({ items, onPick }: { items: ProductCardData[]; onPick: () => void }) {
+function SuggestionList({ items, onPick }: { items: SearchSuggestion[]; onPick: () => void }) {
   return (
     <ul className="divide-y divide-line">
       {items.map((p) => (

@@ -63,7 +63,7 @@ export default function QuickAdd({ slug, onClose }: { slug: string; onClose: () 
         ) : q === null ? (
           <p className="py-16 text-center text-muted">Product unavailable.</p>
         ) : (
-          <div className="grid gap-4 sm:gap-6 md:grid-cols-[220px_1fr] lg:grid-cols-[250px_1fr]">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[250px_minmax(0,1fr)]">
             <div className="relative mx-auto aspect-[4/5] w-full max-w-[180px] overflow-hidden rounded bg-brand-50 sm:max-w-none">
               <SmartImage src={img ?? q.images[0]} alt={q.name} sizes="(max-width: 640px) 180px, 250px" className="object-cover" />
             </div>

@@ -1,5 +1,5 @@
 "use server";
-import { getProductsByIds, getProductDetail, searchProductsUniversal, listProducts } from "@/lib/data";
+import { getProductsByIds, getProductDetail, searchProductsUniversal, listProducts, searchSuggestions as searchSuggestionsData, type SearchSuggestion } from "@/lib/data";
 import { normalizeSearchQuery } from "@/lib/search-utils";
 
 export async function getWishlistProducts(ids: string[]) {
@@ -52,5 +52,25 @@ export async function getSuggestedProducts(limit = 8) {
     return (recent.products || []).slice(0, safeLimit);
   } catch {
     return [];
+  }
+}
+
+
+export type SearchSuggestionResult = {
+  items: SearchSuggestion[];
+  query: string;
+  error: string | null;
+  unavailable: boolean;
+};
+
+export async function searchProductSuggestions(q: string, limit = 8): Promise<SearchSuggestionResult> {
+  try {
+    const query = normalizeSearchQuery(q);
+    if (query.length < 1) return { items: [], query, error: null, unavailable: false };
+    const safeLimit = Math.max(1, Math.min(12, Number(limit) || 8));
+    const res = await searchSuggestionsData({ q: query, limit: safeLimit });
+    return { items: (res as any).suggestions || [], query: res.query, error: res.error, unavailable: res.unavailable };
+  } catch {
+    return { items: [], query: normalizeSearchQuery(q), error: "Search is temporarily unavailable. Please try again.", unavailable: true };
   }
 }

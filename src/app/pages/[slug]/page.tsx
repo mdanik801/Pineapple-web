@@ -13,9 +13,9 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
   const content = (await getPolicies())[m[1]];
   if (!content) notFound();
   return (
-    <div className="container-x max-w-3xl py-12">
+    <div className="content-full w-full py-12"><div className="mx-auto max-w-3xl px-4 sm:px-6">
       <h1 className="section-title mb-6">{m[0]}</h1>
       <p className="whitespace-pre-line leading-8 text-ink/80">{content}</p>
-    </div>
+    </div></div>
   );
 }

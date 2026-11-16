@@ -8,11 +8,11 @@ import { money } from "@/lib/format";
 export default function CartPage() {
   const mounted = useMounted();
   const { items, setQty, remove } = useStore();
-  if (!mounted) return <div className="container-x min-h-[50vh] py-12" />;
+  if (!mounted) return <div className="content-full min-h-[50vh] py-12" />;
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
   return (
-    <div className="container-x py-8 sm:py-10">
+    <div className="content-full py-8 sm:py-10">
       <h1 className="section-title text-2xl sm:text-3xl mb-6 sm:mb-8">Shopping Cart</h1>
       {items.length === 0 ? (
         <div className="rounded-xl border border-line bg-white py-16 text-center shadow-xs">
@@ -21,7 +21,7 @@ export default function CartPage() {
           <Link href="/shop" className="btn btn-primary mt-6 !px-6 !py-3 text-xs sm:text-sm">Start shopping</Link>
         </div>
       ) : (
-        <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <ul className="divide-y divide-line border-y border-line bg-white">
             {items.map((i) => (
               <li key={i.key} className="flex gap-3 sm:gap-4 py-4 sm:py-5">

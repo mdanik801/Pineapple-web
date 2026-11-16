@@ -120,7 +120,7 @@ export default function CheckoutForm({ zones, addresses, me, buyNowMode }: {
           type="button"
           aria-expanded={showSummary}
           onClick={() => setShowSummary(!showSummary)}
-          className="container-x flex w-full items-center justify-between py-3.5 text-xs sm:text-sm text-brand"
+          className="content-full flex w-full items-center justify-between px-4 sm:px-6 py-3.5 text-xs sm:text-sm text-brand"
         >
           <span className="flex items-center gap-1.5 font-medium">
             {showSummary ? "Hide" : "Show"} order summary{" "}
@@ -130,7 +130,7 @@ export default function CheckoutForm({ zones, addresses, me, buyNowMode }: {
         </button>
         <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${showSummary ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
           <div className="overflow-hidden">
-            <div className="container-x pb-5 pt-2">
+            <div className="content-full px-4 sm:px-6 pb-5 pt-2">
               <Summary items={items} subtotal={subtotal} shipping={shipping} total={total} />
             </div>
           </div>

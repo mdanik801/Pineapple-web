@@ -1,6 +1,6 @@
 export default function ProductLoading() {
   return (
-    <div className="container-x py-6 sm:py-8 md:py-12">
+    <div className="content-full py-6 sm:py-8 md:py-12">
       <div className="mb-6 flex gap-2 sm:mb-8">
         <div className="skeleton h-3 w-10 rounded" />
         <div className="skeleton h-3 w-16 rounded" />

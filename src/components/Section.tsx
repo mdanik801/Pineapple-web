@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 
 export default function Section({ title, subtitle, href, children }: { title: string; subtitle?: string; href?: string; children: React.ReactNode }) {
   return (
-    <section className="container-x mt-14 md:mt-20">
+    <section className="content-full mt-14 md:mt-20">
       <div className="mb-7 flex items-end justify-between gap-4">
         <div>
           <h2 className="section-title">{title}</h2>

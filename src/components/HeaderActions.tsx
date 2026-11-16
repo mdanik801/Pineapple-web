@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Phone, ChevronDown, AlertTriangle, RotateCcw, TrendingUp } from "lucide-react";
 import { categoryHref } from "@/lib/slug";
 import { useStore, useMounted } from "@/lib/store";
-import { searchProducts, getSuggestedProducts } from "@/actions/catalog";
+import { searchProductSuggestions, getSuggestedProducts } from "@/actions/catalog";
+import type { SearchSuggestion } from "@/lib/data";
 import type { ProductCardData } from "@/lib/data";
 import { normalizeSearchQuery } from "@/lib/search-utils";
 import { money } from "@/lib/format";
@@ -97,13 +98,14 @@ export default function HeaderActions({
   const [suggestedProducts, setSuggestedProducts] = useState<ProductCardData[]>([]);
   const [suggestedLoading, setSuggestedLoading] = useState(false);
   const [suggestedLoaded, setSuggestedLoaded] = useState(false);
-  const [acItems, setAcItems] = useState<ProductCardData[]>([]);
+  const [acItems, setAcItems] = useState<SearchSuggestion[]>([]);
   const [acLoading, setAcLoading] = useState(false);
   const [acError, setAcError] = useState<string | null>(null);
   const [acRetryTick, setAcRetryTick] = useState(0);
   const catRef = useRef<HTMLDivElement>(null);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const acReqId = useRef(0);
+  const acLastKey = useRef("");
   const searchTerm = normalizeSearchQuery(searchQuery);
 
   const phrases = useMemo(() => {
@@ -182,21 +184,25 @@ export default function HeaderActions({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestionsOpen]);
 
-  // Debounced character-based autocomplete (reuses existing search action/DB logic)
+  // Debounced character-based autocomplete (lightweight suggestions, DB-filtered/cached)
   useEffect(() => {
     if (!searchTerm) {
       setAcLoading(false);
       setAcError(null);
       setAcItems([]);
+      acLastKey.current = "";
       return;
     }
     const currentId = ++acReqId.current;
+    const key = `${searchTerm}|6`;
+    if (key === acLastKey.current) return; // avoid duplicate request for identical query
     setAcLoading(true);
     setAcError(null);
     const t = setTimeout(async () => {
       try {
-        const out = await searchProducts(searchTerm, 6);
+        const out = await searchProductSuggestions(searchTerm, 6);
         if (currentId !== acReqId.current) return; // ignore stale/outdated responses
+        acLastKey.current = key;
         setAcItems(out.items || []);
         setAcError(out.error || null);
       } catch {
@@ -206,7 +212,7 @@ export default function HeaderActions({
       } finally {
         if (currentId === acReqId.current) setAcLoading(false);
       }
-    }, 300);
+    }, 250);
     return () => clearTimeout(t);
   }, [searchTerm, acRetryTick]);
 
@@ -246,7 +252,7 @@ export default function HeaderActions({
       <div className="hidden min-w-0 flex-1 items-center justify-center px-3 md:flex md:px-4 lg:px-6 xl:px-8">
         <div
           ref={searchWrapRef}
-          className="relative w-full min-w-[220px] max-w-full md:max-w-[clamp(26rem,46vw,40rem)] lg:max-w-[clamp(30rem,48vw,48rem)] xl:max-w-[clamp(34rem,50vw,56rem)] 2xl:max-w-[clamp(38rem,52vw,64rem)]"
+          className="relative w-full min-w-0 max-w-full md:max-w-[clamp(26rem,46vw,40rem)] lg:max-w-[clamp(30rem,48vw,48rem)] xl:max-w-[clamp(34rem,50vw,56rem)] 2xl:max-w-[clamp(38rem,52vw,64rem)]"
         >
           <form
             onSubmit={handleSearch}

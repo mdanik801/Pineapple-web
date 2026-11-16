@@ -70,7 +70,7 @@ export default function HeroSlider({ banners, ariaLabel = "Featured", priority =
             </div>
             {(title || b.subtitle || b.description) && <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/15 to-transparent" />}
             {(title || b.subtitle || b.description || (b.cta_text && b.cta_link)) && (
-              <div className={`container-x absolute inset-0 flex flex-col justify-center text-white ${active && prev !== null ? "[animation:textIn_.9s_.55s_cubic-bezier(.22,1,.36,1)_both]" : ""}`}>
+              <div className={`absolute inset-0 flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-16 text-white ${active && prev !== null ? "[animation:textIn_.9s_.55s_cubic-bezier(.22,1,.36,1)_both]" : ""}`}>
                 {title && <h2 className="max-w-xl font-serif text-2xl leading-tight sm:text-4xl lg:text-6xl">{title}</h2>}
                 {b.subtitle && <p className="mt-3 max-w-md text-sm sm:text-base">{b.subtitle}</p>}
                 {b.description && <p className="mt-2 max-w-lg text-sm leading-6 text-white/90 sm:text-base">{b.description}</p>}

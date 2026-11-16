@@ -7,7 +7,7 @@ import Facet from "@/components/Facet";
 import SidebarShell from "@/components/SidebarShell";
 import PriceFilter from "@/components/PriceFilter";
 import SmartImage from "@/components/SmartImage";
-import { getSizes, getCategories, descendantIds, searchFacets, searchCollections, searchProductsUniversal, listProducts } from "@/lib/data";
+import { getSizes, getCategories, descendantIds, searchCollections, searchProductsUniversal, listProducts } from "@/lib/data";
 import { normalizeSearchQuery } from "@/lib/search-utils";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 
@@ -46,10 +46,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     let searchError: string | null = null;
 
     try {
-      [cats, sizes, facets, collections] = await Promise.all([
+      [cats, sizes, collections] = await Promise.all([
         getCategories().catch(() => []),
         getSizes().catch(() => []),
-        hasQuery ? searchFacets(q).catch(() => ({ total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 })) : Promise.resolve({ total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 }),
         hasQuery ? searchCollections(q).catch(() => []) : Promise.resolve([]),
       ]);
     } catch {
@@ -65,6 +64,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     let pages = 1;
     let alternatives: typeof products = [];
 
+    // Single search pipeline: facets + filtered/paginated results (facets ignore their own active dimension where applicable).
     if (!searchError && hasQuery) {
       const res = await searchProductsUniversal({
         q,
@@ -81,6 +81,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       total = res.total;
       pages = res.pages;
       searchError = res.error;
+      facets = res.facets ?? { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
       if (!res.error && res.products.length === 0) {
         try {
           const alt = await listProducts({ limit: 8, sort: "new" });
@@ -104,7 +105,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     const link = (active: boolean) => `block py-1.5 text-sm transition-all duration-200 hover:translate-x-1 hover:text-brand ${active ? "font-semibold text-brand" : "text-ink/80"}`;
 
     return (
-      <div className="container-x w-full min-w-0 py-6 sm:py-10">
+      <div className="content-full w-full min-w-0 py-6 sm:py-10">
         <h1 className="mb-8 text-center text-xl uppercase tracking-[.14em] md:text-2xl">
           {hasQuery ? <>{total} result{total === 1 ? "" : "s"} found for “{q}”</> : "Search our store"}
         </h1>
@@ -128,7 +129,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             </div>
           </div>
         ) : (
-          <div className="grid w-full min-w-0 gap-8 lg:grid-cols-[250px_1fr] lg:gap-12">
+          <div className="grid w-full min-w-0 gap-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-12">
             <SidebarShell>
               <Facet title="Categories">
                 <ul>
@@ -247,7 +248,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     );
   } catch {
     return (
-      <div className="container-x w-full min-w-0 py-10">
+      <div className="content-full w-full min-w-0 py-10">
         <div className="mx-auto max-w-2xl rounded-xl bg-[#f6f8f7] px-5 py-12 text-center">
           <AlertTriangle size={40} className="mx-auto text-amber-500" />
           <p className="mt-4 text-lg font-semibold text-ink">Search is temporarily unavailable. Please try again.</p>

@@ -75,14 +75,14 @@ export default async function Orders() {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-hidden rounded-xl border border-line bg-white shadow-xs">
-            <table className="w-full text-left text-sm">
+          <div className="hidden md:block overflow-x-auto rounded-xl border border-line bg-white shadow-xs">
+            <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
                 <tr className="bg-brand text-xs uppercase tracking-wider text-white">
-                  <th className="px-4 py-3.5 font-semibold">Order</th>
-                  <th className="px-4 py-3.5 font-semibold">Date</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Order</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Date</th>
                   <th className="px-4 py-3.5 font-semibold">Items</th>
-                  <th className="px-4 py-3.5 font-semibold">Total</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Total</th>
                   <th className="px-4 py-3.5 font-semibold">Status</th>
                   <th className="px-4 py-3.5 text-right font-semibold">Action</th>
                 </tr>
@@ -90,13 +90,13 @@ export default async function Orders() {
               <tbody className="divide-y divide-line">
                 {orders.map((o) => (
                   <tr key={o.id} className="group transition-colors hover:bg-brand-50/60">
-                    <td className="px-4 py-4 font-semibold text-brand">{o.order_number}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-ink/80">{formatDate(o.created_at)}</td>
+                    <td className="px-4 py-4 font-semibold text-brand whitespace-nowrap">{o.order_number}</td>
+                    <td className="px-4 py-4 text-ink/80 whitespace-nowrap">{formatDate(o.created_at)}</td>
                     <td className="px-4 py-4">{o.order_items?.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)}</td>
-                    <td className="whitespace-nowrap px-4 py-4 font-semibold">{money(o.net_order_total)}</td>
+                    <td className="px-4 py-4 font-semibold whitespace-nowrap">{money(o.net_order_total)}</td>
                     <td className="px-4 py-4"><StatusBadge status={o.order_status} /></td>
                     <td className="px-4 py-4 text-right">
-                      <Link href={`/account/orders/${o.order_number}`} className="inline-flex items-center gap-1 whitespace-nowrap font-semibold text-gold-dark transition-all group-hover:gap-2">
+                      <Link href={`/account/orders/${o.order_number}`} className="inline-flex items-center justify-end gap-1 font-semibold text-gold-dark transition-all group-hover:gap-2 whitespace-nowrap">
                         View <ChevronRight size={15} />
                       </Link>
                     </td>

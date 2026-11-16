@@ -29,8 +29,8 @@ export default async function Account() {
           <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full border-2 border-gold bg-white/10 font-serif text-2xl text-gold md:h-20 md:w-20 md:text-3xl">{initials}</div>
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-widest text-gold">Welcome back</p>
-            <h1 className="truncate font-serif text-2xl md:text-3xl">{me.first_name} {me.last_name}</h1>
-            <p className="mt-1 truncate text-sm text-white/75">{me.phone}{me.email ? ` · ${me.email}` : ""} · {me.customer_code}</p>
+            <h1 className="font-serif text-2xl md:text-3xl break-words">{me.first_name} {me.last_name}</h1>
+            <p className="mt-1 text-sm text-white/75 break-words">{me.phone}{me.email ? ` · ${me.email}` : ""} · {me.customer_code}</p>
           </div>
         </div>
       </section>

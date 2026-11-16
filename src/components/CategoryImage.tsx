@@ -14,8 +14,10 @@ export default function CategoryImage({ src, alt, sizes }: { src: string | null;
       fill
       sizes={sizes}
       unoptimized={isSvg}
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
       onError={() => setUnavailable(true)}
-      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+      className="pointer-events-none object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
     />
   );
 }

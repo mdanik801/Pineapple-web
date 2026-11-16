@@ -7,7 +7,7 @@ export const metadata = { title: "Order placed" };
 export default async function Success({ params }: { params: Promise<{ number: string }> }) {
   const [{ number }, me] = await Promise.all([params, getCustomer()]);
   return (
-    <div className="container-x py-20 text-center">
+    <div className="content-full py-20 text-center">
       <CheckCircle2 className="mx-auto text-brand" size={72} />
       <h1 className="section-title mt-6">Thank you for your order!</h1>
       <p className="mt-3 text-muted">Your order number is</p>

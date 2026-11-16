@@ -1,6 +1,6 @@
 export default function ShopLoading() {
   return (
-    <div className="container-x py-6 sm:py-10">
+    <div className="content-full py-6 sm:py-10">
       <div className="skeleton mb-6 h-9 w-44 rounded-md sm:mb-8 sm:h-10 sm:w-56" />
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div className="skeleton h-5 w-32 rounded" />

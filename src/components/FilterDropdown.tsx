@@ -36,8 +36,8 @@ export default function FilterDropdown({
         <ChevronDown size={13} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
       </button>
       <div
-        className={`absolute top-full z-30 mt-1.5 min-w-48 max-w-[calc(100vw-2rem)] rounded-md border border-line bg-white p-3.5 shadow-xl transition-all duration-200 ease-out sm:min-w-56 sm:p-4 ${
-          align === "right" ? "right-0 sm:right-auto sm:left-0" : "left-0"
+        className={`absolute top-full z-30 mt-1.5 min-w-[min(12rem,calc(100vw-2rem))] max-w-[min(20rem,calc(100vw-2rem))] rounded-md border border-line bg-white p-3.5 shadow-xl transition-all duration-200 ease-out sm:min-w-56 sm:max-w-[min(24rem,calc(100vw-2rem))] sm:p-4 ${
+          align === "right" ? "right-0" : "left-0"
         } ${open ? "block visible translate-y-0 opacity-100" : "hidden invisible -translate-y-1 opacity-0 pointer-events-none"}`}
       >
         {children}

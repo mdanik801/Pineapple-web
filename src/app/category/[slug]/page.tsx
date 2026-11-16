@@ -19,7 +19,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   if (!cat) notFound();
   const parent = cat.parent_id ? cats.find((c) => c.id === cat.parent_id) : null;
   return (
-    <div className="container-x w-full min-w-0 py-6 sm:py-10">
+    <div className="content-full w-full min-w-0 py-6 sm:py-10">
       <CategoryAnalytics categoryId={cat.id} categorySlug={cat.slug} />
       <nav aria-label="Breadcrumb" className="mb-4 text-xs sm:text-sm text-muted">
         <Link href="/" className="hover:text-brand">Home</Link> / {parent && <><Link href={categoryHref(parent.slug)} className="hover:text-brand">{parent.name}</Link> / </>}

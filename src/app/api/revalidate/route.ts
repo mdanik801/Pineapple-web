@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       ...asStringArray(data.tags),
     ]);
     // Always refresh core homepage/site content caches for safety when triggered by admin.
-    ["hero-banners", "homepage-bottom-carousel", "homepage-cms", "site-content"].forEach((t) => tags.add(t));
+    ["hero-banners", "homepage-bottom-carousel", "homepage-bottom-categories", "homepage-cms", "site-content"].forEach((t) => tags.add(t));
 
     const paths = new Set<string>(["/", ...asStringArray(data.path), ...asStringArray(data.paths)]);
 

@@ -1,8 +1,8 @@
 export default function SearchLoading() {
   return (
-    <div className="container-x w-full min-w-0 py-6 sm:py-10">
+    <div className="content-full w-full min-w-0 py-6 sm:py-10">
       <div className="skeleton mx-auto mb-8 h-8 w-64 rounded" />
-      <div className="grid w-full min-w-0 gap-8 lg:grid-cols-[250px_1fr] lg:gap-12">
+      <div className="grid w-full min-w-0 gap-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-12">
         <aside className="hidden space-y-4 lg:block">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="space-y-2 border-b border-line pb-4">

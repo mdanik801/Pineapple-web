@@ -3,8 +3,10 @@ import { Suspense, cloneElement, isValidElement } from "react";
 import CategoryImage from "@/components/CategoryImage";
 import HeroSlider from "@/components/HeroSlider";
 import HomepageBottomCarousel from "@/components/HomepageBottomCarousel";
+import BottomCategorySection from "@/components/BottomCategorySection";
 import EditorialShowcase from "@/components/EditorialShowcase";
-import { getBanners, getCategories, getFeaturedPiecesProducts, getProductsByIds } from "@/lib/data";
+import CategoriesCarousel from "@/components/CategoriesCarousel";
+import { getBanners, getCategories, getFeaturedPiecesProducts, getProductsByIds, getHomepageBottomCategories } from "@/lib/data";
 import { getPublishedHomepageCms, isSectionVisible, orderedSections } from "@/lib/homepage-cms";
 import { categoryHref } from "@/lib/slug";
 
@@ -25,14 +27,14 @@ export default async function Home() {
     getPublishedHomepageCms(),
     getBanners(),
     getCategories(),
-    getFeaturedPiecesProducts(8),
+    getFeaturedPiecesProducts(16),
   ]);
 
   const topCategories = categories.filter((category) => !category.parent_id);
 
   const featuredCfg = (cms.featured_pieces || {}) as Record<string, unknown>;
-  const HOME_FEATURED_MAX = 8;
-  // Home must show up to 8 (4x2) when eligible; ignore lower CMS/default caps that would hide featured products.
+  const HOME_FEATURED_MAX = 16;
+  // Home Featured pieces: show up to 16 items (4 rows on lg 4-col grid) when eligible, preserving existing selection/sort logic.
   const displayLimit = HOME_FEATURED_MAX;
   const featuredIds = arr<string>(featuredCfg.product_ids).filter((x): x is string => typeof x === "string" && x.length > 0);
   // Primary source of truth: product-level "Show in Homepage Featured Pieces" (products.is_featured).
@@ -43,7 +45,7 @@ export default async function Home() {
     const legacy = await getProductsByIds(featuredIds);
     orderedFeatured = legacy.slice(0, displayLimit);
   }
-  // Deduplicate by id while preserving priority/order, then cap to 8.
+  // Deduplicate by id while preserving priority/order, then cap to display limit.
   const seenFeatured = new Set<string>();
   orderedFeatured = orderedFeatured.filter((p) => {
     if (!p?.id || seenFeatured.has(p.id)) return false;
@@ -79,28 +81,18 @@ export default async function Home() {
         const visible = bool(categoriesCfg.visible, true) && isSectionVisible(cms, "categories");
         if (!visible || topCategories.length === 0) return null;
         return (
-          <section key="categories" className="mx-auto w-full max-w-[94vw] 2xl:max-w-[2400px] px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-14 sm:py-20 lg:py-24">
-            <div className="mb-8 flex items-end justify-between border-b border-black/10 pb-4 sm:mb-10">
-              <div>
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{text(categoriesCfg.label, "Browse the collection")}</p>
-                <h2 className="font-serif text-3xl text-neutral-950 sm:text-4xl">{text(categoriesCfg.heading, "Categories")}</h2>
-              </div>
-              <Link href={text(categoriesCfg.all_products_link, "/shop")} className="text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black">
-                {text(categoriesCfg.all_products_text, "All products")}
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6 xl:gap-x-7 2xl:gap-x-8 lg:gap-y-10">
-              {topCategories.map((category) => (
-                <Link key={category.id} href={categoryHref(category.slug)} className="group block">
-                  <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
-                    <CategoryImage key={`${category.id}:${category.image_url ?? ""}`} src={category.image_url} alt={category.name} sizes="(max-width: 640px) 48vw, (max-width: 1024px) 32vw, 25vw" />
-                  </div>
-                  <div className="flex items-center justify-between border-b border-black/10 py-3">
-                    <h3 className="text-xs font-medium uppercase tracking-[.12em] text-neutral-900 sm:text-sm">{category.name}</h3>
-                    <span aria-hidden="true" className="text-sm text-neutral-500 transition-transform group-hover:translate-x-1">→</span>
-                  </div>
+          <section key="categories" className="w-full min-w-0 pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 lg:pb-10">
+            <div className="content-full">
+              <div className="relative mb-8 border-b border-black/10 pb-4 sm:mb-10">
+                <div className="text-center px-1">
+                  <p className="mb-2 text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{text(categoriesCfg.label, "Browse the collection")}</p>
+                  <h2 className="font-serif text-3xl text-neutral-950 sm:text-4xl">{text(categoriesCfg.heading, "Categories")}</h2>
+                </div>
+                <Link href={text(categoriesCfg.all_products_link, "/shop")} className="mt-3 inline-block w-full text-center text-xs uppercase tracking-[.12em] text-neutral-600 underline decoration-black/20 underline-offset-4 hover:text-black sm:absolute sm:right-0 sm:bottom-4 sm:mt-0 sm:w-auto sm:text-right">
+                  {text(categoriesCfg.all_products_text, "All products")}
                 </Link>
-              ))}
+              </div>
+              <CategoriesCarousel categories={topCategories} />
             </div>
           </section>
         );
@@ -125,9 +117,11 @@ export default async function Home() {
         if (!visible || !desc) return null;
         const label = text(companyCfg.label);
         return (
-          <section key="company_description" className="border-y border-black/10 bg-[#f7f7f5] px-4 py-16 text-center sm:py-24">
-            {label && <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{label}</p>}
-            <p className="mx-auto max-w-2xl font-serif text-xl leading-relaxed text-neutral-800 sm:text-2xl">{desc}</p>
+          <section key="company_description" className="w-full border-y border-black/10 bg-[#f7f7f5] py-16 text-center sm:py-24">
+            <div className="content-full">
+              {label && <p className="mb-3 text-[10px] font-medium uppercase tracking-[.24em] text-neutral-500">{label}</p>}
+              <p className="mx-auto max-w-2xl font-serif text-xl leading-relaxed text-neutral-800 sm:text-2xl">{desc}</p>
+            </div>
           </section>
         );
       }
@@ -135,7 +129,7 @@ export default async function Home() {
       //   const visible = bool(brandsCfg.visible, true) && isSectionVisible(cms, "our_brands");
       //   if (!visible || !brands.some((brand) => brand.logo_url)) return null;
       //   return (
-      //     <section key="our_brands" className="container-x py-14 sm:py-20">
+      //     <section key="our_brands" className="content-full py-14 sm:py-20">
       //       <div className="mb-8 text-center">
       //         <p className="text-[10px] font-medium uppercase tracking-[.22em] text-neutral-500">{text(brandsCfg.label, "The label portfolio")}</p>
       //         <h2 className="mt-2 font-serif text-2xl text-neutral-950 sm:text-3xl">{text(brandsCfg.heading, "Our brands")}</h2>
@@ -173,7 +167,7 @@ export default async function Home() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img} alt={heading || "Promotional banner"} loading="lazy" decoding="async" className="h-auto w-full object-cover" />
             {(heading || desc || btnText) && (
-              <div className="container-x absolute inset-0 flex flex-col items-center justify-center text-center text-white">
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
                 {heading && <h2 className="font-serif text-3xl sm:text-4xl">{heading}</h2>}
                 {desc && <p className="mt-3 max-w-xl text-sm sm:text-base">{desc}</p>}
                 {btnText && btnUrl && <Link href={btnUrl} className="btn btn-gold mt-5">{btnText}</Link>}
@@ -188,6 +182,7 @@ export default async function Home() {
   };
 
   const renderedSectionIds = new Set<string>();
+  const bottomCategories = await getHomepageBottomCategories();
   return (
     <>
       {sections.map((s, i) => {
@@ -198,6 +193,7 @@ export default async function Home() {
         renderedSectionIds.add(id);
         return cloneElement(node, { key: `${id}-${i}` });
       })}
+      <BottomCategorySection categories={bottomCategories} />
       <Suspense fallback={<section aria-label="Loading homepage carousel" className="aspect-[4/5] w-full animate-pulse bg-neutral-100 sm:aspect-[16/8] lg:aspect-[16/7]" />}>
         <HomepageBottomCarousel />
       </Suspense>

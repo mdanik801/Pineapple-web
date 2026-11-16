@@ -59,6 +59,9 @@ export type HomepageBottomCarouselItem = {
 const PRODUCT_COLS =
   "id,name,slug,sku,regular_price,sale_price,category_id,brand_id,featured_image,is_new_arrival,show_first,show_first_order,featured_added_at,created_at,brands(name),product_images(url,is_primary,display_order),product_variants(id,status,color,image_url,sku,size,attribute_summary,regular_price,sale_price,attributes)";
 
+const SEARCH_SUGGESTION_COLS =
+  "id,name,slug,sku,regular_price,sale_price,featured_image,brand_id,brands(name),product_variants(status,color,image_url,regular_price,sale_price,attributes,color_code,color_hex)";
+
 type RawProduct = {
   id: string; name: string; slug: string; sku?: string | null;
   regular_price: number; sale_price: number | null;
@@ -395,6 +398,7 @@ export const getHomepageBottomCarousel = unstable_cache(async (): Promise<Homepa
   tags: ["homepage-bottom-carousel"],
 });
 
+
 export type SearchResult = {
   products: ProductCardData[];
   total: number;
@@ -658,6 +662,121 @@ export const inStockSet = unstable_cache(async (): Promise<Set<string>> => {
   }
 }, ["site-instock-set-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
+// --- Fast search suggestions (lightweight, DB-filtered, bounded) -------------
+export type SearchSuggestion = {
+  id: string; name: string; slug: string; sku: string | null; brand: string | null;
+  image: string | null; regular_price: number; sale_price: number | null; price: number;
+};
+
+function toSuggestionCards(rows: RawProduct[]): SearchSuggestion[] {
+  return rows.map((p) => {
+    const imgs = pickImages(p);
+    const pricing = resolveDisplayPricing(p);
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      sku: p.sku ?? null,
+      brand: brandNameOf(p),
+      image: imgs[0] ?? null,
+      regular_price: pricing.regular_price,
+      sale_price: pricing.sale_price,
+      price: effectivePrice(pricing.regular_price, pricing.sale_price),
+    };
+  });
+}
+
+const searchSuggestionsCached = unstable_cache(async (query: string, limit: number): Promise<SearchSuggestion[]> => {
+  const normalizedQuery = normalizeSearchQuery(query);
+  if (!normalizedQuery) return [];
+  const tokens = tokenizeSearchQuery(normalizedQuery);
+  const effectiveTokens = (tokens.length ? tokens : [normalizedQuery.toLowerCase()]).slice(0, 2);
+  const safeLimit = Math.max(1, Math.min(12, limit || 8));
+
+  const base = () => db.from("products")
+    .select(SEARCH_SUGGESTION_COLS)
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  const queries: Promise<any>[] = [];
+  const escFull = escapeIlikeTerm(normalizedQuery);
+  if (escFull) {
+    queries.push(Promise.resolve(base().or(`name.ilike.%${escFull}%,sku.ilike.%${escFull}%,slug.ilike.%${escFull}%`).limit(30)));
+  }
+  for (const token of effectiveTokens) {
+    if (token === normalizedQuery.toLowerCase() && escFull) continue;
+    const esc = escapeIlikeTerm(token);
+    if (!esc) continue;
+    queries.push(Promise.resolve(base().or(`name.ilike.%${esc}%,sku.ilike.%${esc}%,slug.ilike.%${esc}%`).limit(24)));
+  }
+  try {
+    const t0 = effectiveTokens[0] ? escapeIlikeTerm(effectiveTokens[0]) : "";
+    if (t0) {
+      const [bRes, cRes] = await Promise.all([
+        db.from("brands").select("id").eq("status", "active").ilike("name", `%${t0}%`).limit(20),
+        db.from("categories").select("id").eq("status", "active").ilike("name", `%${t0}%`).limit(30),
+      ]);
+      const bIds = uniqStrings(((bRes.data ?? []) as any[]).map((b: any) => b.id)).slice(0, 20);
+      const cIds = uniqStrings(((cRes.data ?? []) as any[]).map((c: any) => c.id)).slice(0, 30);
+      if (bIds.length) queries.push(Promise.resolve(base().in("brand_id", bIds).limit(24)));
+      if (cIds.length) queries.push(Promise.resolve(base().in("category_id", cIds).limit(24)));
+    }
+  } catch {}
+
+  if (!queries.length) return [];
+  const settled = await Promise.allSettled(queries);
+  const rows: RawProduct[] = [];
+  const seen = new Set<string>();
+  for (const st of settled) {
+    if (st.status !== "fulfilled") continue;
+    const { data, error } = st.value || {};
+    if (error || !Array.isArray(data)) continue;
+    for (const r of data as unknown as RawProduct[]) {
+      if (!r?.id || seen.has(r.id)) continue;
+      seen.add(r.id);
+      rows.push(r);
+    }
+  }
+  if (!rows.length) return [];
+
+  const ql = normalizedQuery.toLowerCase();
+  const score = (r: RawProduct) => {
+    const name = (r.name || "").toLowerCase();
+    const sku = (r.sku || "").toLowerCase();
+    const brand = (brandNameOf(r) || "").toLowerCase();
+    let sc = 0;
+    for (const t of effectiveTokens) {
+      const tl = t.toLowerCase();
+      if (name === tl) sc += 120; else if (name.startsWith(tl)) sc += 80; else if (name.includes(tl)) sc += 50;
+      if (sku === tl) sc += 120; else if (sku.startsWith(tl)) sc += 90; else if (sku.includes(tl)) sc += 60;
+      if (brand.includes(tl)) sc += 25;
+    }
+    if (name.includes(ql)) sc += 20;
+    return sc;
+  };
+
+  const matched = rows.filter((row) => {
+    const hay = `${row.name || ""} ${row.slug || ""} ${row.sku || ""} ${brandNameOf(row) || ""}`.toLowerCase();
+    return effectiveTokens.every((t) => hay.includes(t.toLowerCase()));
+  });
+  const poolRows = matched.length ? matched : rows;
+  poolRows.sort((a, b) => score(b) - score(a) || (a.name || "").localeCompare(b.name || ""));
+  return toSuggestionCards(poolRows.slice(0, safeLimit));
+}, ["search-suggestions-v2"], { revalidate: 45, tags: ["site-content"] });
+
+export async function searchSuggestions(opts: { q: string; limit?: number }): Promise<SearchResult & { suggestions: SearchSuggestion[] }> {
+  const query = normalizeSearchQuery(opts.q);
+  const limit = Math.max(1, Math.min(12, opts.limit ?? 8));
+  if (!query) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false, suggestions: [] };
+  try {
+    const suggestions = await searchSuggestionsCached(query.toLowerCase(), limit);
+    return { products: [], total: suggestions.length, pages: 1, error: null, query, unavailable: false, suggestions };
+  } catch (e) {
+    logSearchError("searchSuggestions", e, { query });
+    return { products: [], total: 0, pages: 1, error: "Search is temporarily unavailable. Please try again.", query, unavailable: true, suggestions: [] };
+  }
+}
+
 // --- Universal Search -------------------------------------------------------
 
 function isUuidLike(s: string) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s); }
@@ -692,9 +811,9 @@ async function resolveSearchContext(tokens: string[]): Promise<SearchCtx> {
     if (!esc) return;
     try {
       const [brandsRes, catsRes, variantsRes] = await Promise.all([
-        db.from("brands").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(100),
-        db.from("categories").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(150),
-        db.from("product_variants").select("product_id,sku").eq("status", "active").ilike("sku", `%${esc}%`).limit(400),
+        db.from("brands").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(40),
+        db.from("categories").select("id,name").eq("status", "active").ilike("name", `%${esc}%`).limit(60),
+        db.from("product_variants").select("product_id,sku").eq("status", "active").ilike("sku", `%${esc}%`).limit(120),
       ]);
       if (!brandsRes.error) {
         const rows = (brandsRes.data ?? []) as any[];
@@ -770,10 +889,10 @@ const fetchSearchCandidates = cache(async (query: string, tokensKey: string, cat
     return q;
   };
 
-  const effectiveTokens = tokens.slice(0, 3); // cap token fanout for performance on slow/mobile networks
+  const effectiveTokens = tokens.slice(0, 2); // cap token fanout for performance on slow/mobile networks
   const ctx = await resolveSearchContext(effectiveTokens);
   const queries: Promise<any>[] = [];
-  const perQueryLimit = 120; // bounded candidate fetch; pagination/ranking applied after DB-filtered candidate retrieval
+  const perQueryLimit = 60; // bounded candidate fetch; pagination/ranking applied after DB-filtered candidate retrieval
 
   // DB-level partial, case-insensitive OR matching across core searchable fields (per token)
   for (const token of effectiveTokens) {
@@ -796,9 +915,9 @@ const fetchSearchCandidates = cache(async (query: string, tokensKey: string, cat
   const allBrandIds = uniqStrings([...ctx.brandIdsByToken.values()].flatMap((s) => [...s]));
   const allCatIds = uniqStrings([...ctx.catIdsByToken.values()].flatMap((s) => [...s]));
   const allVariantProductIds = uniqStrings([...ctx.variantProductIdsByToken.values()].flatMap((s) => [...s]));
-  if (allBrandIds.length) queries.push(Promise.resolve(base().in("brand_id", allBrandIds.slice(0, 150)).limit(perQueryLimit)));
-  if (allCatIds.length) queries.push(Promise.resolve(base().in("category_id", allCatIds.slice(0, 150)).limit(perQueryLimit)));
-  if (allVariantProductIds.length) queries.push(Promise.resolve(base().in("id", allVariantProductIds.slice(0, 200)).limit(perQueryLimit)));
+  if (allBrandIds.length) queries.push(Promise.resolve(base().in("brand_id", allBrandIds.slice(0, 60)).limit(perQueryLimit)));
+  if (allCatIds.length) queries.push(Promise.resolve(base().in("category_id", allCatIds.slice(0, 80)).limit(perQueryLimit)));
+  if (allVariantProductIds.length) queries.push(Promise.resolve(base().in("id", allVariantProductIds.slice(0, 80)).limit(perQueryLimit)));
   if (isUuidLike(normalizedQuery)) queries.push(Promise.resolve(base().eq("id", normalizedQuery).limit(5)));
 
   const settled = await Promise.allSettled(queries);
@@ -831,42 +950,100 @@ const fetchSearchCandidates = cache(async (query: string, tokensKey: string, cat
     .map((x) => x.r);
 });
 
+export type SearchFacetResult = {
+  total: number;
+  inStock: number;
+  outStock: number;
+  byCategory: Map<string, number>;
+  maxPrice: number;
+};
+
+function effectiveSellingPriceNum(r: RawProduct): number {
+  const p = resolveDisplayPricing(r);
+  return effectivePrice(p.regular_price, p.sale_price);
+}
+
+function matchesSearchCandidateFilters(r: RawProduct, opts: { categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string }, stock: Set<string>, ignore?: { category?: boolean; avail?: boolean; price?: boolean }) {
+  if (!ignore?.category && opts.categoryIds?.length) {
+    if (!r.category_id || !opts.categoryIds.includes(r.category_id)) return false;
+  }
+  if (opts.size) {
+    const want = opts.size.toLowerCase();
+    if (!(r.product_variants ?? []).some((v) => v.status === "active" && (v.size || "").toLowerCase() === want)) return false;
+  }
+  if (!ignore?.avail && opts.avail) {
+    const inStock = stock.has(r.id);
+    if (opts.avail === "in" ? !inStock : inStock) return false;
+  }
+  if (!ignore?.price) {
+    const price = effectiveSellingPriceNum(r);
+    if (opts.min != null && price < opts.min) return false;
+    if (opts.max != null && price > opts.max) return false;
+  }
+  return true;
+}
+
+function computeSearchFacets(candidates: RawProduct[], opts: { categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string }, stock: Set<string>): SearchFacetResult {
+  // Category counts: query + other applicable filters (avail/price/size), excluding category restriction.
+  // Availability counts: query + other applicable filters (category/price/size), excluding availability.
+  // Max price: highest effective selling price for query + other applicable filters (category/avail/size), excluding price range.
+  const byCategory = new Map<string, number>();
+  let inStockCount = 0;
+  let outStockCount = 0;
+  let maxPrice = 0;
+  let totalForQuery = 0;
+
+  for (const r of candidates) {
+    if (matchesSearchCandidateFilters(r, opts, stock, { category: true })) {
+      totalForQuery++;
+      if (r.category_id) byCategory.set(r.category_id, (byCategory.get(r.category_id) ?? 0) + 1);
+    }
+    if (matchesSearchCandidateFilters(r, opts, stock, { avail: true })) {
+      if (stock.has(r.id)) inStockCount++; else outStockCount++;
+    }
+    if (matchesSearchCandidateFilters(r, opts, stock, { price: true })) {
+      const p = effectiveSellingPriceNum(r);
+      if (p > maxPrice) maxPrice = p;
+    }
+  }
+
+  return { total: totalForQuery, inStock: inStockCount, outStock: outStockCount, byCategory, maxPrice: Math.ceil(Math.max(0, maxPrice)) };
+}
+
 export async function searchProductsUniversal(opts: {
   q: string; categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string;
   sort?: string; limit?: number; page?: number; collectionId?: string;
-}): Promise<SearchResult> {
+}): Promise<SearchResult & { facets: SearchFacetResult }> {
   const query = normalizeSearchQuery(opts.q);
   const limit = Math.max(1, Math.min(40, opts.limit ?? 20));
   const page = Math.max(1, opts.page ?? 1);
-  if (!query) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
+  const emptyFacets: SearchFacetResult = { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+  if (!query) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false, facets: emptyFacets };
   try {
     const tokens = tokenizeSearchQuery(query);
     const effectiveTokens = tokens.length ? tokens : [query.toLowerCase()];
-    if (!effectiveTokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false };
+    if (!effectiveTokens.length) return { products: [], total: 0, pages: 1, error: null, query, unavailable: false, facets: emptyFacets };
 
-    let candidates = await fetchSearchCandidates(
+    // Base candidates for query context (all categories) fetched once; derive facet counts (ignoring each dimension where needed) + filtered results.
+    const baseCandidates = await fetchSearchCandidates(
       query,
       effectiveTokens.join("\u0001"),
-      (opts.categoryIds || []).join(","),
+      "",
       opts.collectionId || ""
     );
 
-    if (opts.min != null) candidates = candidates.filter((r) => Number(r.regular_price) >= (opts.min as number));
-    if (opts.max != null) candidates = candidates.filter((r) => Number(r.regular_price) <= (opts.max as number));
-    if (opts.size) {
-      const want = opts.size.toLowerCase();
-      candidates = candidates.filter((r) => (r.product_variants ?? []).some((v) => v.status === "active" && (v.size || "").toLowerCase() === want));
-    }
-    if (opts.avail) {
-      const stockRaw = await inStockSet();
-      const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
-      candidates = candidates.filter((r) => opts.avail === "in" ? stock.has(r.id) : !stock.has(r.id));
-    }
+    const stockRaw = await inStockSet();
+    const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
+    const facets = computeSearchFacets(baseCandidates, opts, stock);
+
+    let candidates = baseCandidates.filter((r) => matchesSearchCandidateFilters(r, opts, stock));
 
     const sortCandidates = (arr: RawProduct[]) => {
       const byExisting = (a: RawProduct, b: RawProduct) => {
-        if (opts.sort === "price-asc") return Number(a.regular_price) - Number(b.regular_price);
-        if (opts.sort === "price-desc") return Number(b.regular_price) - Number(a.regular_price);
+        const ap = effectiveSellingPriceNum(a);
+        const bp = effectiveSellingPriceNum(b);
+        if (opts.sort === "price-asc") return ap - bp;
+        if (opts.sort === "price-desc") return bp - ap;
         if (opts.sort === "name") return (a.name || "").localeCompare(b.name || "");
         return 0; // preserve relevance order from fetchSearchCandidates for default search
       };
@@ -885,36 +1062,28 @@ export async function searchProductsUniversal(opts: {
     const from = (page - 1) * limit;
     const pageRows = candidates.slice(from, from + limit);
     const products = await toCards(pageRows);
-    return { products, total, pages, error: null, query, unavailable: false };
+    return { products, total, pages, error: null, query, unavailable: false, facets };
   } catch (e) {
     logSearchError("searchProductsUniversal", e, { query });
-    return { products: [], total: 0, pages: 1, error: "Search is temporarily unavailable. Please try again.", query, unavailable: true };
+    return { products: [], total: 0, pages: 1, error: "Search is temporarily unavailable. Please try again.", query, unavailable: true, facets: emptyFacets };
   }
 }
 
-/** Facet counts for a search term (ignores other active filters). */
-export async function searchFacets(term: string) {
+/** Facet counts for a search term (respects other applicable filters except the facet dimension being counted where applicable). */
+export async function searchFacets(term: string, opts: { categoryIds?: string[]; avail?: "in" | "out"; min?: number; max?: number; size?: string } = {}): Promise<SearchFacetResult> {
   const q = normalizeSearchQuery(term);
-  if (!q) return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+  const empty: SearchFacetResult = { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+  if (!q) return empty;
   try {
     const tokens = tokenizeSearchQuery(q);
-    const effectiveTokens = (tokens.length ? tokens : [q.toLowerCase()]).slice(0, 3);
+    const effectiveTokens = (tokens.length ? tokens : [q.toLowerCase()]).slice(0, 2);
     const candidates = await fetchSearchCandidates(q, effectiveTokens.join("\u0001"), "", "");
     const stockRaw = await inStockSet();
     const stock = stockRaw instanceof Set ? stockRaw : new Set<string>(Array.isArray(stockRaw) ? (stockRaw as string[]) : []);
-    const inStock = candidates.filter((r) => stock.has(r.id)).length;
-    const byCategory = new Map<string, number>();
-    for (const r of candidates) if (r.category_id) byCategory.set(r.category_id, (byCategory.get(r.category_id) ?? 0) + 1);
-    return {
-      total: candidates.length,
-      inStock,
-      outStock: Math.max(0, candidates.length - inStock),
-      byCategory,
-      maxPrice: Math.ceil(Math.max(0, ...candidates.map((r) => Number(r.regular_price) || 0)) / 100) * 100,
-    };
+    return computeSearchFacets(candidates, opts, stock);
   } catch (e) {
     logSearchError("searchFacets", e, { q });
-    return { total: 0, inStock: 0, outStock: 0, byCategory: new Map<string, number>(), maxPrice: 0 };
+    return empty;
   }
 }
 
@@ -946,3 +1115,52 @@ export async function getCollection(slug: string): Promise<CollectionLite | null
   }
 }
 
+
+export const getHomepageBottomCategories = unstable_cache(async (): Promise<Category[]> => {
+  // Primary: category-record selection (Admin > Categories > "Show in Bottom Category", max 2)
+  try {
+    const { data, error } = await db
+      .from("categories")
+      .select("id,name,slug,description,image_url,parent_id,display_order,show_in_bottom_category,status")
+      .eq("show_in_bottom_category", true)
+      .eq("status", "active")
+      .order("display_order", { ascending: true, nullsFirst: false })
+      .order("name")
+      .limit(2);
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return (data as (Category & { show_in_bottom_category?: boolean; status?: string })[])
+        .map(({ show_in_bottom_category: _s, status: _st, ...cat }) => cat as Category)
+        .filter((c) => !!c && typeof c.slug === "string" && c.slug.trim().length > 0)
+        .slice(0, 2);
+    }
+  } catch {}
+
+  // Compatibility fallback: legacy website_content selection (read-only) if category flags not yet set/migrated
+  try {
+    const { data: cfg } = await db
+      .from("website_content")
+      .select("content_data")
+      .eq("section_key", "homepage_bottom_categories")
+      .maybeSingle();
+    const content = (cfg?.content_data as Record<string, unknown> | null) || null;
+    const ids = [content?.category_id_1, content?.category_id_2]
+      .filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+      .map((v) => v.trim());
+    if (ids.length === 0) return [];
+    const { data: legacy } = await db
+      .from("categories")
+      .select("id,name,slug,description,image_url,parent_id,display_order")
+      .in("id", ids)
+      .eq("status", "active");
+    const byId = new Map(((legacy ?? []) as Category[]).map((c) => [String(c.id), c]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((c): c is Category => !!c && typeof c.slug === "string" && c.slug.trim().length > 0)
+      .slice(0, 2);
+  } catch {
+    return [];
+  }
+}, ["homepage-bottom-categories-v2"], {
+  revalidate: SITE_CONTENT_REVALIDATE,
+  tags: ["homepage-bottom-categories", "site-content", "homepage-cms"],
+});
