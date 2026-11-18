@@ -200,58 +200,86 @@ async function toCards(rows: RawProduct[]): Promise<ProductCardData[]> {
 }
 
 export const getCategories = unstable_cache(async (): Promise<Category[]> => {
-  const { data } = await db
+  const { data: catData, error: catError } = await db
     .from("categories")
     .select("id,name,slug,description,image_url,parent_id,display_order")
     .eq("status", "active")
     .order("display_order", { ascending: true, nullsFirst: false })
     .order("name");
-  return (data ?? []) as Category[];
-}, ["site-categories-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
-/** Customer-facing navigation categories: hide subcategories (and nested descendants) that have no Active Products.
- *  Active Products = status 'published' AND deleted_at IS NULL (existing visibility). Top-level categories always included.
- *  Counts are by actual category_id relationship (no duplicates). Cached and revalidated with site-content.
- */
-export const getNavigationCategories = unstable_cache(async (): Promise<Category[]> => {
-  const [cats, prodRes] = await Promise.all([
-    db.from("categories")
-      .select("id,name,slug,description,image_url,parent_id,display_order")
-      .eq("status", "active")
-      .order("display_order", { ascending: true, nullsFirst: false })
-      .order("name"),
-    db.from("products").select("category_id").eq("status", "published").is("deleted_at", null),
-  ]);
-  const all = (cats.data ?? []) as Category[];
-  const directCount = new Map<string, number>();
-  for (const p of (prodRes.data ?? []) as { category_id: string | null }[]) {
-    if (!p?.category_id) continue;
-    directCount.set(p.category_id, (directCount.get(p.category_id) ?? 0) + 1);
-  }
-  const childrenByParent = new Map<string, Category[]>();
-  for (const c of all) {
-    if (!c.parent_id) continue;
-    const arr = childrenByParent.get(c.parent_id) ?? [];
-    arr.push(c);
-    childrenByParent.set(c.parent_id, arr);
-  }
-  const visible = new Set<string>();
-  const canShowSub = (c: Category): boolean => {
-    const kids = childrenByParent.get(c.id) ?? [];
-    let anyChild = false;
-    for (const k of kids) if (canShowSub(k)) anyChild = true;
-    const ok = (directCount.get(c.id) ?? 0) > 0 || anyChild;
-    if (ok) visible.add(c.id);
-    return ok;
-  };
-  for (const c of all) {
-    if (!c.parent_id) {
-      visible.add(c.id); // parent categories / "Shop All" remain visible
-      for (const k of (childrenByParent.get(c.id) ?? [])) canShowSub(k);
+  if (catError || !catData) return [];
+  const raw = catData as Category[];
+  if (!raw.length) return [];
+
+  // Query all category_ids that have at least one eligible published product
+  // (status === 'published' AND deleted_at IS NULL)
+  const { data: prodData } = await db
+    .from("products")
+    .select("category_id")
+    .eq("status", "published")
+    .is("deleted_at", null);
+
+  const eligibleCatIds = new Set<string>();
+  if (Array.isArray(prodData)) {
+    for (const p of prodData) {
+      if (p.category_id) eligibleCatIds.add(String(p.category_id));
     }
   }
-  return all.filter((c) => visible.has(c.id));
-}, ["site-nav-categories-v1"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+  // A subcategory (has parent_id) is visible ONLY if it has at least one eligible published product
+  const visibleSubcategoryIds = new Set<string>();
+  for (const c of raw) {
+    if (c.parent_id && eligibleCatIds.has(String(c.id))) {
+      visibleSubcategoryIds.add(String(c.id));
+    }
+  }
+
+  // A main category (parent_id is null) is visible if:
+  // - It has eligible products directly assigned
+  // OR
+  // - It has at least one visible subcategory containing eligible products
+  const visibleMainCategoryIds = new Set<string>();
+  for (const c of raw) {
+    if (!c.parent_id) {
+      const hasDirectProducts = eligibleCatIds.has(String(c.id));
+      const hasEligibleSubcategories = raw.some(
+        (sub) => String(sub.parent_id) === String(c.id) && visibleSubcategoryIds.has(String(sub.id))
+      );
+      if (hasDirectProducts || hasEligibleSubcategories) {
+        visibleMainCategoryIds.add(String(c.id));
+      }
+    }
+  }
+
+  // Filter raw categories: keep only visible main categories and visible subcategories
+  const eligibleCategories = raw.filter((c) => {
+    if (c.parent_id) {
+      return visibleSubcategoryIds.has(String(c.id));
+    }
+    return visibleMainCategoryIds.has(String(c.id));
+  });
+
+  const parentImageMap = new Map<string, string>();
+  for (const c of raw) {
+    if (!c.parent_id && c.image_url) {
+      parentImageMap.set(String(c.id), c.image_url);
+    }
+  }
+
+  return eligibleCategories.map((c) => ({
+    ...c,
+    image_url: c.image_url || (c.parent_id ? parentImageMap.get(String(c.parent_id)) || null : null),
+  }));
+}, ["site-categories-v3"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
+
+/**
+ * Customer-facing navigation categories: returns all active categories configured by Admin.
+ * Top-level categories and subcategories are structured into hierarchy by HeaderNav / MobileMenu.
+ * Cached and revalidated with site-content.
+ */
+export const getNavigationCategories = unstable_cache(async (): Promise<Category[]> => {
+  return await getCategories();
+}, ["site-nav-categories-v3"], { revalidate: SITE_CONTENT_REVALIDATE, tags: ["site-content"] });
 
 export const getSettings = unstable_cache(async () => {
   const { data } = await db
@@ -1128,9 +1156,11 @@ export const getHomepageBottomCategories = unstable_cache(async (): Promise<Cate
       .order("name")
       .limit(2);
     if (!error && Array.isArray(data) && data.length > 0) {
+      const eligible = await getCategories();
+      const eligibleIds = new Set(eligible.map((c) => String(c.id)));
       return (data as (Category & { show_in_bottom_category?: boolean; status?: string })[])
         .map(({ show_in_bottom_category: _s, status: _st, ...cat }) => cat as Category)
-        .filter((c) => !!c && typeof c.slug === "string" && c.slug.trim().length > 0)
+        .filter((c) => !!c && typeof c.slug === "string" && c.slug.trim().length > 0 && eligibleIds.has(String(c.id)))
         .slice(0, 2);
     }
   } catch {}
@@ -1147,6 +1177,8 @@ export const getHomepageBottomCategories = unstable_cache(async (): Promise<Cate
       .filter((v): v is string => typeof v === "string" && v.trim().length > 0)
       .map((v) => v.trim());
     if (ids.length === 0) return [];
+    const eligible = await getCategories();
+    const eligibleIds = new Set(eligible.map((c) => String(c.id)));
     const { data: legacy } = await db
       .from("categories")
       .select("id,name,slug,description,image_url,parent_id,display_order")
@@ -1154,13 +1186,14 @@ export const getHomepageBottomCategories = unstable_cache(async (): Promise<Cate
       .eq("status", "active");
     const byId = new Map(((legacy ?? []) as Category[]).map((c) => [String(c.id), c]));
     return ids
+      .filter((id) => eligibleIds.has(id))
       .map((id) => byId.get(id))
       .filter((c): c is Category => !!c && typeof c.slug === "string" && c.slug.trim().length > 0)
       .slice(0, 2);
   } catch {
     return [];
   }
-}, ["homepage-bottom-categories-v2"], {
+}, ["homepage-bottom-categories-v3"], {
   revalidate: SITE_CONTENT_REVALIDATE,
   tags: ["homepage-bottom-categories", "site-content", "homepage-cms"],
 });
